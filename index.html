@@ -114,7 +114,7 @@
             const [isLoading, setIsLoading] = useState(false);
             const [deferredPrompt, setDeferredPrompt] = useState(null);
             const [showDonation, setShowDonation] = useState(false);
-            const [countdownText, setCountdownText] = useState("");
+            const [ramadanCountdownText, setRamadanCountdownText] = useState("");
             
             // Theme State
             const [theme, setTheme] = useState('auto');
@@ -125,11 +125,12 @@
             const [mealPlan, setMealPlan] = useState({});
             const [activeMealWeek, setActiveMealWeek] = useState(1);
             
-            // Fitur State (LOCATION HYBRID)
+            // Shalat Fitur State
             const [prayerCity, setPrayerCity] = useState('Jakarta');
             const [prayerTimes, setPrayerTimes] = useState(null);
             const [prayerError, setPrayerError] = useState(null);
-            const [prayerCoords, setPrayerCoords] = useState(null); // {lat, lng}
+            const [prayerCoords, setPrayerCoords] = useState(null);
+            const [nextPrayerCountdown, setNextPrayerCountdown] = useState("");
             
             const [surahList, setSurahList] = useState([]);
             const [selectedSurah, setSelectedSurah] = useState(null);
@@ -162,7 +163,18 @@
 
             const toggleTheme = () => setTheme(prev => prev === 'auto' ? 'dark' : prev === 'dark' ? 'light' : 'auto');
 
-            // --- COUNTDOWN LOGIC ---
+            // --- PRAYER MAP ---
+            const prayerMap = [
+                { l: 'Subuh', k: 'Fajr' },
+                { l: 'Terbit', k: 'Sunrise' },
+                { l: 'Dhuha', k: 'Dhuha' }, // Akan dihitung manual
+                { l: 'Dzuhur', k: 'Dhuhr' },
+                { l: 'Ashar', k: 'Asr' },
+                { l: 'Maghrib', k: 'Maghrib' },
+                { l: 'Isya', k: 'Isha' }
+            ];
+
+            // --- RAMADHAN COUNTDOWN LOGIC ---
             useEffect(() => {
                 const calculateCountdown = () => {
                     const targetDate = new Date('2026-02-18');
@@ -171,12 +183,64 @@
                     today.setHours(0, 0, 0, 0);
                     const diffTime = targetDate - today;
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    if (diffDays > 0) setCountdownText(`H-${diffDays} Menuju Ramadhan`);
-                    else if (diffDays === 0) setCountdownText("Marhaban Ya Ramadhan");
-                    else setCountdownText("");
+                    if (diffDays > 0) setRamadanCountdownText(`H-${diffDays} Menuju Ramadhan`);
+                    else if (diffDays === 0) setRamadanCountdownText("Marhaban Ya Ramadhan");
+                    else setRamadanCountdownText("");
                 };
                 calculateCountdown();
             }, []);
+
+            // --- NEXT PRAYER COUNTDOWN LOGIC ---
+            useEffect(() => {
+                if (!prayerTimes) return;
+
+                const timer = setInterval(() => {
+                    const now = new Date();
+                    // Daftar shalat utama untuk countdown (kecuali Terbit & Dhuha sesuai request)
+                    const trackedPrayers = [
+                        { name: 'Subuh', time: prayerTimes.Fajr },
+                        { name: 'Dzuhur', time: prayerTimes.Dhuhr },
+                        { name: 'Ashar', time: prayerTimes.Asr },
+                        { name: 'Maghrib', time: prayerTimes.Maghrib },
+                        { name: 'Isya', time: prayerTimes.Isha }
+                    ];
+
+                    let next = null;
+                    let nextDate = null;
+
+                    for (const p of trackedPrayers) {
+                        const [h, m] = p.time.split(':').map(Number);
+                        const pDate = new Date();
+                        pDate.setHours(h, m, 0, 0);
+
+                        if (pDate > now) {
+                            next = p;
+                            nextDate = pDate;
+                            break;
+                        }
+                    }
+
+                    // Jika semua sudah lewat, berarti Subuh besok
+                    if (!next) {
+                        next = trackedPrayers[0];
+                        const [h, m] = next.time.split(':').map(Number);
+                        nextDate = new Date();
+                        nextDate.setDate(nextDate.getDate() + 1);
+                        nextDate.setHours(h, m, 0, 0);
+                    }
+
+                    const diffMs = nextDate - now;
+                    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+                    setNextPrayerCountdown(
+                        `${next.name} dalam ${diffHrs > 0 ? diffHrs + 'j ' : ''}${diffMins}m ${diffSecs}s`
+                    );
+                }, 1000);
+
+                return () => clearInterval(timer);
+            }, [prayerTimes]);
 
             // --- REVERSE GEOCODING HELPER ---
             const updateCityName = async (lat, lng) => {
@@ -206,13 +270,11 @@
                 setTasbihCount(loadData('ramadan_v5_tasbih', 0));
                 setQuranTargetDays(loadData('ramadan_v5_quran_target', 30));
 
-                // HYBRID LOCATION LOAD LOGIC
                 const savedCity = localStorage.getItem('ramadan_v5_city') || 'Jakarta';
                 const savedCoords = loadData('ramadan_v5_coords', null);
 
                 if (savedCoords) {
                     setPrayerCoords(savedCoords);
-                    // Langsung cari nama kota berdasarkan koordinat yang tersimpan
                     updateCityName(savedCoords.lat, savedCoords.lng);
                     fetchPrayerTimes(null, savedCoords);
                 } else {
@@ -232,7 +294,6 @@
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_tasbih', JSON.stringify(tasbihCount)); }, [tasbihCount, isReady]);
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_quran_target', JSON.stringify(quranTargetDays)); }, [quranTargetDays, isReady]);
             
-            // Save Location Data
             useEffect(() => { if(isReady && !prayerCoords) localStorage.setItem('ramadan_v5_city', prayerCity); }, [prayerCity, isReady, prayerCoords]);
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_coords', JSON.stringify(prayerCoords)); }, [prayerCoords, isReady]);
 
@@ -253,11 +314,7 @@
                             const { latitude, longitude } = position.coords;
                             const coords = { lat: latitude, lng: longitude };
                             setPrayerCoords(coords);
-                            
-                            // Cari nama kota secara otomatis
                             updateCityName(latitude, longitude);
-                            
-                            // Ambil jadwal shalat
                             fetchPrayerTimes(null, coords);
                         },
                         (error) => {
@@ -275,7 +332,7 @@
             };
 
             const handleManualSearch = () => {
-                setPrayerCoords(null); // Reset GPS mode
+                setPrayerCoords(null);
                 fetchPrayerTimes(prayerCity, null);
             };
 
@@ -294,7 +351,19 @@
                     const data = await res.json();
                     
                     if (data.code === 200 && data.data) {
-                        setPrayerTimes(data.data.timings);
+                        const timings = data.data.timings;
+                        
+                        // Hitung Dhuha (Sunrise + 20 Menit)
+                        if (timings.Sunrise) {
+                            const [h, m] = timings.Sunrise.split(':').map(Number);
+                            const sunriseDate = new Date();
+                            sunriseDate.setHours(h, m + 20, 0);
+                            const dhuhaH = String(sunriseDate.getHours()).padStart(2, '0');
+                            const dhuhaM = String(sunriseDate.getMinutes()).padStart(2, '0');
+                            timings.Dhuha = `${dhuhaH}:${dhuhaM}`;
+                        }
+
+                        setPrayerTimes(timings);
                         if (!coords) setPrayerCity(city); 
                     } else {
                         setPrayerError("Jadwal tidak ditemukan");
@@ -341,21 +410,14 @@
                 { k: 'dzuhur', l: 'Dzuhur', i: 'Sun', color: 'text-yellow-600' }, { k: 'ashar', l: 'Ashar', i: 'Sun', color: 'text-orange-600' }, 
                 { k: 'maghrib', l: 'Maghrib', i: 'Moon', color: 'text-indigo-600' }, { k: 'isya', l: 'Isya', i: 'Moon', color: 'text-blue-800' },
             ];
-            const prayerMap = [{l:'Subuh',k:'Fajr'},{l:'Dzuhur',k:'Dhuhr'},{l:'Ashar',k:'Asr'},{l:'Maghrib',k:'Maghrib'},{l:'Isya',k:'Isha'}];
+
             const doaList = [
                 { id: 1, category: "Ramadhan", title: "Niat Puasa", arabic: "نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلّٰهِ تَعَالَى", latin: "Nawaitu shauma ghadin 'an adaa'i fardhi syahri Ramadhaana haadzihis sanati lillaahi ta'aala.", artinya: "Aku berniat puasa esok hari untuk menunaikan fardhu di bulan Ramadhan tahun ini, karena Allah Ta'ala." },
                 { id: 2, category: "Ramadhan", title: "Doa Berbuka", arabic: "اَللّٰهُمَّ لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ بِرَحْمَتِكَ يَا اَرْحَمَ الرَّحِمِيْنَ", latin: "Allahumma laka shumtu wa bika aamantu wa 'alaa rizqika afthartu birahmatika yaa arhamar raahimiin.", artinya: "Ya Allah, untuk-Mu aku berpuasa, dan kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka. Dengan rahmat-Mu wahai Dzat Yang Maha Penyayang." },
                 { id: 3, category: "Ramadhan", title: "Niat Zakat Fitrah (Keluarga)", arabic: "نَوَيْتُ أَنْ أُخْرِجَ زَكَاةَ الْفِطْرِ عَنِّى وَعَنْ جَمِيْعِ مَا يَلْزَمُنِى نَفَقَاتُهُمْ شَرْعًا فَرْضًا ِللهِ تَعَالَى", latin: "Nawaytu an ukhrija zakaata al-fitri 'anni wa 'an jamii'i maa yalzamunii nafaqatuhum syar'an fardhan lillahi ta'aala.", artinya: "Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh orang yang nafkahnya menjadi tanggunganku, fardhu karena Allah Ta'ala." },
-                { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman tawallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
+                { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman towallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
                 { id: 5, category: "Ramadhan", title: "Doa Khatam Qur'an", arabic: "اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً", latin: "Allahummarhamni bil quran wa'jalhu li imaman wa nuran wa hudan wa rahmah.", artinya: "Ya Allah, rahmatilah aku dengan Al-Qur'an dan jadikanlah ia sebagai imam, cahaya, petunjuk, dan rahmat bagiku." },
-                { id: 6, category: "Ramadhan", title: "Lailatul Qadar", arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي", latin: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'annii.", artinya: "Ya Allah, sesungguhnya Engkau Maha Pemaaf dan senang memaafkan, maka maafkanlah kesalahanku." },
-                { id: 7, category: "Harian", title: "Sayyidul Istighfar", arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلقتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ", latin: "Allahumma anta rabbii laa ilaaha illaa anta khalaqtanii wa anaa 'abduka wa anaa 'alaa 'ahdika wa wa'dika mastatha'tu.", artinya: "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau. Engkau telah menciptakanku dan aku adalah hamba-Mu, dan aku setia pada janji dan ancaman-Mu semampuku." },
-                { id: 8, category: "Harian", title: "Sapu Jagat", arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", latin: "Rabbana atina fid dunya hasanah wa fil akhirati hasanah wa qina 'adzaban naar.", artinya: "Ya Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat, dan lindungilah kami dari azab neraka." },
-                { id: 9, category: "Harian", title: "Pembuka Rezeki", arabic: "اَللّٰهُمَّ اكْفِنِيْ بِحَلَالِكَ عَنْ حَرَامِكَ وَ أَغْنِنِيْ بِفَضْلِكَ عَمَّنْ سِوَاكَ", latin: "Allahummakfinii bi halaalika 'an haraamika wa aghninii bi fadhlika 'amman siwaaka.", artinya: "Ya Allah, cukupkanlah aku dengan rezeki-Mu yang halal hingga aku terhindar dari yang haram, dan kayakanlah aku dengan karunia-Mu hingga aku tidak meminta kepada selain-Mu." },
-                { id: 10, category: "Harian", title: "Setelah Sholat Dhuha", arabic: "اَللّٰهُمَّ إِنَّ الضُّحَآءَ ضُحَاءُكَ وَالْبَهَاءَ بَهَاءُكَ وَالْجَمَالَ جَمَالُكَ وَالْقُوَّةَ قُوَّتُكَ", latin: "Allahumma innadh dhuha-a dhuha-uka, wal bahaa-a bahaa-uka, wal jamaala jamaaluka, wal quwwata quwwatuka.", artinya: "Ya Allah, sesungguhnya waktu dhuha adalah waktu dhuha-Mu, keagungan adalah keagungan-Mu, keindahan adalah keindahan-Mu, kekuatan adalah kekuatan-Mu." },
-                { id: 11, category: "Harian", title: "Masuk Masjid", arabic: "اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ", latin: "Allahummaftah lii abwaaba rahmatik.", artinya: "Ya Allah, bukakanlah untukku pintu-pintu rahmat-Mu." },
-                { id: 12, category: "Harian", title: "Keluar Masjid", arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ", latin: "Allahumma innii as-aluka min fadhlik.", artinya: "Ya Allah, sesungguhnya aku memohon karunia-Mu." },
-                { id: 13, category: "Perjalanan", title: "Doa Safar (Mudik)", arabic: "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَى رَبِّنَا لَمُنْقَلِبُونَ", latin: "Subhaanalladzii sakhkhara lanaa haadzaa wamaa kunnaa lahuu muqriniin, wa innaa ilaa rabbinaa lamunqalibuun.", artinya: "Maha Suci Allah yang telah menundukkan semua ini bagi kami padahal kami sebelumnya tidak mampu menguasainya, dan sesungguhnya kami akan kembali kepada Tuhan kami." }
+                { id: 6, category: "Ramadhan", title: "Lailatul Qadar", arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي", latin: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'annii.", artinya: "Ya Allah, sesungguhnya Engkau Maha Pemaaf dan senang memaafkan, maka maafkanlah kesalahanku." }
             ];
 
             if (!isReady) return <div className="min-h-screen flex items-center justify-center text-slate-500 bg-slate-50 dark:bg-slate-950 dark:text-slate-400">Memuat Aplikasi...</div>;
@@ -397,7 +459,7 @@
                         </div>
                     )}
 
-                    {/* HEADER COMPACT & THEME TOGGLE */}
+                    {/* HEADER */}
                     <header className="bg-emerald-700 dark:bg-emerald-950 text-white py-2 px-4 sticky top-0 z-20 shadow-md">
                         <div className="max-w-md mx-auto flex justify-between items-center">
                             <div className="flex items-center gap-2">
@@ -407,8 +469,8 @@
                                 <div>
                                     <h1 className="text-base font-bold leading-none">Jurnal Ramadhan</h1>
                                     <p className="text-[10px] opacity-80">Planner Keluarga</p>
-                                    {countdownText && (
-                                        <p className="text-[9px] text-yellow-300 font-bold mt-0.5 animate-pulse">{countdownText}</p>
+                                    {ramadanCountdownText && (
+                                        <p className="text-[9px] text-yellow-300 font-bold mt-0.5 animate-pulse">{ramadanCountdownText}</p>
                                     )}
                                 </div>
                             </div>
@@ -438,7 +500,7 @@
                                 </div>
                             </div>
                             <div className="space-y-4">
-                            {Array.isArray(members) && members.map(member => {
+                            {members.map(member => {
                                 const dayLog = member.log?.[currentDay] || {};
                                 const completedCount = tasks.filter(t => dayLog[t.k]).length;
                                 const progress = Math.round((completedCount / tasks.length) * 100);
@@ -473,21 +535,20 @@
                         </div>
                         )}
 
-                        {/* TAB 2: SHALAT */}
+                        {/* TAB 2: SHALAT (MINIMIZED) */}
                         {activeTab === 'shalat' && (
                         <div className="space-y-4">
-                            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                                <label className="text-xs font-bold text-slate-400 block mb-2">LOKASI / KOTA</label>
-                                <div className="flex gap-2 mb-2">
+                            {/* Lokasi Bar (Compact) */}
+                            <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <div className="flex gap-2 items-center">
                                     <button 
                                         onClick={handleUseGPS}
-                                        className={`p-2.5 rounded-lg border transition-all ${prayerCoords ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'}`}
-                                        title="Gunakan Lokasi Saya"
+                                        className={`p-2 rounded-lg border transition-all ${prayerCoords ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'}`}
                                     >
-                                        <Icon name="Locate" size={20}/>
+                                        <Icon name="Locate" size={18}/>
                                     </button>
                                     <div className="flex-1 relative">
-                                        <div className="absolute left-3 top-2.5 text-red-500"><Icon name="MapPin" size={16}/></div>
+                                        <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-red-500"><Icon name="MapPin" size={14}/></div>
                                         <input 
                                             type="text" 
                                             value={prayerCity} 
@@ -495,34 +556,53 @@
                                                 setPrayerCity(e.target.value);
                                                 if (prayerCoords) setPrayerCoords(null); 
                                             }} 
-                                            placeholder="Masukkan nama kota..."
-                                            className="w-full pl-9 pr-4 py-2 border dark:border-slate-700 rounded-lg text-sm focus:outline-emerald-500 bg-white dark:bg-slate-800 dark:text-white" 
+                                            placeholder="Cari Kota..."
+                                            className="w-full pl-8 pr-4 py-1.5 border dark:border-slate-700 rounded-lg text-xs focus:outline-emerald-500 bg-white dark:bg-slate-800 dark:text-white" 
                                         />
                                     </div>
+                                    <button onClick={handleManualSearch} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-colors" disabled={isLoading}>
+                                        Cari
+                                    </button>
                                 </div>
-                                <button onClick={handleManualSearch} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg text-sm font-medium transition-colors" disabled={isLoading}>
-                                    {isLoading ? 'Sedang Memuat...' : 'Cari Jadwal Manual'}
-                                </button>
-                                {prayerError && <div className="mt-2 text-xs text-red-500 flex items-center gap-1"><Icon name="AlertTriangle" size={12}/> {prayerError}</div>}
-                                {prayerCoords && !prayerError && <div className="mt-2 text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Icon name="CheckCircle" size={10}/> Menggunakan Koordinat GPS Akurat</div>}
+                                {prayerError && <div className="mt-1 text-[10px] text-red-500 flex items-center gap-1"><Icon name="AlertTriangle" size={10}/> {prayerError}</div>}
                             </div>
+
+                            {/* Jadwal Shalat (Compact) */}
                             {prayerTimes ? (
-                            <div className="bg-slate-800 dark:bg-slate-900 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
-                                <div className="text-center mb-4">
-                                    <h3 className="text-xs opacity-70 uppercase tracking-widest">Jadwal Shalat</h3>
-                                    <p className="text-lg font-bold truncate px-4">{prayerCity}</p>
-                                </div>
-                                <div className="space-y-2">
-                                {prayerMap.map(({ l, k }) => (
-                                    <div key={k} className="flex justify-between items-center bg-white/10 p-2.5 rounded-lg border border-white/5">
-                                        <span className="font-medium flex items-center gap-2 text-sm"><Icon name="Clock" size={14}/> {l}</span>
-                                        <span className="font-bold font-mono text-lg">{prayerTimes[k]}</span>
+                            <div className="space-y-3">
+                                <div className="bg-slate-800 dark:bg-slate-900 rounded-2xl p-3 text-white shadow-lg relative overflow-hidden">
+                                    <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
+                                        <div>
+                                            <h3 className="text-[10px] opacity-60 uppercase tracking-widest font-bold">Jadwal Shalat</h3>
+                                            <p className="text-sm font-bold truncate max-w-[150px]">{prayerCity}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] opacity-60 font-bold uppercase">Metode</p>
+                                            <p className="text-[10px]">Kemenag RI</p>
+                                        </div>
                                     </div>
-                                ))}
+                                    
+                                    <div className="grid grid-cols-1 gap-1.5">
+                                    {prayerMap.map(({ l, k }) => (
+                                        <div key={k} className="flex justify-between items-center bg-white/5 px-3 py-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
+                                            <span className="font-medium flex items-center gap-2 text-xs opacity-90"><Icon name="Clock" size={12}/> {l}</span>
+                                            <span className="font-bold font-mono text-base">{prayerTimes[k]}</span>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </div>
+
+                                {/* Countdown Section (Empty area filled) */}
+                                <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 p-4 rounded-2xl text-center">
+                                    <h4 className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-500 tracking-widest mb-1">Shalat Berikutnya</h4>
+                                    <div className="text-2xl font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                                        {nextPrayerCountdown || "Menghitung..."}
+                                    </div>
+                                    <p className="text-[9px] text-emerald-600/60 dark:text-emerald-500/40 mt-1 italic italic">"Shalat adalah tiang agama"</p>
                                 </div>
                             </div>
                             ) : (
-                            <div className="text-center p-8 bg-white dark:bg-slate-900 rounded-2xl text-slate-400 text-sm">{isLoading ? "Sedang memuat..." : "Jadwal tidak tersedia. Coba cari kota lain."}</div>
+                            <div className="text-center p-8 bg-white dark:bg-slate-900 rounded-2xl text-slate-400 text-sm">{isLoading ? "Memuat jadwal..." : "Silakan cari kota Anda."}</div>
                             )}
                         </div>
                         )}
@@ -668,7 +748,7 @@
                         )}
                     </main>
 
-                    {/* NAVBAR FOOTER COMPACT */}
+                    {/* NAVBAR FOOTER */}
                     <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 z-30 shadow-lg">
                         <div className="flex justify-around pt-1 pb-0">
                             {[{ id: 'tracker', label: 'Ibadah', icon: 'Calendar' }, { id: 'shalat', label: 'Shalat', icon: 'Clock' }, { id: 'quran', label: "Qur'an", icon: 'BookOpen' }, { id: 'meal', label: 'Dapur', icon: 'Utensils' }, { id: 'doa', label: 'Menu', icon: 'Menu' }].map(tab => (
@@ -691,3 +771,4 @@
     </script>
 </body>
 </html>
+
