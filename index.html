@@ -9,7 +9,6 @@
     
     <link rel="manifest" href="/manifest.json">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,14 +23,11 @@
         }
     </script>
     
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Font & Styles -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -182,6 +178,20 @@
                 calculateCountdown();
             }, []);
 
+            // --- REVERSE GEOCODING HELPER ---
+            const updateCityName = async (lat, lng) => {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
+                    const data = await res.json();
+                    const realCityName = data.address.city || data.address.town || data.address.county || data.address.village || "Lokasi GPS Terdeteksi";
+                    setPrayerCity(realCityName);
+                    return realCityName;
+                } catch (error) {
+                    setPrayerCity("Lokasi GPS Terdeteksi");
+                    return "Lokasi GPS Terdeteksi";
+                }
+            };
+
             // --- INIT & LOAD DATA ---
             useEffect(() => {
                 const handleBeforeInstallPrompt = (e) => { e.preventDefault(); setDeferredPrompt(e); };
@@ -202,7 +212,8 @@
 
                 if (savedCoords) {
                     setPrayerCoords(savedCoords);
-                    setPrayerCity("Lokasi GPS Terdeteksi");
+                    // Langsung cari nama kota berdasarkan koordinat yang tersimpan
+                    updateCityName(savedCoords.lat, savedCoords.lng);
                     fetchPrayerTimes(null, savedCoords);
                 } else {
                     setPrayerCity(savedCity);
@@ -238,38 +249,23 @@
                 setPrayerError(null);
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
-                        async (position) => { // Tambahkan 'async' di sini
+                        (position) => {
                             const { latitude, longitude } = position.coords;
                             const coords = { lat: latitude, lng: longitude };
-                            
                             setPrayerCoords(coords);
-                            setPrayerCity("Mencari nama kota..."); // Teks sementara saat loading
+                            
+                            // Cari nama kota secara otomatis
+                            updateCityName(latitude, longitude);
                             
                             // Ambil jadwal shalat
                             fetchPrayerTimes(null, coords);
-
-                            // --- TAMBAHAN: REVERSE GEOCODING (Cari Nama Kota) ---
-                            try {
-                                // Menggunakan OpenStreetMap Nominatim API (Gratis)
-                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`);
-                                const data = await res.json();
-                                
-                                // Prioritas nama: Kota -> Kota Kecil -> Kabupaten -> Desa -> Default
-                                const realCityName = data.address.city || data.address.town || data.address.county || data.address.village || "Lokasi GPS Terdeteksi";
-                                
-                                setPrayerCity(realCityName);
-                            } catch (error) {
-                                // Jika gagal internet/API, kembalikan ke teks default
-                                setPrayerCity("Lokasi GPS Terdeteksi");
-                            }
-                            // -----------------------------------------------------
                         },
                         (error) => {
                             let msg = "Gagal mendeteksi lokasi.";
                             if (error.code === 1) msg = "Izin lokasi ditolak.";
                             setPrayerError(msg);
                             setIsLoading(false);
-                            setPrayerCoords(null); // Fallback to manual
+                            setPrayerCoords(null); 
                         }
                     );
                 } else {
@@ -283,7 +279,7 @@
                 fetchPrayerTimes(prayerCity, null);
             };
 
-            // --- API LOGIC (MODIFIED FOR HYBRID) ---
+            // --- API LOGIC ---
             const fetchPrayerTimes = async (city, coords) => {
                 setIsLoading(true); setPrayerError(null);
                 try {
@@ -299,7 +295,7 @@
                     
                     if (data.code === 200 && data.data) {
                         setPrayerTimes(data.data.timings);
-                        if (!coords) setPrayerCity(city); // Ensure text updates on manual search success
+                        if (!coords) setPrayerCity(city); 
                     } else {
                         setPrayerError("Jadwal tidak ditemukan");
                         setPrayerTimes(null);
@@ -350,10 +346,10 @@
                 { id: 1, category: "Ramadhan", title: "Niat Puasa", arabic: "نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلّٰهِ تَعَالَى", latin: "Nawaitu shauma ghadin 'an adaa'i fardhi syahri Ramadhaana haadzihis sanati lillaahi ta'aala.", artinya: "Aku berniat puasa esok hari untuk menunaikan fardhu di bulan Ramadhan tahun ini, karena Allah Ta'ala." },
                 { id: 2, category: "Ramadhan", title: "Doa Berbuka", arabic: "اَللّٰهُمَّ لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ بِرَحْمَتِكَ يَا اَرْحَمَ الرَّحِمِيْنَ", latin: "Allahumma laka shumtu wa bika aamantu wa 'alaa rizqika afthartu birahmatika yaa arhamar raahimiin.", artinya: "Ya Allah, untuk-Mu aku berpuasa, dan kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka. Dengan rahmat-Mu wahai Dzat Yang Maha Penyayang." },
                 { id: 3, category: "Ramadhan", title: "Niat Zakat Fitrah (Keluarga)", arabic: "نَوَيْتُ أَنْ أُخْرِجَ زَكَاةَ الْفِطْرِ عَنِّى وَعَنْ جَمِيْعِ مَا يَلْزَمُنِى نَفَقَاتُهُمْ شَرْعًا فَرْضًا ِللهِ تَعَالَى", latin: "Nawaytu an ukhrija zakaata al-fitri 'anni wa 'an jamii'i maa yalzamunii nafaqatuhum syar'an fardhan lillahi ta'aala.", artinya: "Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh orang yang nafkahnya menjadi tanggunganku, fardhu karena Allah Ta'ala." },
-                { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيْتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman tawallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
+                { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman tawallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
                 { id: 5, category: "Ramadhan", title: "Doa Khatam Qur'an", arabic: "اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً", latin: "Allahummarhamni bil quran wa'jalhu li imaman wa nuran wa hudan wa rahmah.", artinya: "Ya Allah, rahmatilah aku dengan Al-Qur'an dan jadikanlah ia sebagai imam, cahaya, petunjuk, dan rahmat bagiku." },
                 { id: 6, category: "Ramadhan", title: "Lailatul Qadar", arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي", latin: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'annii.", artinya: "Ya Allah, sesungguhnya Engkau Maha Pemaaf dan senang memaafkan, maka maafkanlah kesalahanku." },
-                { id: 7, category: "Harian", title: "Sayyidul Istighfar", arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ", latin: "Allahumma anta rabbii laa ilaaha illaa anta khalaqtanii wa anaa 'abduka wa anaa 'alaa 'ahdika wa wa'dika mastatha'tu.", artinya: "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau. Engkau telah menciptakanku dan aku adalah hamba-Mu, dan aku setia pada janji dan ancaman-Mu semampuku." },
+                { id: 7, category: "Harian", title: "Sayyidul Istighfar", arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلقتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ", latin: "Allahumma anta rabbii laa ilaaha illaa anta khalaqtanii wa anaa 'abduka wa anaa 'alaa 'ahdika wa wa'dika mastatha'tu.", artinya: "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau. Engkau telah menciptakanku dan aku adalah hamba-Mu, dan aku setia pada janji dan ancaman-Mu semampuku." },
                 { id: 8, category: "Harian", title: "Sapu Jagat", arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", latin: "Rabbana atina fid dunya hasanah wa fil akhirati hasanah wa qina 'adzaban naar.", artinya: "Ya Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat, dan lindungilah kami dari azab neraka." },
                 { id: 9, category: "Harian", title: "Pembuka Rezeki", arabic: "اَللّٰهُمَّ اكْفِنِيْ بِحَلَالِكَ عَنْ حَرَامِكَ وَ أَغْنِنِيْ بِفَضْلِكَ عَمَّنْ سِوَاكَ", latin: "Allahummakfinii bi halaalika 'an haraamika wa aghninii bi fadhlika 'amman siwaaka.", artinya: "Ya Allah, cukupkanlah aku dengan rezeki-Mu yang halal hingga aku terhindar dari yang haram, dan kayakanlah aku dengan karunia-Mu hingga aku tidak meminta kepada selain-Mu." },
                 { id: 10, category: "Harian", title: "Setelah Sholat Dhuha", arabic: "اَللّٰهُمَّ إِنَّ الضُّحَآءَ ضُحَاءُكَ وَالْبَهَاءَ بَهَاءُكَ وَالْجَمَالَ جَمَالُكَ وَالْقُوَّةَ قُوَّتُكَ", latin: "Allahumma innadh dhuha-a dhuha-uka, wal bahaa-a bahaa-uka, wal jamaala jamaaluka, wal quwwata quwwatuka.", artinya: "Ya Allah, sesungguhnya waktu dhuha adalah waktu dhuha-Mu, keagungan adalah keagungan-Mu, keindahan adalah keindahan-Mu, kekuatan adalah kekuatan-Mu." },
@@ -477,7 +473,7 @@
                         </div>
                         )}
 
-                        {/* TAB 2: SHALAT - HYBRID LOCATION */}
+                        {/* TAB 2: SHALAT */}
                         {activeTab === 'shalat' && (
                         <div className="space-y-4">
                             <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
@@ -497,7 +493,7 @@
                                             value={prayerCity} 
                                             onChange={(e) => {
                                                 setPrayerCity(e.target.value);
-                                                if (prayerCoords) setPrayerCoords(null); // Switch to manual mode on typing
+                                                if (prayerCoords) setPrayerCoords(null); 
                                             }} 
                                             placeholder="Masukkan nama kota..."
                                             className="w-full pl-9 pr-4 py-2 border dark:border-slate-700 rounded-lg text-sm focus:outline-emerald-500 bg-white dark:bg-slate-800 dark:text-white" 
@@ -531,7 +527,7 @@
                         </div>
                         )}
 
-                        {/* TAB 3: QURAN & PLANNER */}
+                        {/* TAB 3: QURAN */}
                         {activeTab === 'quran' && (
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-[600px]">
                             <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 border-b border-emerald-100 dark:border-emerald-900 flex items-center gap-2">
@@ -542,7 +538,6 @@
                             <div className="flex-1 overflow-y-auto p-0 relative">
                             {!selectedSurah ? (
                                 <div>
-                                    {/* QURAN PLANNER (TARGET KHATAM) */}
                                     <div className="p-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white m-4 rounded-xl shadow-lg">
                                         <div className="flex items-start justify-between mb-3">
                                             <div>
@@ -696,4 +691,3 @@
     </script>
 </body>
 </html>
-
