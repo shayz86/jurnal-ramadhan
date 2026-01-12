@@ -115,7 +115,7 @@
             const [showDonation, setShowDonation] = useState(false);
             const [ramadanCountdownText, setRamadanCountdownText] = useState("");
             
-            // --- THEME LOGIC (FIXED) ---
+            // --- THEME LOGIC ---
             const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'auto');
             const [resolvedTheme, setResolvedTheme] = useState('light');
 
@@ -146,11 +146,8 @@
             const toggleTheme = () => {
                 setTheme(prev => {
                     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    // Jika sekarang di auto dan tampilan gelap -> paksa ke terang (lewatkan manual dark)
                     if (prev === 'auto') return isSystemDark ? 'light' : 'dark';
-                    // Jika manual dark -> pindah ke manual terang
                     if (prev === 'dark') return 'light';
-                    // Jika manual terang -> balik ke auto
                     return 'auto';
                 });
             };
@@ -422,7 +419,7 @@
                 { id: 1, category: "Ramadhan", title: "Niat Puasa", arabic: "نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلّٰهِ تَعَالَى", latin: "Nawaitu shauma ghadin 'an adaa'i fardhi syahri Ramadhaana haadzihis sanati lillaahi ta'aala.", artinya: "Aku berniat puasa esok hari untuk menunaikan fardhu di bulan Ramadhan tahun ini, karena Allah Ta'ala." },
                 { id: 2, category: "Ramadhan", title: "Doa Berbuka", arabic: "اَللّٰهُمَّ لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ بِرَحْمَتِكَ يَا اَرْحَمَ الرَّحِمِيْنَ", latin: "Allahumma laka shumtu wa bika aamantu wa 'alaa rizqika afthartu birahmatika yaa arhamar raahimiin.", artinya: "Ya Allah, untuk-Mu aku berpuasa, dan kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka. Dengan rahmat-Mu wahai Dzat Yang Maha Penyayang." },
                 { id: 3, category: "Ramadhan", title: "Niat Zakat Fitrah (Keluarga)", arabic: "نَوَيْتُ أَنْ أُخْرِجَ زَكَاةَ الْفِطْرِ عَنِّى وَعَنْ جَمِيْعِ مَا يَلْزَمُنِى نَفَقَاتُهُمْ شَرْعًا فَرْضًا ِللهِ تَعَالَى", latin: "Nawaytu an ukhrija zakaata al-fitri 'anni wa 'an jamii'i maa yalzamunii nafaqatuhum syar'an fardhan lillahi ta'aala.", artinya: "Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh orang yang nafkahnya menjadi tanggunganku, fardhu karena Allah Ta'ala." },
-                { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman towallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
+                { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّني فِيمَنْ تَوَلَّيتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman towallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
                 { id: 5, category: "Ramadhan", title: "Doa Khatam Qur'an", arabic: "اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً", latin: "Allahummarhamni bil quran wa'jalhu li imaman wa nuran wa hudan wa rahmah.", artinya: "Ya Allah, rahmatilah aku dengan Al-Qur'an dan jadikanlah ia sebagai imam, cahaya, petunjuk, dan rahmat bagiku." },
                 { id: 6, category: "Ramadhan", title: "Lailatul Qadar", arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي", latin: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'annii.", artinya: "Ya Allah, sesungguhnya Engkau Maha Pemaaf dan senang memaafkan, maka maafkanlah kesalahanku." }
             ];
@@ -482,7 +479,7 @@
                                 </button>
                                 <div>
                                     <h1 className="text-base font-bold leading-none">Jurnal Ramadhan</h1>
-                                    <p className="text-[10px] opacity-80">{theme === 'auto' ? 'Mode Otomatis' : 'Planner Keluarga'}</p>
+                                    <p className="text-[10px] opacity-80">Planner Keluarga</p>
                                     {ramadanCountdownText && (
                                         <p className="text-[9px] text-yellow-300 font-bold mt-0.5 animate-pulse">{ramadanCountdownText}</p>
                                     )}
