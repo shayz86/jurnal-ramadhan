@@ -25,7 +25,6 @@
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -116,8 +115,45 @@
             const [showDonation, setShowDonation] = useState(false);
             const [ramadanCountdownText, setRamadanCountdownText] = useState("");
             
-            // Theme State
-            const [theme, setTheme] = useState('auto');
+            // --- THEME LOGIC (FIXED) ---
+            const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'auto');
+            const [resolvedTheme, setResolvedTheme] = useState('light');
+
+            useEffect(() => {
+                const root = window.document.documentElement;
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                
+                const applyTheme = () => {
+                    const isSystemDark = mediaQuery.matches;
+                    let active = 'light';
+                    
+                    if (theme === 'dark' || (theme === 'auto' && isSystemDark)) {
+                        root.classList.add('dark');
+                        active = 'dark';
+                    } else {
+                        root.classList.remove('dark');
+                        active = 'light';
+                    }
+                    setResolvedTheme(active);
+                    localStorage.setItem('app_theme', theme);
+                };
+
+                applyTheme();
+                mediaQuery.addEventListener('change', applyTheme);
+                return () => mediaQuery.removeEventListener('change', applyTheme);
+            }, [theme]);
+
+            const toggleTheme = () => {
+                setTheme(prev => {
+                    const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    // Jika sekarang di auto dan tampilan gelap -> paksa ke terang (lewatkan manual dark)
+                    if (prev === 'auto') return isSystemDark ? 'light' : 'dark';
+                    // Jika manual dark -> pindah ke manual terang
+                    if (prev === 'dark') return 'light';
+                    // Jika manual terang -> balik ke auto
+                    return 'auto';
+                });
+            };
 
             // Data State
             const [members, setMembers] = useState([{ id: 1, name: 'Ayah', log: {} }, { id: 2, name: 'Ibu', log: {} }]);
@@ -143,31 +179,11 @@
             
             const audioRef = useRef(null);
 
-            // --- THEME LOGIC ---
-            useEffect(() => {
-                const storedTheme = localStorage.getItem('app_theme') || 'auto';
-                setTheme(storedTheme);
-            }, []);
-
-            useEffect(() => {
-                const root = window.document.documentElement;
-                const applyTheme = (t) => {
-                    if (t === 'dark') root.classList.add('dark');
-                    else if (t === 'light') root.classList.remove('dark');
-                    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) root.classList.add('dark');
-                    else root.classList.remove('dark');
-                };
-                applyTheme(theme);
-                localStorage.setItem('app_theme', theme);
-            }, [theme]);
-
-            const toggleTheme = () => setTheme(prev => prev === 'auto' ? 'dark' : prev === 'dark' ? 'light' : 'auto');
-
             // --- PRAYER MAP ---
             const prayerMap = [
                 { l: 'Subuh', k: 'Fajr' },
                 { l: 'Terbit', k: 'Sunrise' },
-                { l: 'Dhuha', k: 'Dhuha' }, // Akan dihitung manual
+                { l: 'Dhuha', k: 'Dhuha' },
                 { l: 'Dzuhur', k: 'Dhuhr' },
                 { l: 'Ashar', k: 'Asr' },
                 { l: 'Maghrib', k: 'Maghrib' },
@@ -196,7 +212,6 @@
 
                 const timer = setInterval(() => {
                     const now = new Date();
-                    // Daftar shalat utama untuk countdown (kecuali Terbit & Dhuha sesuai request)
                     const trackedPrayers = [
                         { name: 'Subuh', time: prayerTimes.Fajr },
                         { name: 'Dzuhur', time: prayerTimes.Dhuhr },
@@ -220,7 +235,6 @@
                         }
                     }
 
-                    // Jika semua sudah lewat, berarti Subuh besok
                     if (!next) {
                         next = trackedPrayers[0];
                         const [h, m] = next.time.split(':').map(Number);
@@ -304,7 +318,6 @@
                 if (outcome === 'accepted') setDeferredPrompt(null);
             };
 
-            // --- GPS HANDLER ---
             const handleUseGPS = () => {
                 setIsLoading(true);
                 setPrayerError(null);
@@ -336,7 +349,6 @@
                 fetchPrayerTimes(prayerCity, null);
             };
 
-            // --- API LOGIC ---
             const fetchPrayerTimes = async (city, coords) => {
                 setIsLoading(true); setPrayerError(null);
                 try {
@@ -352,8 +364,6 @@
                     
                     if (data.code === 200 && data.data) {
                         const timings = data.data.timings;
-                        
-                        // Hitung Dhuha (Sunrise + 20 Menit)
                         if (timings.Sunrise) {
                             const [h, m] = timings.Sunrise.split(':').map(Number);
                             const sunriseDate = new Date();
@@ -362,9 +372,7 @@
                             const dhuhaM = String(sunriseDate.getMinutes()).padStart(2, '0');
                             timings.Dhuha = `${dhuhaH}:${dhuhaM}`;
                         }
-
                         setPrayerTimes(timings);
-                        if (!coords) setPrayerCity(city); 
                     } else {
                         setPrayerError("Jadwal tidak ditemukan");
                         setPrayerTimes(null);
@@ -373,7 +381,6 @@
                 finally { setIsLoading(false); }
             };
 
-            // --- OTHER LOGIC FUNCTIONS ---
             const handleTasbihTap = () => { setTasbihCount(c => c + 1); if (navigator && navigator.vibrate) navigator.vibrate(40); };
             const togglePlayAyat = (idx) => {
                 if (playingAyatIndex === idx) { setPlayingAyatIndex(null); if (audioRef.current) audioRef.current.pause(); } else { setPlayingAyatIndex(idx); }
@@ -434,9 +441,9 @@
                                     <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400 mb-2">Terima Kasih</h3>
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Bantu kami mengembangkan aplikasi ini lebih lanjut.</p>
                                     <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl mb-4 border border-dashed border-slate-300 dark:border-slate-700">
-                                        <img src="qris.jpg" alt="QRIS Donasi" className="w-full h-auto rounded-lg mix-blend-multiply dark:mix-blend-normal" />
+                                        <div className="w-full h-48 bg-slate-200 dark:bg-slate-700 flex items-center justify-center rounded-lg text-xs italic">Simulasi QRIS</div>
                                     </div>
-                                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 py-2 rounded-lg border border-emerald-100 dark:border-emerald-900">Scan QRIS ini untuk mengirim dukungan</p>
+                                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 py-2 rounded-lg border border-emerald-100 dark:border-emerald-900">Scan QRIS untuk dukungan pengembangan</p>
                                 </div>
                             </div>
                         </div>
@@ -463,12 +470,19 @@
                     <header className="bg-emerald-700 dark:bg-emerald-950 text-white py-2 px-4 sticky top-0 z-20 shadow-md">
                         <div className="max-w-md mx-auto flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                                <button onClick={toggleTheme} className="p-1.5 bg-emerald-800 dark:bg-emerald-900 rounded-full hover:bg-emerald-600 transition-colors">
-                                    {theme === 'dark' ? <Icon name="Moon" className="text-yellow-300" size={16} /> : <Icon name="Sun" className="text-yellow-300" size={16} />}
+                                <button 
+                                    onClick={toggleTheme} 
+                                    className="p-1.5 bg-emerald-800 dark:bg-emerald-900 rounded-full hover:bg-emerald-600 transition-colors flex items-center justify-center min-w-[32px] min-h-[32px]"
+                                    title={`Mode: ${theme}`}
+                                >
+                                    {resolvedTheme === 'dark' ? 
+                                        <Icon name="Moon" className="text-yellow-300" size={16} /> : 
+                                        <Icon name="Sun" className="text-yellow-400" size={16} />
+                                    }
                                 </button>
                                 <div>
                                     <h1 className="text-base font-bold leading-none">Jurnal Ramadhan</h1>
-                                    <p className="text-[10px] opacity-80">Planner Keluarga</p>
+                                    <p className="text-[10px] opacity-80">{theme === 'auto' ? 'Mode Otomatis' : 'Planner Keluarga'}</p>
                                     {ramadanCountdownText && (
                                         <p className="text-[9px] text-yellow-300 font-bold mt-0.5 animate-pulse">{ramadanCountdownText}</p>
                                     )}
@@ -535,53 +549,28 @@
                         </div>
                         )}
 
-                        {/* TAB 2: SHALAT (MINIMIZED) */}
+                        {/* TAB 2: SHALAT */}
                         {activeTab === 'shalat' && (
                         <div className="space-y-4">
-                            {/* Lokasi Bar (Compact) */}
                             <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
                                 <div className="flex gap-2 items-center">
-                                    <button 
-                                        onClick={handleUseGPS}
-                                        className={`p-2 rounded-lg border transition-all ${prayerCoords ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'}`}
-                                    >
-                                        <Icon name="Locate" size={18}/>
-                                    </button>
+                                    <button onClick={handleUseGPS} className={`p-2 rounded-lg border transition-all ${prayerCoords ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'}`}><Icon name="Locate" size={18}/></button>
                                     <div className="flex-1 relative">
                                         <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-red-500"><Icon name="MapPin" size={14}/></div>
-                                        <input 
-                                            type="text" 
-                                            value={prayerCity} 
-                                            onChange={(e) => {
-                                                setPrayerCity(e.target.value);
-                                                if (prayerCoords) setPrayerCoords(null); 
-                                            }} 
-                                            placeholder="Cari Kota..."
-                                            className="w-full pl-8 pr-4 py-1.5 border dark:border-slate-700 rounded-lg text-xs focus:outline-emerald-500 bg-white dark:bg-slate-800 dark:text-white" 
-                                        />
+                                        <input type="text" value={prayerCity} onChange={(e) => { setPrayerCity(e.target.value); if (prayerCoords) setPrayerCoords(null); }} placeholder="Cari Kota..." className="w-full pl-8 pr-4 py-1.5 border dark:border-slate-700 rounded-lg text-xs focus:outline-emerald-500 bg-white dark:bg-slate-800 dark:text-white" />
                                     </div>
-                                    <button onClick={handleManualSearch} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-colors" disabled={isLoading}>
-                                        Cari
-                                    </button>
+                                    <button onClick={handleManualSearch} className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-colors" disabled={isLoading}>Cari</button>
                                 </div>
                                 {prayerError && <div className="mt-1 text-[10px] text-red-500 flex items-center gap-1"><Icon name="AlertTriangle" size={10}/> {prayerError}</div>}
                             </div>
 
-                            {/* Jadwal Shalat (Compact) */}
                             {prayerTimes ? (
                             <div className="space-y-3">
                                 <div className="bg-slate-800 dark:bg-slate-900 rounded-2xl p-3 text-white shadow-lg relative overflow-hidden">
                                     <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
-                                        <div>
-                                            <h3 className="text-[10px] opacity-60 uppercase tracking-widest font-bold">Jadwal Shalat</h3>
-                                            <p className="text-sm font-bold truncate max-w-[150px]">{prayerCity}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] opacity-60 font-bold uppercase">Metode</p>
-                                            <p className="text-[10px]">Kemenag RI</p>
-                                        </div>
+                                        <div><h3 className="text-[10px] opacity-60 uppercase tracking-widest font-bold">Jadwal Shalat</h3><p className="text-sm font-bold truncate max-w-[150px]">{prayerCity}</p></div>
+                                        <div className="text-right"><p className="text-[10px] opacity-60 font-bold uppercase">Metode</p><p className="text-[10px]">Kemenag RI</p></div>
                                     </div>
-                                    
                                     <div className="grid grid-cols-1 gap-1.5">
                                     {prayerMap.map(({ l, k }) => (
                                         <div key={k} className="flex justify-between items-center bg-white/5 px-3 py-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
@@ -591,14 +580,9 @@
                                     ))}
                                     </div>
                                 </div>
-
-                                {/* Countdown Section (Empty area filled) */}
                                 <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 p-4 rounded-2xl text-center">
                                     <h4 className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-500 tracking-widest mb-1">Shalat Berikutnya</h4>
-                                    <div className="text-2xl font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                                        {nextPrayerCountdown || "Menghitung..."}
-                                    </div>
-                                    <p className="text-[9px] text-emerald-600/60 dark:text-emerald-500/40 mt-1 italic italic">"Shalat adalah tiang agama"</p>
+                                    <div className="text-2xl font-mono font-bold text-emerald-700 dark:text-emerald-400">{nextPrayerCountdown || "Menghitung..."}</div>
                                 </div>
                             </div>
                             ) : (
@@ -620,29 +604,15 @@
                                 <div>
                                     <div className="p-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white m-4 rounded-xl shadow-lg">
                                         <div className="flex items-start justify-between mb-3">
-                                            <div>
-                                                <h3 className="text-sm font-bold flex items-center gap-1.5"><Icon name="Target" size={16}/> Target Khatam</h3>
-                                                <p className="text-[10px] opacity-80">Rencanakan khatam Quran-mu</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="text-2xl font-bold leading-none">{Math.ceil(604 / (quranTargetDays || 1))}</div>
-                                                <div className="text-[9px] uppercase opacity-70">Hal / Hari</div>
-                                            </div>
+                                            <div><h3 className="text-sm font-bold flex items-center gap-1.5"><Icon name="Target" size={16}/> Target Khatam</h3><p className="text-[10px] opacity-80">Rencanakan khatam Quran-mu</p></div>
+                                            <div className="text-right"><div className="text-2xl font-bold leading-none">{Math.ceil(604 / (quranTargetDays || 1))}</div><div className="text-[9px] uppercase opacity-70">Hal / Hari</div></div>
                                         </div>
                                         <div className="flex items-center gap-2 bg-white/20 p-2 rounded-lg border border-white/10">
                                             <span className="text-[10px] whitespace-nowrap">Target Selesai:</span>
-                                            <input 
-                                                type="number" 
-                                                min="1" 
-                                                max="365" 
-                                                value={quranTargetDays} 
-                                                onChange={(e) => setQuranTargetDays(Math.max(1, parseInt(e.target.value) || 1))}
-                                                className="w-full bg-transparent text-sm font-bold focus:outline-none text-right placeholder-white/50"
-                                            />
+                                            <input type="number" value={quranTargetDays} onChange={(e) => setQuranTargetDays(Math.max(1, parseInt(e.target.value) || 1))} className="w-full bg-transparent text-sm font-bold focus:outline-none text-right placeholder-white/50" />
                                             <span className="text-[10px]">Hari</span>
                                         </div>
                                     </div>
-
                                     <div className="p-3 sticky top-0 bg-white dark:bg-slate-900 z-10 border-b border-slate-50 dark:border-slate-800">
                                         <input type="text" placeholder="Cari surat..." className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-emerald-500 dark:text-white" onChange={(e) => setSearchSurah(e.target.value.toLowerCase())}/>
                                     </div>
@@ -667,9 +637,7 @@
                                         <div key={a.nomorAyat} className={`border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 transition-colors ${isThisPlaying ? 'bg-emerald-50/50 dark:bg-emerald-900/20 -mx-4 px-4 py-4 rounded border-emerald-100 dark:border-emerald-900' : ''}`}>
                                             <div className="mb-2 flex justify-between items-center">
                                             <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${isThisPlaying ? 'bg-emerald-500 text-white' : 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300'}`}>{a.nomorAyat}</span>
-                                            <button onClick={() => togglePlayAyat(index)} className={`p-1 rounded-full ${isThisPlaying ? 'bg-red-100 text-red-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-emerald-600'}`}>
-                                                {isThisPlaying ? <Icon name="StopCircle" size={18}/> : <Icon name="PlayCircle" size={18}/>}
-                                            </button>
+                                            <button onClick={() => togglePlayAyat(index)} className={`p-1 rounded-full ${isThisPlaying ? 'bg-red-100 text-red-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-emerald-600'}`}>{isThisPlaying ? <Icon name="StopCircle" size={18}/> : <Icon name="PlayCircle" size={18}/>}</button>
                                             </div>
                                             <p className="text-right font-serif text-2xl leading-loose text-slate-800 dark:text-slate-200 mb-2" dir="rtl">{a.teksArab}</p>
                                             <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium mb-1">{a.teksLatin}</p>
@@ -709,14 +677,10 @@
                         {/* TAB 5: DOA & TASBIH */}
                         {activeTab === 'doa' && (
                         <div className="space-y-6">
-                            <div className="w-full">
-                                <button onClick={() => setShowDonation(true)} className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-xl hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-amber-200 dark:border-amber-800 shadow-sm">
-                                    <Icon name="Coffee" size={16} className="fill-current" /> TRAKTIR KOPI (SUPPORT)
-                                </button>
-                            </div>
+                            <button onClick={() => setShowDonation(true)} className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-xl hover:bg-amber-200 transition-colors border border-amber-200 dark:border-amber-800 shadow-sm"><Icon name="Coffee" size={16} className="fill-current" /> TRAKTIR KOPI (SUPPORT)</button>
                             <div onClick={() => setIsTasbihFullScreen(true)} className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white text-center shadow-lg relative overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform">
                                 <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="Fingerprint" size={100} /></div>
-                                <div className="absolute top-3 right-3 opacity-50 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest"><Icon name="Maximize2" size={14} /> Full Screen</div>
+                                <div className="absolute top-3 right-3 opacity-50 flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest"><Icon name="Maximize2" size={14} /> Full Screen</div>
                                 <h2 className="text-sm font-bold opacity-70 mb-4 uppercase tracking-widest flex items-center justify-center gap-2">Tasbih Digital</h2>
                                 <div className="text-6xl font-mono font-bold mb-6 tracking-widest">{tasbihCount}</div>
                                 <div className="flex justify-center gap-6 items-center">
@@ -725,24 +689,24 @@
                                 </div>
                             </div>
                             <div className="space-y-3">
-                            <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2"><Icon name="BookOpen" size={20} className="text-emerald-600 dark:text-emerald-400"/> Pilihan Doa</h3>
-                            {doaList.map((item) => {
-                                const isOpen = openDoaId === item.id;
-                                return (
-                                <div key={item.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300">
-                                    <button onClick={() => setOpenDoaId(isOpen ? null : item.id)} className={`w-full flex justify-between items-center p-4 text-left transition-colors ${isOpen ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
-                                        <div className="flex flex-col"><span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">{item.category}</span><span className="font-bold text-sm">{item.title}</span></div>
-                                        {isOpen ? <Icon name="ChevronUp" size={20} className="text-emerald-600"/> : <Icon name="ChevronDown" size={20} className="text-slate-400"/>}
-                                    </button>
-                                    {isOpen && (
-                                    <div className="p-5 border-t border-emerald-100 dark:border-emerald-900 animate-in slide-in-from-top-2 fade-in duration-200">
-                                        <p className="text-right text-2xl font-serif leading-loose mb-4 text-slate-800 dark:text-slate-200" dir="rtl">{item.arabic}</p>
-                                        <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border-l-4 border-emerald-400"><p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium italic mb-2">"{item.latin}"</p><p className="text-sm text-slate-600 dark:text-slate-400">{item.artinya}</p></div>
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2"><Icon name="BookOpen" size={20} className="text-emerald-600 dark:text-emerald-400"/> Pilihan Doa</h3>
+                                {doaList.map((item) => {
+                                    const isOpen = openDoaId === item.id;
+                                    return (
+                                    <div key={item.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300">
+                                        <button onClick={() => setOpenDoaId(isOpen ? null : item.id)} className={`w-full flex justify-between items-center p-4 text-left transition-colors ${isOpen ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
+                                            <div className="flex flex-col"><span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">{item.category}</span><span className="font-bold text-sm">{item.title}</span></div>
+                                            {isOpen ? <Icon name="ChevronUp" size={20} className="text-emerald-600"/> : <Icon name="ChevronDown" size={20} className="text-slate-400"/>}
+                                        </button>
+                                        {isOpen && (
+                                        <div className="p-5 border-t border-emerald-100 dark:border-emerald-900 animate-in slide-in-from-top-2 fade-in duration-200">
+                                            <p className="text-right text-2xl font-serif leading-loose mb-4 text-slate-800 dark:text-slate-200" dir="rtl">{item.arabic}</p>
+                                            <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border-l-4 border-emerald-400"><p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium italic mb-2">"{item.latin}"</p><p className="text-sm text-slate-600 dark:text-slate-400">{item.artinya}</p></div>
+                                        </div>
+                                        )}
                                     </div>
-                                    )}
-                                </div>
-                                );
-                            })}
+                                    );
+                                })}
                             </div>
                         </div>
                         )}
@@ -758,9 +722,7 @@
                             </button>
                             ))}
                         </div>
-                        <div className="w-full text-center pb-1 pb-safe -mt-1">
-                            <p className="text-[9px] text-slate-300 dark:text-slate-600 font-medium">@2026 Project by Sayyid H</p>
-                        </div>
+                        <div className="w-full text-center pb-1 pb-safe -mt-1"><p className="text-[9px] text-slate-300 dark:text-slate-600 font-medium">@2026 Project by Sayyid H</p></div>
                     </nav>
                 </div>
             );
