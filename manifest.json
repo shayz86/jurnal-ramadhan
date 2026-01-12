@@ -1,7 +1,7 @@
 {
-  "name": "Jurnal Ramadhan 1446H",
+  "name": "Jurnal Ramadhan Keluarga",
   "short_name": "Jurnal Ramadhan",
-  "start_url": "/",
+  "start_url": "./index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
