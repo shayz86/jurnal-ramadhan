@@ -238,12 +238,31 @@
                 setPrayerError(null);
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
-                        (position) => {
+                        async (position) => { // Tambahkan 'async' di sini
                             const { latitude, longitude } = position.coords;
                             const coords = { lat: latitude, lng: longitude };
+                            
                             setPrayerCoords(coords);
-                            setPrayerCity("Lokasi GPS Terdeteksi");
+                            setPrayerCity("Mencari nama kota..."); // Teks sementara saat loading
+                            
+                            // Ambil jadwal shalat
                             fetchPrayerTimes(null, coords);
+
+                            // --- TAMBAHAN: REVERSE GEOCODING (Cari Nama Kota) ---
+                            try {
+                                // Menggunakan OpenStreetMap Nominatim API (Gratis)
+                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`);
+                                const data = await res.json();
+                                
+                                // Prioritas nama: Kota -> Kota Kecil -> Kabupaten -> Desa -> Default
+                                const realCityName = data.address.city || data.address.town || data.address.county || data.address.village || "Lokasi GPS Terdeteksi";
+                                
+                                setPrayerCity(realCityName);
+                            } catch (error) {
+                                // Jika gagal internet/API, kembalikan ke teks default
+                                setPrayerCity("Lokasi GPS Terdeteksi");
+                            }
+                            // -----------------------------------------------------
                         },
                         (error) => {
                             let msg = "Gagal mendeteksi lokasi.";
