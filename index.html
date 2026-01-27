@@ -93,7 +93,6 @@
 
 
     <script type="text/babel">
-    alert("SCRIPT MASUK");
 
         const { useState, useEffect, useRef } = React;
 
@@ -220,10 +219,16 @@
         // ===== PRO SYSTEM =====
 const getUID = () => {
   let id = localStorage.getItem("nr_uid");
+
   if (!id) {
-    id = "NR-" + crypto.randomUUID();
+    id =
+      "NR-" +
+      Date.now().toString(36) +
+      Math.random().toString(36).substring(2, 8);
+
     localStorage.setItem("nr_uid", id);
   }
+
   return id;
 };
 
@@ -358,7 +363,7 @@ const userId = getUID();
 
             const [prayerCoords, setPrayerCoords] = useState(null);
 
-            const [nextPrayerCountdown, setNextPrayerCountdown] = useState("");
+            const [nextPrayerInfo, setNextPrayerInfo] = useState(null);
 
             const [editingPrayer, setEditingPrayer] = useState(null); // UNTUK UI EDIT
             
@@ -463,62 +468,72 @@ const userId = getUID();
 
 
             useEffect(() => {
+  if (!prayerTimes) return;
 
-                if (!prayerTimes) return;
+  const timer = setInterval(() => {
+    const now = new Date();
 
-                const timer = setInterval(() => {
+    const trackedPrayers = [
+      { name: 'Subuh', key: 'Fajr' },
+      { name: 'Dzuhur', key: 'Dhuhr' },
+      { name: 'Ashar', key: 'Asr' },
+      { name: 'Maghrib', key: 'Maghrib' },
+      { name: 'Isya', key: 'Isha' },
+    ];
 
-                    const now = new Date();
+    let next = null;
+    let nextDate = null;
 
-                    const trackedPrayers = [
+    for (const p of trackedPrayers) {
+      const finalTime = adjustTime(
+        prayerTimes[p.key],
+        prayerOffsets[p.key]
+      );
 
-                        { name: 'Subuh', time: adjustTime(prayerTimes.Fajr, prayerOffsets.Fajr) },
+      const [h, m] = finalTime.split(':').map(Number);
 
-                        { name: 'Dzuhur', time: adjustTime(prayerTimes.Dhuhr, prayerOffsets.Dhuhr) },
+      const d = new Date();
+      d.setHours(h, m, 0, 0);
 
-                        { name: 'Ashar', time: adjustTime(prayerTimes.Asr, prayerOffsets.Asr) },
+      if (d > now) {
+        next = { ...p, time: finalTime };
+        nextDate = d;
+        break;
+      }
+    }
 
-                        { name: 'Maghrib', time: adjustTime(prayerTimes.Maghrib, prayerOffsets.Maghrib) },
+    if (!next) {
+      const p = trackedPrayers[0];
+      const finalTime = adjustTime(
+        prayerTimes[p.key],
+        prayerOffsets[p.key]
+      );
 
-                        { name: 'Isya', time: adjustTime(prayerTimes.Isha, prayerOffsets.Isha) }
+      const [h, m] = finalTime.split(':').map(Number);
 
-                    ];
+      nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + 1);
+      nextDate.setHours(h, m, 0, 0);
 
-                    let next = null; let nextDate = null;
+      next = { ...p, time: finalTime };
+    }
 
-                    for (const p of trackedPrayers) {
+    const diffMs = nextDate - now;
 
-                        const [h, m] = p.time.split(':').map(Number);
+    const h = Math.floor(diffMs / 3600000);
+    const m = Math.floor((diffMs % 3600000) / 60000);
+    const s = Math.floor((diffMs % 60000) / 1000);
 
-                        const pDate = new Date(); pDate.setHours(h, m, 0, 0);
+    setNextPrayerInfo({
+      name: next.name,
+      time: next.time,
+      countdown: `${h > 0 ? h + 'j ' : ''}${m}m ${s}s`
+    });
 
-                        if (pDate > now) { next = p; nextDate = pDate; break; }
+  }, 1000);
 
-                    }
-
-                    if (!next) {
-
-                        next = trackedPrayers[0]; const [h, m] = next.time.split(':').map(Number);
-
-                        nextDate = new Date(); nextDate.setDate(nextDate.getDate() + 1); nextDate.setHours(h, m, 0, 0);
-
-                    }
-
-                    const diffMs = nextDate - now;
-
-                    const dH = Math.floor(diffMs / (1000 * 60 * 60));
-
-                    const dM = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-                    const dS = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-                    setNextPrayerCountdown(`${next.name} dalam ${dH > 0 ? dH + 'j ' : ''}${dM}m ${dS}s`);
-
-                }, 1000);
-
-                return () => clearInterval(timer);
-
-            }, [prayerTimes, prayerOffsets]);
+  return () => clearInterval(timer);
+}, [prayerTimes, prayerOffsets]);
 
 
 
@@ -841,33 +856,113 @@ const userId = getUID();
                     )}
                     
                     {showPrayerPopup && prayerTimes && (
+
   <div
     className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
     onClick={() => setShowPrayerPopup(false)}
   >
+
     <div
       onClick={e => e.stopPropagation()}
       className="bg-white dark:bg-slate-900 rounded-2xl p-4 w-full max-w-md"
     >
+
       <h3 className="font-bold text-center mb-3">
         Jadwal Shalat — {prayerCity}
       </h3>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
+
         {prayerMap.map(({ l, k }) => {
+
           const offset = prayerOffsets[k] || 0;
           const finalTime = adjustTime(prayerTimes[k], offset);
+          const isEditing = editingPrayer === k;
 
           return (
+
             <div
               key={k}
-              className="flex justify-between px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg"
+              className="bg-slate-100 dark:bg-slate-800 rounded-xl p-3"
             >
-              <span>{l}</span>
-              <span className="font-mono font-bold">{finalTime}</span>
+
+              <div className="flex justify-between items-center">
+
+                <span className="font-medium">{l}</span>
+
+                <div className="flex items-center gap-2">
+
+                  <span className="font-mono font-bold">
+                    {finalTime}
+                  </span>
+
+                  <button
+                    onClick={() =>
+                      setEditingPrayer(isEditing ? null : k)
+                    }
+                    className="text-emerald-600 text-sm"
+                  >
+                    ✏️
+                  </button>
+
+                </div>
+
+              </div>
+
+              {isEditing && (
+
+                <div className="mt-3 flex items-center gap-2">
+
+                  <button
+                    onClick={() =>
+                      setPrayerOffsets({
+                        ...prayerOffsets,
+                        [k]: offset - 1
+                      })
+                    }
+                    className="px-3 py-1 bg-white dark:bg-slate-700 rounded text-xs"
+                  >
+                    −1
+                  </button>
+
+                  <span className="text-xs font-mono w-8 text-center">
+                    {offset > 0 ? `+${offset}` : offset}
+                  </span>
+
+                  <button
+                    onClick={() =>
+                      setPrayerOffsets({
+                        ...prayerOffsets,
+                        [k]: offset + 1
+                      })
+                    }
+                    className="px-3 py-1 bg-white dark:bg-slate-700 rounded text-xs"
+                  >
+                    +1
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setPrayerOffsets({
+                        ...prayerOffsets,
+                        [k]: 0
+                      })
+                    }
+                    className="ml-auto text-[10px] text-red-500 font-bold"
+                  >
+                    Reset
+                  </button>
+
+                </div>
+
+              )}
+
             </div>
+
           );
+
         })}
+
       </div>
 
       <button
@@ -876,8 +971,11 @@ const userId = getUID();
       >
         Tutup
       </button>
+
     </div>
+
   </div>
+
 )}
 
                     {/* MODAL TAFSIR */}
@@ -988,21 +1086,36 @@ const userId = getUID();
 
                             </div>
                             
-                            {/* ===== PRO WIDGET ===== */}
-{isPro && prayerTimes && (
+                            {/* ===== PRO WIDGET COMPACT ===== */}
+{isPro && prayerTimes && nextPrayerInfo && (
   <div
     onClick={() => setShowPrayerPopup(true)}
-    className="bg-emerald-600 text-white p-4 rounded-2xl shadow-lg text-center cursor-pointer active:scale-95 transition"
+    className="
+      bg-gradient-to-r from-emerald-600 to-teal-600
+      text-white px-4 py-3 rounded-2xl shadow-md
+      flex items-center justify-between
+      cursor-pointer active:scale-95 transition
+    "
   >
-    <h4 className="text-[10px] uppercase font-bold opacity-80">
-      Shalat Berikutnya
-    </h4>
+    <div className="flex flex-col leading-tight">
+      <span className="text-[10px] uppercase tracking-widest opacity-80 font-bold">
+        Shalat Berikutnya
+      </span>
 
-    <div className="text-2xl font-mono font-bold">
-      {nextPrayerCountdown || "..."}
+      <span className="text-sm font-semibold">
+        {nextPrayerInfo.name}
+      </span>
     </div>
 
-    <p className="text-[10px] opacity-70 mt-1">{prayerCity}</p>
+    <div className="text-right">
+      <div className="font-mono text-lg font-bold">
+        {nextPrayerInfo.time}
+      </div>
+
+      <div className="text-[10px] opacity-90 font-mono">
+        ⏳ {nextPrayerInfo.countdown}
+      </div>
+    </div>
   </div>
 )}
 
@@ -1097,11 +1210,11 @@ const userId = getUID();
   </div>
 )}
 
+</div>
+)}
 
-
-                        {/* TAB QURAN */}
-
-                        {activeTab === 'quran' && (
+{/* TAB QURAN */}
+{activeTab === 'quran' && (
 
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-[600px] animate-in">
 
