@@ -351,13 +351,14 @@ const userId = getUID();
 
             const [activeMealWeek, setActiveMealWeek] = useState(1);
 
-            
-
+           
             const [prayerCity, setPrayerCity] = useState('Jakarta');
 
             const [prayerTimes, setPrayerTimes] = useState(null);
 
             const [prayerOffsets, setPrayerOffsets] = useState({}); // STATE BARU: OFFSETS WAKTU
+            
+            const [dailyQuote, setDailyQuote] = useState(null);
 
             const [prayerError, setPrayerError] = useState(null);
 
@@ -552,8 +553,42 @@ const userId = getUID();
                 } catch (error) { setPrayerCity("Lokasi GPS Terdeteksi"); return "Lokasi GPS Terdeteksi"; }
 
             };
+            
+            useEffect(() => {
+  fetch("/quotes/index.json")
+    .then(res => res.json())
+    .then(data => {
+      if (!Array.isArray(data) || data.length === 0) return;
 
+      const todayKey = new Date().toISOString().slice(0, 10);
 
+      const saved = localStorage.getItem("nr_daily_quote");
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.date === todayKey) {
+          setDailyQuote(parsed.quote);
+          return;
+        }
+      }
+
+      const idx = new Date().getDate() % data.length;
+      const quote = data[idx];
+
+      setDailyQuote(quote);
+
+      localStorage.setItem(
+        "nr_daily_quote",
+        JSON.stringify({
+          date: todayKey,
+          quote
+        })
+      );
+    })
+    .catch(err => {
+      console.log("Quote load failed", err);
+    });
+}, []);
 
             useEffect(() => {
 
@@ -1119,6 +1154,21 @@ const userId = getUID();
   </div>
 )}
 
+{isPro && dailyQuote && (
+  <div className="
+    bg-white dark:bg-slate-900
+    border border-slate-100 dark:border-slate-800
+    rounded-2xl p-4 shadow-sm
+  ">
+    <p className="italic text-sm leading-relaxed">
+      “{dailyQuote.text}”
+    </p>
+
+    <p className="mt-2 text-right text-[10px] text-slate-500 font-semibold">
+      — {dailyQuote.source}
+    </p>
+  </div>
+)}
 
                             {!isPro && prayerTimes && (
 
