@@ -93,6 +93,7 @@
 
 
     <script type="text/babel">
+    alert("SCRIPT MASUK");
 
         const { useState, useEffect, useRef } = React;
 
@@ -838,8 +839,46 @@ const userId = getUID();
                         </div>
 
                     )}
+                    
+                    {showPrayerPopup && prayerTimes && (
+  <div
+    className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
+    onClick={() => setShowPrayerPopup(false)}
+  >
+    <div
+      onClick={e => e.stopPropagation()}
+      className="bg-white dark:bg-slate-900 rounded-2xl p-4 w-full max-w-md"
+    >
+      <h3 className="font-bold text-center mb-3">
+        Jadwal Shalat — {prayerCity}
+      </h3>
 
+      <div className="space-y-2">
+        {prayerMap.map(({ l, k }) => {
+          const offset = prayerOffsets[k] || 0;
+          const finalTime = adjustTime(prayerTimes[k], offset);
 
+          return (
+            <div
+              key={k}
+              className="flex justify-between px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg"
+            >
+              <span>{l}</span>
+              <span className="font-mono font-bold">{finalTime}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={() => setShowPrayerPopup(false)}
+        className="mt-4 w-full bg-emerald-600 text-white py-2 rounded-xl font-bold"
+      >
+        Tutup
+      </button>
+    </div>
+  </div>
+)}
 
                     {/* MODAL TAFSIR */}
 
@@ -948,10 +987,27 @@ const userId = getUID();
                                 {prayerError && <div className="mt-1 text-[10px] text-red-500 flex items-center gap-1"><Icon name="AlertTriangle" size={10}/> {prayerError}</div>}
 
                             </div>
+                            
+                            {/* ===== PRO WIDGET ===== */}
+{isPro && prayerTimes && (
+  <div
+    onClick={() => setShowPrayerPopup(true)}
+    className="bg-emerald-600 text-white p-4 rounded-2xl shadow-lg text-center cursor-pointer active:scale-95 transition"
+  >
+    <h4 className="text-[10px] uppercase font-bold opacity-80">
+      Shalat Berikutnya
+    </h4>
+
+    <div className="text-2xl font-mono font-bold">
+      {nextPrayerCountdown || "..."}
+    </div>
+
+    <p className="text-[10px] opacity-70 mt-1">{prayerCity}</p>
+  </div>
+)}
 
 
-
-                            {prayerTimes ? (
+                            {!isPro && prayerTimes && (
 
                             <div className="space-y-3">
 
@@ -1031,21 +1087,15 @@ const userId = getUID();
 
                                 </div>
 
-                                <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 p-4 rounded-2xl text-center">
-
-                                    <h4 className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-500 tracking-widest mb-1">Shalat Berikutnya</h4>
-
-                                    <div className="text-2xl font-mono font-bold text-emerald-700 dark:text-emerald-400">{nextPrayerCountdown || "..."}</div>
-
-                                </div>
-
                             </div>
 
-                            ) : <div className="text-center p-8 text-slate-400 text-sm">{isLoading ? "Memuat..." : "Cari kota Anda."}</div>}
+                            )}
 
-                        </div>
-
-                        )}
+{!prayerTimes && (
+  <div className="text-center p-8 text-slate-400 text-sm">
+    {isLoading ? "Memuat..." : "Cari kota Anda."}
+  </div>
+)}
 
 
 
