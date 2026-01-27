@@ -588,7 +588,7 @@
                     </main>
 
                     {/* NAVBAR FOOTER */}
-                    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-950 border-t dark:border-slate-800 z-30 shadow-lg"><div className="flex justify-around pt-1 pb-0">{[{ id: 'shalat', label: 'Shalat', icon: 'Clock' }, { id: 'quran', label: "Qur'an", icon: 'BookOpen' }, { id: 'ramadhan', label: 'Ramadhan', icon: 'Moon' }, { id: 'doa', label: 'Lainnya', icon: 'Menu' }].map(tab => (<button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex flex-col items-center p-2 rounded-xl transition-all duration-300 ${activeTab === tab.id ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 -translate-y-2 border border-emerald-100' : 'text-slate-400'}`}><Icon name={tab.icon} size={20} strokeWidth={activeTab === tab.id ? 2.5 : 2} /><span className="text-[10px] font-bold mt-1">{tab.label}</span></button>))}</div><div className="w-full text-center pb-1 pb-safe -mt-1"><p className="text-[9px] text-slate-300 font-medium">&copy;2026 Project by Sayyid H</p></div></nav>
+                    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-950 border-t dark:border-slate-800 z-30 shadow-lg"><div className="flex justify-around pt-1 pb-0">{[{ id: 'shalat', label: 'Shalat', icon: 'Clock' }, { id: 'quran', label: "Qur'an", icon: 'BookOpen' }, { id: 'ramadhan', label: 'Ramadhan', icon: 'Moon' }, { id: 'doa', label: 'Lainnya', icon: 'Menu' }].map(tab => (<button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex flex-col items-center p-2 rounded-xl transition-all duration-300 ${activeTab === tab.id ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 -translate-y-2 border border-emerald-100' : 'text-slate-400'}`}><Icon name={tab.icon} size={20} strokeWidth={activeTab === tab.id ? 2.5 : 2} /><span className="text-[10px] font-bold mt-1">{tab.label}</span></button>))}</div><div className="w-full text-center pb-1 pb-safe -mt-1"><p className="text-[9px] text-slate-300 font-medium">&copy;2026 Project by Esel Store</p></div></nav>
                 </div>
             );
         };
@@ -598,3 +598,4 @@
     </script>
 </body>
 </html>
+
