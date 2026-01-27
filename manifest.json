@@ -1,6 +1,6 @@
 {
-  "name": "Jurnal Ramadhan Keluarga",
-  "short_name": "Jurnal Ramadhan",
+  "name": "NoorRahma: Cahaya dan Rahmat di Setiap Langkah",
+  "short_name": "NoorRahma",
   "start_url": "./index.html",
   "scope": "/",
   "display": "standalone",
@@ -19,4 +19,5 @@
       "type": "image/png"
     }
   ]
+
 }
