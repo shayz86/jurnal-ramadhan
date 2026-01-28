@@ -1234,6 +1234,27 @@ useEffect(() => {
   </div>
 )}
 
+{/* ===== PRO GRID HIJRIYAH ===== */}
+{isPro && (
+  <div className="grid grid-cols-2 gap-3">
+
+    <div
+      onClick={() => location.href = "/hijriah/"}
+      className="bg-white dark:bg-slate-900
+      border border-slate-100 dark:border-slate-800
+      rounded-2xl p-4 shadow-sm
+      text-center cursor-pointer active:scale-95"
+    >
+      📅
+      <h4 className="font-bold text-sm mt-2">Kalender Hijriah</h4>
+      <p className="text-[10px] text-slate-500">
+        Puasa Sunnah & Hari Besar
+      </p>
+    </div>
+
+  </div>
+)}
+
                             {!isPro && prayerTimes && (
 
                             <div className="space-y-3">
