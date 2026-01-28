@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Islamic Assistant — NoorRahma</title>
+
+<meta name="theme-color" content="#4f46e5" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+  darkMode: "class",
+};
+</script>
+
+<style>
+body { -webkit-tap-highlight-color:none }
+.chat-scroll::-webkit-scrollbar { display:none }
+.chat-scroll { scrollbar-width:none }
+</style>
+
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-950">
+
+<div id="app" class="max-w-md mx-auto min-h-screen flex flex-col">
+
+<!-- ================= HEADER ================= -->
+<header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-4 flex justify-between items-center shadow-lg">
+
+<button onclick="history.back()" class="bg-white/20 px-3 py-1.5 rounded-xl text-sm font-bold">
+← Kembali
+</button>
+
+<h1 class="font-bold">Smart Assistant</h1>
+
+<div class="text-xs font-bold bg-black/20 px-3 py-1 rounded-full">
+PRO
+</div>
+
+</header>
+
+<!-- ================= PRO BLOCK ================= -->
+<div id="blocked" class="hidden flex-1 flex items-center justify-center p-8 text-center">
+
+<div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl">
+
+<h2 class="text-xl font-bold mb-3">Fitur PRO</h2>
+<p class="text-sm text-slate-500 mb-5">
+Smart Islamic Assistant hanya tersedia untuk akun PRO.
+</p>
+
+<button onclick="location.href='/'"
+class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold">
+Kembali
+</button>
+
+</div>
+
+</div>
+
+<!-- ================= CHAT ================= -->
+<div id="chat" class="hidden flex-1 flex flex-col">
+
+<div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll"></div>
+
+<!-- suggested -->
+<div id="suggested" class="px-4 pb-2 flex gap-2 overflow-x-auto text-xs">
+</div>
+
+<!-- input -->
+<div class="bg-white dark:bg-slate-900 border-t dark:border-slate-800 p-3 flex gap-2">
+
+<input id="input"
+placeholder="Tanya seputar ibadah..."
+class="flex-1 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm outline-none"/>
+
+<button onclick="sendMessage()"
+class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">
+Kirim
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+const isPro = localStorage.getItem("nr_is_pro")==="1";
+
+const blocked = document.getElementById("blocked");
+const chat = document.getElementById("chat");
+
+if(!isPro){
+  blocked.classList.remove("hidden");
+}else{
+  chat.classList.remove("hidden");
+}
+
+const messagesEl = document.getElementById("messages");
+const inputEl = document.getElementById("input");
+const suggestedEl = document.getElementById("suggested");
+
+let historyChat = JSON.parse(localStorage.getItem("nr_assistant_chat")||"[]");
+
+const suggestions = [
+ "Bagaimana niat shalat?",
+ "Kapan waktu dhuha?",
+ "Apa itu zakat fitrah?",
+ "Berapa rakaat tarawih?",
+ "Apa doa berbuka?",
+];
+
+suggestions.forEach(t=>{
+  const b=document.createElement("button");
+  b.textContent=t;
+  b.className="bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap";
+  b.onclick=()=>{ inputEl.value=t; sendMessage(); }
+  suggestedEl.appendChild(b);
+});
+
+function render(){
+ messagesEl.innerHTML="";
+ historyChat.forEach(m=>{
+  addBubble(m.role,m.text,false);
+ });
+ scrollBottom();
+}
+render();
+
+function addBubble(role,text,save=true){
+ const div=document.createElement("div");
+ div.className=role==="user"
+ ? "bg-indigo-600 text-white self-end px-4 py-2 rounded-2xl max-w-[80%]"
+ : "bg-white dark:bg-slate-900 px-4 py-2 rounded-2xl shadow max-w-[80%]";
+
+ div.textContent=text;
+ messagesEl.appendChild(div);
+
+ if(save){
+  historyChat.push({role,text});
+  localStorage.setItem("nr_assistant_chat",JSON.stringify(historyChat));
+ }
+
+ scrollBottom();
+}
+
+function scrollBottom(){
+ messagesEl.scrollTop=messagesEl.scrollHeight;
+}
+
+async function sendMessage(){
+ const text=inputEl.value.trim();
+ if(!text) return;
+
+ inputEl.value="";
+ addBubble("user",text);
+
+ const loader=document.createElement("div");
+ loader.className="italic text-slate-400 text-sm";
+ loader.textContent="Assistant sedang mengetik...";
+ messagesEl.appendChild(loader);
+ scrollBottom();
+
+ // ⚠️ nanti bisa dihubungkan ke API AI
+ setTimeout(()=>{
+   loader.remove();
+   const reply=mockAnswer(text);
+   addBubble("bot",reply);
+ },900);
+}
+
+function mockAnswer(q){
+ q=q.toLowerCase();
+
+ if(q.includes("niat")) return "Niat shalat cukup di dalam hati saat takbiratul ihram.";
+ if(q.includes("dhuha")) return "Waktu dhuha dimulai setelah matahari naik sekitar 15 menit hingga sebelum dzuhur.";
+ if(q.includes("tarawih")) return "Shalat tarawih biasanya 8 atau 20 rakaat menurut mazhab.";
+ if(q.includes("zakat")) return "Zakat fitrah wajib sebelum Idul Fitri sebesar makanan pokok ±2,5kg.";
+ if(q.includes("buka")) return "Doa berbuka: Allahumma laka shumtu...";
+
+ return "Pertanyaan bagus 😊 insyaAllah akan kami tambahkan jawaban lengkapnya.";
+}
+</script>
+
+</body>
+</html>
