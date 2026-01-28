@@ -6,6 +6,7 @@
 <title>Kalender Hijriah</title>
 
 <link rel="stylesheet" href="hijriah.css" />
+
 </head>
 <body>
 
@@ -99,15 +100,15 @@
 
 </div>
 
-/* ================= ARABIC NUM ================= */
+<!-- ================= SCRIPT ================= -->
+
+<script>
 
 const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
 
 function toArabic(num){
  return num.toString().split("").map(n=>arabNums[n]).join("");
 }
-
-/* ================= MONTH NAMES ================= */
 
 const hijriMonths=[
  "Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
@@ -119,15 +120,14 @@ const hijriMonths=[
 const grid=document.getElementById("calendarGrid");
 const monthTitle=document.getElementById("monthTitle");
 
-/* ================= FORMATTER ================= */
-
-const hijriFmt=new Intl.DateTimeFormat(
- "en-TN-u-ca-islamic",
- {day:"numeric",month:"numeric",year:"numeric"}
-);
-
 function getHijriParts(date){
- const parts=hijriFmt.formatToParts(date);
+
+ const fmt=new Intl.DateTimeFormat(
+  "en-TN-u-ca-islamic",
+  {day:"numeric",month:"numeric",year:"numeric"}
+ );
+
+ const parts=fmt.formatToParts(date);
  const obj={};
 
  parts.forEach(p=>{
@@ -137,34 +137,10 @@ function getHijriParts(date){
  return obj;
 }
 
-/* ================= TODAY FIX ================= */
-
-// simpan hari real SEKALI
-const realToday=new Date();
-const todayHijri=getHijriParts(realToday);
-
-/* ================= VIEW DATE ================= */
-
 let baseDate=new Date();
 
-/* ================= DAYS IN MONTH ================= */
-
-function getHijriMonthLength(date){
-
- const test=new Date(date);
- const start=getHijriParts(test).month;
-
- let count=0;
-
- while(true){
-  const h=getHijriParts(test);
-  if(h.month!==start) break;
-  count++;
-  test.setDate(test.getDate()+1);
- }
-
- return count;
-}
+/* ===== simpan hijri today asli ===== */
+const todayHijri=getHijriParts(new Date());
 
 /* ================= RENDER ================= */
 
@@ -176,15 +152,14 @@ function renderCalendar(){
 
  const hMonth=hijri.month-1;
  const hYear=hijri.year;
- const hDay=hijri.day;
 
  monthTitle.textContent=
   hijriMonths[hMonth]+" "+hYear+" H";
 
- // cari awal bulan hijriah
+ // cari masehi awal bulan hijriah
  const firstDayDate=new Date(baseDate);
  firstDayDate.setDate(
-  baseDate.getDate()-(hDay-1)
+  baseDate.getDate()-(hijri.day-1)
  );
 
  const startOffset=firstDayDate.getDay()===0
@@ -194,7 +169,7 @@ function renderCalendar(){
   grid.appendChild(document.createElement("div"));
  }
 
- const daysInMonth=getHijriMonthLength(firstDayDate);
+ const daysInMonth=30;
 
  for(let d=1;d<=daysInMonth;d++){
 
@@ -213,11 +188,11 @@ function renderCalendar(){
   h.className="hijri";
   h.textContent=toArabic(d);
 
-  // ===== highlight ONLY real today =====
+  /* highlight ONLY jika bulan+tahun sama */
   if(
-    d===todayHijri.day &&
     hijri.month===todayHijri.month &&
-    hijri.year===todayHijri.year
+    hijri.year===todayHijri.year &&
+    d===todayHijri.day
   ){
     cell.classList.add("today");
   }
@@ -252,6 +227,7 @@ document.getElementById("openPuasa").onclick=()=>{
 function closePuasa(){
  popup.classList.remove("show");
 }
+
 </script>
 
 </body>
