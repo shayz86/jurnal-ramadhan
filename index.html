@@ -338,8 +338,28 @@ const userId = getUID();
                 });
 
             };
+            
+            const requestNotifPermission = async () => {
 
+  if (!("Notification" in window)) {
+    alert("Browser tidak mendukung notifikasi");
+    return;
+  }
 
+  const perm = await Notification.requestPermission();
+
+  if (perm === "granted") {
+    setNotifEnabled(true);
+    localStorage.setItem("nr_notif_enabled", "1");
+    alert("Notif shalat aktif ✅");
+  } else {
+    alert("Notif ditolak");
+  }
+};
+
+const [notifEnabled, setNotifEnabled] = useState(
+  () => localStorage.getItem("nr_notif_enabled") === "1"
+);
 
             // DATA STATES
 
@@ -359,6 +379,8 @@ const userId = getUID();
             const [prayerOffsets, setPrayerOffsets] = useState({}); // STATE BARU: OFFSETS WAKTU
             
             const [dailyQuote, setDailyQuote] = useState(null);
+            
+            
 
             const [prayerError, setPrayerError] = useState(null);
 
@@ -466,7 +488,24 @@ const userId = getUID();
 
             }, []);
 
+useEffect(() => {
 
+  if (!isPro || !notifEnabled || !prayerTimes) return;
+
+  if (!navigator.serviceWorker) return;
+
+  navigator.serviceWorker.ready.then(reg => {
+
+    reg.active?.postMessage({
+      type: "SET_PRAYERS",
+      city: prayerCity,
+      times: prayerTimes,
+      offsets: prayerOffsets
+    });
+
+  });
+
+}, [isPro, notifEnabled, prayerTimes, prayerOffsets]);
 
             useEffect(() => {
   if (!prayerTimes) return;
@@ -905,6 +944,31 @@ const userId = getUID();
       <h3 className="font-bold text-center mb-3">
         Jadwal Shalat — {prayerCity}
       </h3>
+      
+      {isPro && (
+  <button
+    onClick={() =>
+      notifEnabled
+        ? (
+            setNotifEnabled(false),
+            localStorage.setItem("nr_notif_enabled", "0")
+          )
+        : requestNotifPermission()
+    }
+    className={`
+      w-full mb-3 py-2 rounded-xl text-xs font-bold transition
+      ${
+        notifEnabled
+          ? "bg-emerald-600 text-white"
+          : "bg-slate-200 dark:bg-slate-700 text-slate-700"
+      }
+    `}
+  >
+    {notifEnabled
+      ? "🔔 Notifikasi Shalat Aktif"
+      : "🔕 Aktifkan Notifikasi Shalat"}
+  </button>
+)}
 
       <div className="space-y-3">
 
@@ -1509,6 +1573,12 @@ const userId = getUID();
         root.render(<App />);
 
     </script>
+    
+    <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+</script>
 
 </body>
 
