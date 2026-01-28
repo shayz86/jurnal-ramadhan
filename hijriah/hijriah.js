@@ -1,8 +1,25 @@
-const app = document.getElementById("app");
+const grid = document.getElementById("hijriGrid");
+const title = document.getElementById("hijriMonthTitle");
 
-app.innerHTML = `
-  <div class="h-card">
-    <h3>Bulan Hijriah</h3>
-    <div class="h-grid" id="grid"></div>
-  </div>
-`;
+function renderHijri() {
+
+  const formatter = new Intl.DateTimeFormat("id-TN-u-ca-islamic", {
+    month: "long",
+    year: "numeric"
+  });
+
+  title.textContent = formatter.format(new Date());
+
+  grid.innerHTML = "";
+
+  for (let i = 1; i <= 30; i++) {
+
+    const box = document.createElement("div");
+    box.className = "hijri-day";
+    box.textContent = i;
+
+    grid.appendChild(box);
+  }
+}
+
+renderHijri();
