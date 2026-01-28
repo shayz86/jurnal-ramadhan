@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Asmaul Husna</title>
+
+<style>
+body{
+  margin:0;
+  background:#043b47;
+  font-family:system-ui, sans-serif;
+  color:white;
+}
+
+header{
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#022f38;
+}
+
+header h1{
+  font-size:18px;
+  margin:0;
+}
+
+.back{
+  background:none;
+  border:none;
+  font-size:20px;
+  color:white;
+}
+
+.container{
+  padding:18px;
+}
+
+.quote{
+  margin-bottom:18px;
+}
+
+.quote arab{
+  font-size:22px;
+}
+
+.card{
+  background:#064652;
+  border-radius:18px;
+  padding:16px;
+}
+
+.asma{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.asma:last-child{border:none;}
+
+.badge{
+  background:#a855f7;
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:20px;
+  min-width:60px;
+  text-align:center;
+}
+
+.asma h3{
+  margin:0;
+  font-size:15px;
+}
+
+.asma p{
+  margin:4px 0 0;
+  opacity:.8;
+  font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= PRO GUARD ================= -->
+
+<script>
+(function(){
+  try{
+    const cache = localStorage.getItem("nr_pro_cache");
+    if(!cache) return location.href="/";
+
+    const parsed = JSON.parse(cache);
+    if(!parsed.pro) location.href="/";
+
+  }catch(e){
+    location.href="/";
+  }
+})();
+</script>
+
+<header>
+  <button onclick="history.back()" class="back">←</button>
+  <h1>Asmaul Husna</h1>
+</header>
+
+<div class="container">
+
+  <h2>Menghafal Asmaul Husna</h2>
+
+  <p>
+  إِنَّ لِلَّهِ تِسْعَةً وَتِسْعِينَ اسْمًا مِائَةً إِلَّا وَاحِدًا مَنْ أَحْصَاهَا دَخَلَ الْجَنَّةَ
+  </p>
+
+  <p style="opacity:.8;font-size:13px">
+  “Sesungguhnya Allah memiliki 99 nama...”
+  </p>
+
+  <div class="card">
+
+    <div class="asma">
+      <div class="badge">الرَّحْمٰن</div>
+      <div>
+        <h3>1. Ar Rahman</h3>
+        <p>Yang Maha Pengasih</p>
+      </div>
+    </div>
+
+    <div class="asma">
+      <div class="badge">الرَّحِيْم</div>
+      <div>
+        <h3>2. Ar Rahiim</h3>
+        <p>Yang Maha Penyayang</p>
+      </div>
+    </div>
+
+    <div class="asma">
+      <div class="badge">الْمَلِك</div>
+      <div>
+        <h3>3. Al Malik</h3>
+        <p>Yang Maha Merajai</p>
+      </div>
+    </div>
+
+    <div class="asma">
+      <div class="badge">الْقُدُّوس</div>
+      <div>
+        <h3>4. Al Quddus</h3>
+        <p>Yang Maha Suci</p>
+      </div>
+    </div>
+
+    <div class="asma">
+      <div class="badge">السَّلَام</div>
+      <div>
+        <h3>5. As Salaam</h3>
+        <p>Yang Maha Memberi Kesejahteraan</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
