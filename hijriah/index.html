@@ -2,28 +2,27 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kalender Hijriah</title>
 
-<link rel="stylesheet" href="hijriah.css" />
+<link rel="stylesheet" href="hijriah.css"/>
 
 </head>
 <body>
 
-<header class="topbar">
-  <button onclick="history.back()" class="back">←</button>
+<header class="top-bar">
+  <button onclick="history.back()">←</button>
   <h1>Kalender Hijriah</h1>
-
-  <button id="openPuasa" class="calendarBtn">📅</button>
+  <button id="fastingBtn">📅</button>
 </header>
 
-<section class="monthNav">
-  <button id="prevMonth">‹</button>
-  <h2 id="monthTitle">-</h2>
-  <button id="nextMonth">›</button>
+<section class="month-bar">
+  <button onclick="changeMonth(-1)">‹</button>
+  <h2 id="monthTitle"></h2>
+  <button onclick="changeMonth(1)">›</button>
 </section>
 
-<div class="weekday">
+<div class="weekdays">
   <span>Sen</span>
   <span>Sel</span>
   <span>Rab</span>
@@ -35,144 +34,114 @@
 
 <div id="calendarGrid" class="calendar-grid"></div>
 
-<!-- ================= POPUP PUASA ================= -->
-
-<div id="puasaPopup" class="popup">
- <div class="popupBox">
-   <h3>Puasa Sunnah</h3>
-
-   <ul>
-     <li>✔ Senin & Kamis</li>
-     <li>✔ Ayyamul Bidh (13-15)</li>
-     <li>✔ Puasa Daud</li>
-     <li>✔ Puasa Arafah</li>
-     <li>✔ Puasa Asyura</li>
-   </ul>
-
-   <button onclick="closePuasa()">Tutup</button>
- </div>
-</div>
-
-<!-- ================= SCRIPT ================= -->
-
 <script>
 
-const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+// ============================
+// GLOBAL STATE
+// ============================
 
-function toArabic(num){
- return num.toString().split("").map(n=>arabNums[n]).join("");
+let viewDate = new Date();
+
+const arabicNums = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+
+function toArabic(num) {
+ return num.toString().split("").map(n=>arabicNums[n]).join("");
 }
 
-const hijriMonths=[
- "Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
- "Jumadal Ula","Jumadal Akhirah",
- "Rajab","Sha'ban","Ramadhan",
- "Syawal","Dzulqa'dah","Dzulhijjah"
-];
+// ============================
+// TODAY HIJRI
+// ============================
 
-const grid=document.getElementById("calendarGrid");
-const monthTitle=document.getElementById("monthTitle");
+const today = new Date();
+const todayHijri = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+ day:"numeric",
+ month:"numeric",
+ year:"numeric"
+}).format(today).split("/").map(Number);
 
-function getHijriParts(date){
+const [todayHDay, todayHMonth, todayHYear] = todayHijri;
 
- const fmt=new Intl.DateTimeFormat(
-  "en-TN-u-ca-islamic",
-  {day:"numeric",month:"numeric",year:"numeric"}
- );
+// ============================
+// RENDER
+// ============================
 
- const parts=fmt.formatToParts(date);
- const obj={};
+function renderCalendar() {
 
- parts.forEach(p=>{
-  if(p.type!=="literal") obj[p.type]=parseInt(p.value);
- });
+ const grid = document.getElementById("calendarGrid");
+ grid.innerHTML = "";
 
- return obj;
-}
+ // hijri for first of month
+ const firstHijri = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+  day:"numeric",
+  month:"long",
+  year:"numeric"
+ }).format(viewDate);
 
-let baseDate=new Date();
+ document.getElementById("monthTitle").innerText = firstHijri;
 
-/* ================= RENDER ================= */
+ // first day index
+ const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
 
-function renderCalendar(){
+ const hijriMonth = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+  month:"numeric"
+ }).format(firstDay);
 
- grid.innerHTML="";
+ const hijriYear = new Intl.DateTimeFormat("en-TN-u-ca-islamic", {
+  year:"numeric"
+ }).format(firstDay);
 
- const hijri=getHijriParts(baseDate);
+ const weekday = (firstDay.getDay()+6)%7;
 
- const hMonth=hijri.month-1;
- const hYear=hijri.year;
- const today=hijri.day;
-
- monthTitle.textContent=
-  hijriMonths[hMonth]+" "+hYear+" H";
-
- // cari tanggal masehi awal bulan hijriah
- const firstDayDate=new Date(baseDate);
- firstDayDate.setDate(
-  baseDate.getDate()-(today-1)
- );
-
- const startOffset=firstDayDate.getDay()===0
-  ?6:firstDayDate.getDay()-1;
-
- for(let i=0;i<startOffset;i++){
+ for(let i=0;i<weekday;i++){
   grid.appendChild(document.createElement("div"));
  }
 
- const daysInMonth=30;
+ for(let i=0;i<30;i++){
 
- for(let d=1;d<=daysInMonth;d++){
+  const cell = document.createElement("div");
+  cell.className="day";
 
-  const cell=document.createElement("div");
-  cell.className="hijri-day";
+  const temp = new Date(firstDay);
+  temp.setDate(temp.getDate()+i);
 
-  const g=document.createElement("div");
-  g.className="greg";
+  const hijriParts = new Intl.DateTimeFormat("en-TN-u-ca-islamic",{
+   day:"numeric",
+   month:"numeric",
+   year:"numeric"
+  }).format(temp).split("/").map(Number);
 
-  const mDate=new Date(firstDayDate);
-  mDate.setDate(firstDayDate.getDate()+d-1);
+  const [hDay,hMonth,hYear] = hijriParts;
 
-  g.textContent=mDate.getDate();
+  // STOP jika bulan berganti
+  if(hMonth!=hijriMonth) break;
 
-  const h=document.createElement("div");
-  h.className="hijri";
-  h.textContent=toArabic(d);
+  const gDay = temp.getDate();
 
-  if(d===today){
+  cell.innerHTML=`
+    <div class="g">${gDay}</div>
+    <div class="h">${toArabic(hDay)}</div>
+  `;
+
+  // today highlight
+  if(
+   hDay===todayHDay &&
+   hMonth===todayHMonth &&
+   hYear===todayHYear
+  ){
    cell.classList.add("today");
   }
 
-  cell.append(g,h);
   grid.appendChild(cell);
  }
+
+}
+
+function changeMonth(dir){
+ viewDate.setMonth(viewDate.getMonth()+dir);
+ renderCalendar();
 }
 
 renderCalendar();
-
-/* ================= NAV ================= */
-
-document.getElementById("prevMonth").onclick=()=>{
- baseDate.setDate(baseDate.getDate()-30);
- renderCalendar();
-};
-
-document.getElementById("nextMonth").onclick=()=>{
- baseDate.setDate(baseDate.getDate()+30);
- renderCalendar();
-};
-
-/* ================= POPUP ================= */
-
-const popup=document.getElementById("puasaPopup");
-
-document.getElementById("openPuasa").onclick=()=>{
- popup.classList.add("show");
-};
-
-function closePuasa(){
- popup.classList.remove("show");
-}
 
 </script>
 
