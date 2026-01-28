@@ -1267,6 +1267,36 @@ useEffect(() => {
         Hafalan 99 Nama Allah
       </p>
     </div>
+    
+    {/* KIBLAT COMPASS */}
+    <div
+  onClick={() => location.href = "/kiblat/"}
+  className="bg-white dark:bg-slate-900
+  border border-slate-100 dark:border-slate-800
+  rounded-2xl p-4 shadow-sm
+  text-center cursor-pointer active:scale-95"
+>
+  🧭
+  <h4 className="font-bold text-sm mt-2">Kompas Kiblat</h4>
+  <p className="text-[10px] text-slate-500">
+    Arah Shalat Real-time
+  </p>
+</div>
+
+{/* KIBLAT COMPASS AR */}
+<div
+ onClick={()=>location.href="/kiblat-ar/"}
+ className="bg-white dark:bg-slate-900
+ border border-slate-100 dark:border-slate-800
+ rounded-2xl p-4 shadow-sm
+ text-center cursor-pointer active:scale-95"
+>
+ 📱🧭
+ <h4 className="font-bold text-sm mt-2">Kiblat AR</h4>
+ <p className="text-[10px] text-slate-500">
+  Kamera & Arah Real-time
+ </p>
+</div>
 
   </div>
 )}
@@ -1620,4 +1650,3 @@ if ("serviceWorker" in navigator) {
 </body>
 
 </html>
-
