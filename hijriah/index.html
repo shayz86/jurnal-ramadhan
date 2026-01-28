@@ -103,6 +103,33 @@
 <!-- ================= SCRIPT ================= -->
 
 <script>
+/* ===================================================
+   🔒 PRO GUARD — BLOCK NON PRO
+=================================================== */
+
+(function () {
+  try {
+    const cache = localStorage.getItem("nr_pro_cache");
+
+    if (!cache) {
+      location.href = "/";
+      return;
+    }
+
+    const parsed = JSON.parse(cache);
+
+    if (!parsed.pro) {
+      location.href = "/";
+      return;
+    }
+
+  } catch (e) {
+    location.href = "/";
+  }
+})();
+</script>
+
+<script>
 
 const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
 
