@@ -2,9 +2,7 @@
 // ===== PWA CORE ===============
 // ===============================
 
-self.addEventListener("install", e => {
-  self.skipWaiting();
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", e => {
   e.waitUntil(self.clients.claim());
@@ -18,7 +16,8 @@ self.addEventListener("fetch", e => {
 // ===== NOTIF SHALAT PRO ========
 // ===============================
 
-let prayerTimers = {};
+let prayerData = null;
+let firedToday = {};
 
 const PRAYER_KEYS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
@@ -30,46 +29,67 @@ const LABELS = {
   Isha: "Isya"
 };
 
-function clearTimers() {
-  Object.values(prayerTimers).forEach(t => clearTimeout(t));
-  prayerTimers = {};
-}
-
-function parseTimeToDate(timeStr, offset = 0) {
+function parseTime(timeStr, offset = 0) {
   const [h, m] = timeStr.split(":").map(Number);
 
   const d = new Date();
-  d.setSeconds(0);
-  d.setMilliseconds(0);
+  d.setSeconds(0, 0);
   d.setMinutes(m + offset);
   d.setHours(h);
-
-  if (d < new Date()) {
-    d.setDate(d.getDate() + 1);
-  }
 
   return d;
 }
 
-function schedulePrayer(key, timeStr, offset, city) {
-  const target = parseTimeToDate(timeStr, offset);
-  const delay = target - Date.now();
+function checkPrayerTimes() {
+  if (!prayerData) return;
 
-  prayerTimers[key] = setTimeout(() => {
+  const now = new Date();
 
-    self.registration.showNotification("Waktu Shalat", {
-      body: `${LABELS[key]} — ${city || ""}`,
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
-      tag: "shalat-" + key,
-      renotify: true
-    });
+  PRAYER_KEYS.forEach(k => {
 
-    // schedule ulang untuk besok
-    schedulePrayer(key, timeStr, offset, city);
+    const base = prayerData.times[k];
+    if (!base) return;
 
-  }, delay);
+    const offset = prayerData.offsets?.[k] || 0;
+
+    const target = parseTime(base, offset);
+
+    // reset setiap hari
+    const todayKey = new Date().toDateString();
+    firedToday[todayKey] ??= {};
+
+    // kalau sudah lewat hari ini, geser ke besok
+    if (target < now) return;
+
+    const diff = target - now;
+
+    // trigger kalau 0–30 detik sebelum
+    if (diff <= 30000 && diff >= 0) {
+
+      if (firedToday[todayKey][k]) return;
+
+      firedToday[todayKey][k] = true;
+
+      self.registration.showNotification("Waktu Shalat", {
+        body: `${LABELS[k]} — ${prayerData.city || ""}`,
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        tag: "shalat-" + k,
+        renotify: true,
+        vibrate: [200, 100, 200]
+      });
+
+    }
+
+  });
 }
+
+// cek tiap 30 detik
+setInterval(checkPrayerTimes, 30000);
+
+// ===============================
+// ===== MESSAGE HANDLER =========
+// ===============================
 
 self.addEventListener("message", e => {
 
@@ -78,24 +98,20 @@ self.addEventListener("message", e => {
 
   if (data.type === "SET_PRAYERS") {
 
-    clearTimers();
+    prayerData = {
+      times: data.times,
+      offsets: data.offsets || {},
+      city: data.city
+    };
 
-    const { times, offsets, city } = data;
+    firedToday = {};
 
-    PRAYER_KEYS.forEach(k => {
-      if (times[k]) {
-        schedulePrayer(
-          k,
-          times[k],
-          offsets?.[k] || 0,
-          city
-        );
-      }
-    });
+    console.log("[SW] Prayer data updated", prayerData);
   }
 
   if (data.type === "CLEAR_PRAYERS") {
-    clearTimers();
+    prayerData = null;
+    firedToday = {};
   }
 
 });
