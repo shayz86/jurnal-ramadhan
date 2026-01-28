@@ -3,203 +3,242 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Kompas Kiblat</title>
-
-<meta name="theme-color" content="#047857" />
+<title>Kiblat — NoorRahma</title>
 
 <style>
 body{
-  margin:0;
-  font-family: system-ui, sans-serif;
-  background:#0f172a;
-  color:white;
-  text-align:center;
+ margin:0;
+ font-family:system-ui;
+ background:#0f172a;
+ color:white;
 }
 
 header{
-  background:#047857;
-  padding:14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
+ display:flex;
+ align-items:center;
+ gap:10px;
+ padding:14px;
+ background:#064e3b;
 }
 
 header button{
-  background:none;
-  border:none;
-  color:white;
-  font-size:20px;
+ background:none;
+ border:none;
+ color:white;
+ font-size:20px;
 }
 
-main{
-  padding:24px;
+.container{
+ padding:16px;
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:14px;
+}
+
+.card{
+ background:#020617;
+ border-radius:18px;
+ padding:20px;
+ text-align:center;
+ cursor:pointer;
+ border:1px solid #1e293b;
+}
+
+.card h3{margin:10px 0 0;font-size:15px}
+
+.full{
+ grid-column:1/3;
 }
 
 #compassWrap{
-  margin-top:30px;
-  position:relative;
-  width:280px;
-  height:280px;
-  border-radius:50%;
-  border:6px solid rgba(255,255,255,.15);
-  margin-inline:auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+ margin-top:20px;
+ text-align:center;
 }
 
-#dial{
-  position:absolute;
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  border:1px dashed rgba(255,255,255,.2);
+.circle{
+ width:260px;
+ height:260px;
+ border-radius:50%;
+ border:4px solid #10b981;
+ margin:auto;
+ position:relative;
 }
 
-#needle{
-  width:8px;
-  height:120px;
-  background:#22c55e;
-  position:absolute;
-  top:20px;
-  border-radius:6px;
-  transform-origin:50% 90%;
+.arrow{
+ position:absolute;
+ top:50%;
+ left:50%;
+ width:6px;
+ height:110px;
+ background:#ef4444;
+ transform-origin:bottom center;
+ translate:-50% -100%;
+ border-radius:4px;
 }
 
-#kaaba{
-  font-size:40px;
-  position:absolute;
-  bottom:25px;
+.status{
+ margin-top:10px;
+ font-size:13px;
+ opacity:.8;
 }
 
-.info{
-  margin-top:18px;
-  font-size:13px;
-  opacity:.8;
-}
+.hidden{display:none}
 
-.deg{
-  font-size:26px;
-  font-weight:bold;
-  margin-top:12px;
-}
-
-.warn{
-  margin-top:25px;
-  font-size:13px;
-  opacity:.7;
+.btn{
+ background:#10b981;
+ color:black;
+ border:none;
+ padding:10px 16px;
+ border-radius:14px;
+ font-weight:600;
 }
 </style>
 </head>
 <body>
 
 <header>
-  <button onclick="history.back()">←</button>
-  <h3>Kompas Kiblat</h3>
+<button onclick="history.back()">←</button>
+<h2>Kiblat</h2>
 </header>
 
-<main>
+<div class="container">
 
-<h2>Arah Kiblat</h2>
-
-<div id="compassWrap">
-  <div id="dial"></div>
-  <div id="needle"></div>
-  <div id="kaaba">🕋</div>
+<div class="card" onclick="openCompass()">
+🧭
+<h3>Kompas</h3>
 </div>
 
-<div class="deg" id="degree">0°</div>
-<div class="info" id="location">Mendeteksi lokasi...</div>
+<div class="card" onclick="location.href='/kiblat-ar/'">
+📷
+<h3>AR Camera</h3>
+</div>
 
-<p class="warn">
-  Putar HP membentuk angka 8 untuk kalibrasi sensor.
-</p>
+<div class="card full" onclick="openCalibrate()">
+🌀
+<h3>Kalibrasi Sensor</h3>
+</div>
 
-</main>
+</div>
+
+<!-- ================= COMPASS ================= -->
+
+<div id="compassWrap" class="hidden">
+
+<div class="circle">
+ <div id="arrow" class="arrow"></div>
+</div>
+
+<div id="degTxt" class="status">0°</div>
+<div id="gpsTxt" class="status">GPS: ...</div>
+<div id="sensorTxt" class="status">Sensor: ...</div>
+
+<button class="btn" onclick="stopCompass()">Tutup</button>
+
+</div>
+
+<!-- ================= KALIBRASI ================= -->
+
+<div id="calibWrap" class="hidden" style="padding:20px;text-align:center">
+
+<h3>Kalibrasi Kompas</h3>
+<p>Putar HP membentuk angka 8 selama 10 detik.</p>
+<p>Jauhkan dari benda logam / magnet.</p>
+
+<button class="btn" onclick="closeCalibrate()">Selesai</button>
+
+</div>
 
 <script>
 /* ================= PRO GUARD ================= */
 
-const cache = localStorage.getItem("nr_pro_cache");
-
-if (!cache || !JSON.parse(cache).pro) {
-  alert("Fitur ini khusus akun PRO");
-  location.href = "/";
+if(localStorage.getItem("nr_is_pro")!=="1"){
+ alert("Fitur PRO 🔒");
+ location.href="/";
 }
 
 /* ================= KIBLAT LOGIC ================= */
 
-const KAABA = { lat: 21.4225, lon: 39.8262 };
+const kaaba={lat:21.4225,lon:39.8262};
 
-let userLat = null;
-let userLon = null;
-let qiblaBearing = 0;
+function bearing(lat1,lon1,lat2,lon2){
+ const φ1=lat1*Math.PI/180;
+ const φ2=lat2*Math.PI/180;
+ const dλ=(lon2-lon1)*Math.PI/180;
 
-const needle = document.getElementById("needle");
-const degText = document.getElementById("degree");
-const locText = document.getElementById("location");
-
-function toRad(d){ return d*Math.PI/180; }
-function toDeg(r){ return r*180/Math.PI; }
-
-function calcBearing(lat1, lon1, lat2, lon2){
- const φ1 = toRad(lat1);
- const φ2 = toRad(lat2);
- const Δλ = toRad(lon2-lon1);
-
- const y = Math.sin(Δλ);
- const x =
-  Math.cos(φ1)*Math.tan(φ2) -
-  Math.sin(φ1)*Math.cos(Δλ);
-
- return (toDeg(Math.atan2(y,x))+360)%360;
+ return (Math.atan2(
+  Math.sin(dλ),
+  Math.cos(φ1)*Math.tan(φ2)-Math.sin(φ1)*Math.cos(dλ)
+ )*180/Math.PI+360)%360;
 }
 
-navigator.geolocation.getCurrentPosition(pos=>{
- userLat=pos.coords.latitude;
- userLon=pos.coords.longitude;
+let watchId=null;
+let qibla=0;
+let lastAngle=null;
 
- qiblaBearing=calcBearing(
-  userLat,userLon,
-  KAABA.lat,KAABA.lon
- );
+const arrow=document.getElementById("arrow");
+const degTxt=document.getElementById("degTxt");
 
- locText.textContent=
-  `Lat ${userLat.toFixed(3)}, Lon ${userLon.toFixed(3)}`;
-});
+function smoothAngle(target){
+ if(lastAngle===null){
+  lastAngle=target;
+  return target;
+ }
+ let delta=((target-lastAngle+540)%360)-180;
+ lastAngle=(lastAngle+delta*0.12+360)%360;
+ return lastAngle;
+}
 
-/* ================= SENSOR ================= */
+function openCompass(){
+ document.querySelector(".container").classList.add("hidden");
+ document.getElementById("compassWrap").classList.remove("hidden");
 
-function handleOrientation(e){
+ navigator.geolocation.getCurrentPosition(pos=>{
+  qibla=bearing(
+   pos.coords.latitude,
+   pos.coords.longitude,
+   kaaba.lat,
+   kaaba.lon
+  );
+  gpsTxt.textContent="GPS: OK";
+ });
 
- let heading;
+ window.addEventListener("deviceorientationabsolute",handleOri,true);
+ window.addEventListener("deviceorientation",handleOri,true);
+}
+
+function handleOri(e){
+ let heading=null;
 
  if(e.webkitCompassHeading){
-   heading=e.webkitCompassHeading;
- }else{
-   heading=360-e.alpha;
+  heading=e.webkitCompassHeading;
+ }else if(e.alpha!==null){
+  heading=360-e.alpha;
  }
 
- const diff=(qiblaBearing-heading+360)%360;
+ if(!heading)return;
 
- needle.style.transform=`rotate(${diff}deg)`;
- degText.textContent=`${Math.round(diff)}°`;
+ sensorTxt.textContent="Sensor: OK";
 
+ const raw=(qibla-heading+360)%360;
+ const smooth=smoothAngle(raw);
+
+ arrow.style.transform=`rotate(${smooth}deg)`;
+ degTxt.textContent=Math.round(smooth)+"°";
 }
 
-if(
- typeof DeviceOrientationEvent!=="undefined" &&
- typeof DeviceOrientationEvent.requestPermission==="function"
-){
- DeviceOrientationEvent.requestPermission()
- .then(p=>{
-  if(p==="granted"){
-    window.addEventListener("deviceorientation",handleOrientation,true);
-  }
- });
-}else{
- window.addEventListener("deviceorientationabsolute",handleOrientation,true);
- window.addEventListener("deviceorientation",handleOrientation,true);
+function stopCompass(){
+ location.reload();
+}
+
+/* ================= KALIBRASI ================= */
+
+function openCalibrate(){
+ document.querySelector(".container").classList.add("hidden");
+ document.getElementById("calibWrap").classList.remove("hidden");
+}
+
+function closeCalibrate(){
+ location.reload();
 }
 </script>
 
