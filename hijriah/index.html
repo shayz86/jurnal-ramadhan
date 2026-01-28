@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kalender Hijriah</title>
+  <meta charset="UTF-8">
+  <title>Kalender Hijriah</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="hijriah.css">
-
+  <link rel="stylesheet" href="hijriah.css">
 </head>
 
-<body>
+<body class="bg-slate-950">
 
-<header class="h-header">
-  Kalender Hijriah
-</header>
+  <header class="header">
+    Kalender Hijriah
+  </header>
 
-<main id="app" style="padding:1rem"></main>
+  <main class="container">
 
-<script src="hijriah.js"></script>
+    <div class="card">
+
+      <h2>Bulan Hijriah</h2>
+
+      <!-- JUDUL BULAN -->
+      <div id="hijriMonthTitle"></div>
+
+      <!-- GRID TANGGAL -->
+      <div id="hijriGrid"></div>
+
+    </div>
+
+  </main>
+
+  <script src="hijriah.js"></script>
 </body>
 </html>
