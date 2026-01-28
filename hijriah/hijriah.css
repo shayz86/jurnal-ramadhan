@@ -1,118 +1,118 @@
-body {
+* {
+  box-sizing: border-box;
   margin: 0;
-  background: #020617;
-  font-family: system-ui;
+  padding: 0;
 }
-
-.header {
-  background: #064e3b;
-  padding: 16px;
-  font-weight: bold;
-  color: white;
-  text-align: center;
-}
-
-.container {
-  padding: 16px;
-}
-
-.card {
-  background: #065f46;
-  border-radius: 20px;
-  padding: 16px;
-  color: white;
-}
-
-#hijriGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.hijri-day {
-  background: #047857;
-  padding: 12px 0;
-  border-radius: 12px;
-  text-align: center;
-  font-weight: bold;
-}
-
-/* ===== FULLSCREEN HIJRI CALENDAR ===== */
 
 body {
-  background: radial-gradient(circle at top, #083344, #042f3e);
-  color: white;
+  background: radial-gradient(circle at top, #0b3a42, #041b22);
+  color: #e5f7f8;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Ubuntu, sans-serif;
+  min-height: 100vh;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
+
 .hijri-header {
+  position: sticky;
+  top: 0;
+  background: #063940;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 14px 16px;
+  font-weight: 700;
+  z-index: 10;
 }
 
 .hijri-header h1 {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
 }
 
-/* MONTH NAV */
+.hijri-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ================= MONTH NAV ================= */
+
 .hijri-month-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
-  font-size: 18px;
+  justify-content: space-between;
+  padding: 18px 24px;
+  font-size: 20px;
   font-weight: 600;
-  margin: 8px 0 18px;
 }
 
 .hijri-month-nav button {
   background: none;
   border: none;
+  font-size: 26px;
   color: white;
-  font-size: 22px;
+  cursor: pointer;
 }
 
-/* WEEK DAYS */
+/* ================= WEEKDAYS ================= */
+
 .hijri-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  opacity: 0.7;
+  padding: 10px 18px;
   text-align: center;
-  margin-bottom: 10px;
+  opacity: 0.7;
+  font-size: 13px;
 }
 
-/* GRID */
+/* ================= GRID ================= */
+
 .hijri-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 14px;
-  padding: 0 14px;
+  gap: 12px;
+  padding: 20px;
 }
 
-/* CELL */
 .hijri-day {
-  min-height: 60px;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 18px;
-  padding-top: 6px;
+  height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
 }
+
+/* ================= TEXT ================= */
 
 .hijri-day .greg {
-  font-size: 13px;
-  opacity: 0.75;
+  font-size: 14px;
+  opacity: 0.85;
 }
 
 .hijri-day .hijri {
-  font-size: 18px;
-  margin-top: 4px;
+  font-size: 20px;
+  font-family: serif;
+  margin-top: 2px;
 }
 
-/* TODAY */
+/* ================= TODAY ================= */
+
 .hijri-day.today {
-  background: linear-gradient(135deg,#7c3aed,#9333ea);
-  box-shadow: 0 10px 24px rgba(124,58,237,.45);
+  background: linear-gradient(135deg, #7c2fcf, #9a5cff);
+  box-shadow: 0 6px 18px rgba(154, 92, 255, 0.4);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (min-width: 500px) {
+  .hijri-day {
+    height: 90px;
+  }
 }
