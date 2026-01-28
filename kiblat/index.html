@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kompas Kiblat</title>
+
+<meta name="theme-color" content="#047857" />
+
+<style>
+body{
+  margin:0;
+  font-family: system-ui, sans-serif;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+}
+
+header{
+  background:#047857;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+header button{
+  background:none;
+  border:none;
+  color:white;
+  font-size:20px;
+}
+
+main{
+  padding:24px;
+}
+
+#compassWrap{
+  margin-top:30px;
+  position:relative;
+  width:280px;
+  height:280px;
+  border-radius:50%;
+  border:6px solid rgba(255,255,255,.15);
+  margin-inline:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#dial{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  border:1px dashed rgba(255,255,255,.2);
+}
+
+#needle{
+  width:8px;
+  height:120px;
+  background:#22c55e;
+  position:absolute;
+  top:20px;
+  border-radius:6px;
+  transform-origin:50% 90%;
+}
+
+#kaaba{
+  font-size:40px;
+  position:absolute;
+  bottom:25px;
+}
+
+.info{
+  margin-top:18px;
+  font-size:13px;
+  opacity:.8;
+}
+
+.deg{
+  font-size:26px;
+  font-weight:bold;
+  margin-top:12px;
+}
+
+.warn{
+  margin-top:25px;
+  font-size:13px;
+  opacity:.7;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <button onclick="history.back()">←</button>
+  <h3>Kompas Kiblat</h3>
+</header>
+
+<main>
+
+<h2>Arah Kiblat</h2>
+
+<div id="compassWrap">
+  <div id="dial"></div>
+  <div id="needle"></div>
+  <div id="kaaba">🕋</div>
+</div>
+
+<div class="deg" id="degree">0°</div>
+<div class="info" id="location">Mendeteksi lokasi...</div>
+
+<p class="warn">
+  Putar HP membentuk angka 8 untuk kalibrasi sensor.
+</p>
+
+</main>
+
+<script>
+/* ================= PRO GUARD ================= */
+
+const cache = localStorage.getItem("nr_pro_cache");
+
+if (!cache || !JSON.parse(cache).pro) {
+  alert("Fitur ini khusus akun PRO");
+  location.href = "/";
+}
+
+/* ================= KIBLAT LOGIC ================= */
+
+const KAABA = { lat: 21.4225, lon: 39.8262 };
+
+let userLat = null;
+let userLon = null;
+let qiblaBearing = 0;
+
+const needle = document.getElementById("needle");
+const degText = document.getElementById("degree");
+const locText = document.getElementById("location");
+
+function toRad(d){ return d*Math.PI/180; }
+function toDeg(r){ return r*180/Math.PI; }
+
+function calcBearing(lat1, lon1, lat2, lon2){
+ const φ1 = toRad(lat1);
+ const φ2 = toRad(lat2);
+ const Δλ = toRad(lon2-lon1);
+
+ const y = Math.sin(Δλ);
+ const x =
+  Math.cos(φ1)*Math.tan(φ2) -
+  Math.sin(φ1)*Math.cos(Δλ);
+
+ return (toDeg(Math.atan2(y,x))+360)%360;
+}
+
+navigator.geolocation.getCurrentPosition(pos=>{
+ userLat=pos.coords.latitude;
+ userLon=pos.coords.longitude;
+
+ qiblaBearing=calcBearing(
+  userLat,userLon,
+  KAABA.lat,KAABA.lon
+ );
+
+ locText.textContent=
+  `Lat ${userLat.toFixed(3)}, Lon ${userLon.toFixed(3)}`;
+});
+
+/* ================= SENSOR ================= */
+
+function handleOrientation(e){
+
+ let heading;
+
+ if(e.webkitCompassHeading){
+   heading=e.webkitCompassHeading;
+ }else{
+   heading=360-e.alpha;
+ }
+
+ const diff=(qiblaBearing-heading+360)%360;
+
+ needle.style.transform=`rotate(${diff}deg)`;
+ degText.textContent=`${Math.round(diff)}°`;
+
+}
+
+if(
+ typeof DeviceOrientationEvent!=="undefined" &&
+ typeof DeviceOrientationEvent.requestPermission==="function"
+){
+ DeviceOrientationEvent.requestPermission()
+ .then(p=>{
+  if(p==="granted"){
+    window.addEventListener("deviceorientation",handleOrientation,true);
+  }
+ });
+}else{
+ window.addEventListener("deviceorientationabsolute",handleOrientation,true);
+ window.addEventListener("deviceorientation",handleOrientation,true);
+}
+</script>
+
+</body>
+</html>
