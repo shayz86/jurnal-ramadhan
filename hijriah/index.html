@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Kalender Hijriah</title>
-<link rel="stylesheet" href="hijriah.css"/>
 
+<link rel="stylesheet" href="hijriah.css" />
 </head>
 <body>
 
-<header class="top-bar">
-  <button onclick="history.back()">←</button>
+<header class="topbar">
+  <button onclick="history.back()" class="back">←</button>
   <h1>Kalender Hijriah</h1>
-  <button id="fastingBtn">📅</button>
+
+  <button id="openPuasa" class="calendarBtn">📅</button>
 </header>
 
-<section class="month-bar">
-  <button onclick="changeMonth(-1)">‹</button>
-  <h2 id="monthTitle"></h2>
-  <button onclick="changeMonth(1)">›</button>
+<section class="monthNav">
+  <button id="prevMonth">‹</button>
+  <h2 id="monthTitle">-</h2>
+  <button id="nextMonth">›</button>
 </section>
 
-<div class="weekdays">
+<div class="weekday">
   <span>Sen</span>
   <span>Sel</span>
   <span>Rab</span>
@@ -34,111 +34,178 @@
 
 <div id="calendarGrid" class="calendar-grid"></div>
 
+<!-- ================= POPUP PUASA ================= -->
+
+<div id="puasaPopup" class="popup">
+ <div class="popupBox">
+   <h3>Puasa Sunnah</h3>
+
+   <ul>
+     <li>✔ Senin & Kamis</li>
+     <li>✔ Ayyamul Bidh (13-15)</li>
+     <li>✔ Puasa Daud</li>
+     <li>✔ Puasa Arafah</li>
+     <li>✔ Puasa Asyura</li>
+   </ul>
+
+   <button onclick="closePuasa()">Tutup</button>
+ </div>
+</div>
+
 <script>
+/* ================= ARABIC NUM ================= */
 
-// ============================
-// STATE
-// ============================
+const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
 
-let viewDate = new Date();
-
-// Arabic digits
-const arabicNums = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
-
-function toArabic(n){
- return n.toString().split("").map(d=>arabicNums[d]).join("");
+function toArabic(num){
+ return num.toString().split("").map(n=>arabNums[n]).join("");
 }
 
-// hijri formatter
-const hijriFmt = new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{
- day:"numeric",
- month:"long",
- year:"numeric"
-});
+/* ================= MONTH NAMES ================= */
 
-const hijriParts = d => hijriFmt.formatToParts(d);
+const hijriMonths=[
+ "Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
+ "Jumadal Ula","Jumadal Akhirah",
+ "Rajab","Sha'ban","Ramadhan",
+ "Syawal","Dzulqa'dah","Dzulhijjah"
+];
 
-// ============================
-// TODAY HIJRI
-// ============================
+const grid=document.getElementById("calendarGrid");
+const monthTitle=document.getElementById("monthTitle");
 
-const today = new Date();
-const todayParts = hijriParts(today);
+/* ================= FORMATTER ================= */
 
-const todayHDay = +todayParts.find(p=>p.type==="day").value;
-const todayHMonth = todayParts.find(p=>p.type==="month").value;
-const todayHYear = +todayParts.find(p=>p.type==="year").value;
+const hijriFmt=new Intl.DateTimeFormat(
+ "en-TN-u-ca-islamic",
+ {day:"numeric",month:"numeric",year:"numeric"}
+);
 
-// ============================
-// RENDER
-// ============================
+function getHijriParts(date){
+ const parts=hijriFmt.formatToParts(date);
+ const obj={};
+
+ parts.forEach(p=>{
+  if(p.type!=="literal") obj[p.type]=parseInt(p.value);
+ });
+
+ return obj;
+}
+
+/* ================= TODAY FIX ================= */
+
+// simpan hari real SEKALI
+const realToday=new Date();
+const todayHijri=getHijriParts(realToday);
+
+/* ================= VIEW DATE ================= */
+
+let baseDate=new Date();
+
+/* ================= DAYS IN MONTH ================= */
+
+function getHijriMonthLength(date){
+
+ const test=new Date(date);
+ const start=getHijriParts(test).month;
+
+ let count=0;
+
+ while(true){
+  const h=getHijriParts(test);
+  if(h.month!==start) break;
+  count++;
+  test.setDate(test.getDate()+1);
+ }
+
+ return count;
+}
+
+/* ================= RENDER ================= */
 
 function renderCalendar(){
 
- const grid = document.getElementById("calendarGrid");
  grid.innerHTML="";
 
- // title month
- const titleParts = hijriParts(viewDate);
+ const hijri=getHijriParts(baseDate);
 
- const monthName = titleParts.find(p=>p.type==="month").value;
- const yearNum = titleParts.find(p=>p.type==="year").value;
+ const hMonth=hijri.month-1;
+ const hYear=hijri.year;
+ const hDay=hijri.day;
 
- document.getElementById("monthTitle").innerText =
-   `${monthName} ${yearNum} H`;
+ monthTitle.textContent=
+  hijriMonths[hMonth]+" "+hYear+" H";
 
- // start from first gregorian day of month
- const firstDay = new Date(viewDate.getFullYear(),viewDate.getMonth(),1);
+ // cari awal bulan hijriah
+ const firstDayDate=new Date(baseDate);
+ firstDayDate.setDate(
+  baseDate.getDate()-(hDay-1)
+ );
 
- const firstHijriMonth =
-  hijriParts(firstDay).find(p=>p.type==="month").value;
+ const startOffset=firstDayDate.getDay()===0
+  ?6:firstDayDate.getDay()-1;
 
- const weekday = (firstDay.getDay()+6)%7;
+ for(let i=0;i<startOffset;i++){
+  grid.appendChild(document.createElement("div"));
+ }
 
- for(let i=0;i<weekday;i++)
-   grid.appendChild(document.createElement("div"));
+ const daysInMonth=getHijriMonthLength(firstDayDate);
 
- for(let i=0;i<35;i++){
-
-  const d = new Date(firstDay);
-  d.setDate(d.getDate()+i);
-
-  const parts = hijriParts(d);
-
-  const hDay = +parts.find(p=>p.type==="day").value;
-  const hMonth = parts.find(p=>p.type==="month").value;
-  const hYear = +parts.find(p=>p.type==="year").value;
-
-  if(hMonth!==firstHijriMonth) break;
+ for(let d=1;d<=daysInMonth;d++){
 
   const cell=document.createElement("div");
-  cell.className="day";
+  cell.className="hijri-day";
 
-  cell.innerHTML=`
-    <div class="g">${d.getDate()}</div>
-    <div class="h">${toArabic(hDay)}</div>
-  `;
+  const g=document.createElement("div");
+  g.className="greg";
 
+  const mDate=new Date(firstDayDate);
+  mDate.setDate(firstDayDate.getDate()+d-1);
+
+  g.textContent=mDate.getDate();
+
+  const h=document.createElement("div");
+  h.className="hijri";
+  h.textContent=toArabic(d);
+
+  // ===== highlight ONLY real today =====
   if(
-    hDay===todayHDay &&
-    hMonth===todayHMonth &&
-    hYear===todayHYear
+    d===todayHijri.day &&
+    hijri.month===todayHijri.month &&
+    hijri.year===todayHijri.year
   ){
     cell.classList.add("today");
   }
 
+  cell.append(g,h);
   grid.appendChild(cell);
  }
-
-}
-
-function changeMonth(dir){
- viewDate.setMonth(viewDate.getMonth()+dir);
- renderCalendar();
 }
 
 renderCalendar();
 
+/* ================= NAV ================= */
+
+document.getElementById("prevMonth").onclick=()=>{
+ baseDate.setDate(baseDate.getDate()-30);
+ renderCalendar();
+};
+
+document.getElementById("nextMonth").onclick=()=>{
+ baseDate.setDate(baseDate.getDate()+30);
+ renderCalendar();
+};
+
+/* ================= POPUP ================= */
+
+const popup=document.getElementById("puasaPopup");
+
+document.getElementById("openPuasa").onclick=()=>{
+ popup.classList.add("show");
+};
+
+function closePuasa(){
+ popup.classList.remove("show");
+}
 </script>
 
 </body>
