@@ -1,825 +1,1645 @@
 <!DOCTYPE html>
 
+
+
 <html lang="id">
+
+
 
 <head>
 
+
+
     <meta charset="UTF-8">
+
+
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+
+
     <meta name="theme-color" content="#047857">
+
+
 
     <meta name="description" content="Aplikasi NoorRahma: Cahaya dan Rahmat di Setiap Langkah">
 
+
+
     <title>NoorRahma: Teman Ibadah Muslim</title>
 
+
+
     
+
+
 
     <link rel="manifest" href="/manifest.json">
 
 
 
+
+
+
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+
 
     <script>
 
+
+
         tailwind.config = {
+
+
 
             darkMode: 'class',
 
+
+
             theme: {
+
+
 
                 extend: {
 
+
+
                     colors: {
+
+
 
                         slate: { 850: '#1e293b', 950: '#020617' }
 
+
+
                     }
+
+
 
                 }
 
+
+
             }
+
+
 
         }
 
+
+
     </script>
+
+
 
     
 
+
+
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 
+
+
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+
 
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
 
 
+
+
+
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+
+
 
     
 
+
+
     <style>
+
+
 
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
 
+
+
         .font-arab { font-family: 'Amiri', serif; }
+
+
 
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
+
+
         
+
+
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+
+
         .animate-in { animation: fadeIn 0.3s ease-out forwards; }
+
+
 
         
 
+
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+
 
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+
+
         .scroll-smooth-container { scroll-behavior: smooth; }
+
+
 
     </style>
 
+
+
 </head>
 
+
+
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+
 
     <div id="root"></div>
 
 
 
+
+
+
+
     <script type="text/babel">
+
+
 
         const { useState, useEffect, useRef } = React;
 
 
 
+
+
+
+
         const Icon = ({ name, size = 20, className = "", onClick }) => {
+
+
 
             const icons = {
 
+
+
                 Moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>,
+
+
 
                 Sun: <g><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></g>,
 
+
+
                 CheckCircle: <g><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></g>,
+
+
 
                 BookOpen: <g><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></g>,
 
+
+
                 Utensils: <g><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></g>,
+
+
 
                 Wallet: <g><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path></g>,
 
+
+
                 Edit3: <g><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></g>,
+
+
 
                 RotateCcw: <path d="M1 4v6h6"></path>,
 
+
+
                 MapPin: <g><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></g>,
+
+
 
                 Clock: <g><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></g>,
 
+
+
                 Menu: <line x1="3" y1="12" x2="21" y2="12"></line>,
+
+
 
                 ArrowLeft: <line x1="19" y1="12" x2="5" y2="12"></line>,
 
+
+
                 Trash2: <g><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></g>,
+
+
 
                 Fingerprint: <path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10"></path>,
 
+
+
                 ChevronDown: <polyline points="6 9 12 15 18 9"></polyline>,
+
+
 
                 ChevronUp: <polyline points="18 15 12 9 6 15"></polyline>,
 
+
+
                 ChevronLeft: <polyline points="15 18 9 12 15 6"></polyline>,
+
+
 
                 ChevronRight: <polyline points="9 18 15 12 9 6"></polyline>,
 
+
+
                 PlayCircle: <circle cx="12" cy="12" r="10"></circle>,
+
+
 
                 StopCircle: <circle cx="12" cy="12" r="10"></circle>,
 
+
+
                 Coffee: <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>,
+
+
 
                 Star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>,
 
+
+
                 Maximize2: <polyline points="15 3 21 3 21 9"></polyline>,
+
+
 
                 Minimize2: <polyline points="4 14 10 14 10 20"></polyline>,
 
+
+
                 Plus: <line x1="12" y1="5" x2="12" y2="19"></line>,
+
+
 
                 Calendar: <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>,
 
+
+
                 AlertTriangle: <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>,
+
+
 
                 Download: <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>,
 
+
+
                 Heart: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>,
+
+
 
                 X: <line x1="18" y1="6" x2="6" y2="18"></line>,
 
+
+
                 Target: <g><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></g>,
+
+
 
                 Locate: <g><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><circle cx="12" cy="12" r="3"></circle></g>
 
+
+
             };
+
+
+
+
 
 
 
             const extras = {
 
+
+
                  Menu: <><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></>,
+
+
 
                  ArrowLeft: <polyline points="12 19 5 12 12 5"></polyline>,
 
+
+
                  PlayCircle: <polygon points="10 8 16 12 10 16 10 8"></polygon>,
+
+
 
                  StopCircle: <rect x="9" y="9" width="6" height="6"></rect>,
 
+
+
                  Coffee: <><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></>,
+
+
 
                  Maximize2: <><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></>,
 
+
+
                  Minimize2: <><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></>,
+
+
 
                  Plus: <line x1="5" y1="12" x2="19" y2="12"></line>,
 
+
+
                  Calendar: <><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></>,
+
+
 
                  Download: <><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></>,
 
+
+
                  X: <line x1="6" y1="6" x2="18" y2="18"></line>
 
+
+
             };
+
+
+
+
 
 
 
             return (
 
+
+
                 <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} onClick={onClick}>
+
+
 
                     {icons[name]}
 
+
+
                     {extras[name]}
+
+
 
                 </svg>
 
+
+
             );
+
+
 
         };
 
 
 
+
+
+
+
         const App = () => {
 
+
+
         // ===== PRO SYSTEM =====
+
 const getUID = () => {
+
   let id = localStorage.getItem("nr_uid");
 
+
+
   if (!id) {
+
     id =
+
       "NR-" +
+
       Date.now().toString(36) +
+
       Math.random().toString(36).substring(2, 8);
 
+
+
     localStorage.setItem("nr_uid", id);
+
   }
 
+
+
   return id;
+
 };
 
+
+
 const userId = getUID();
+
 // ======================
+
             const [isReady, setIsReady] = useState(false);
+
+
 
             const [activeTab, setActiveTab] = useState('shalat');
 
+
+
             const [isPro, setIsPro] = useState(false);
+
             const [currentDay, setCurrentDay] = useState(1);
+
+
 
             const [isLoading, setIsLoading] = useState(false);
 
+
+
             const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+
 
             const [showInstallPopup, setShowInstallPopup] = useState(false);
 
+
+
             const [showDonation, setShowDonation] = useState(false);
+
+
 
             const [ramadanCountdownText, setRamadanCountdownText] = useState("");
 
+
+
             const [isRamadhanActive, setIsRamadhanActive] = useState(false);
+
+
 
             const [ramadhanSubTab, setRamadhanSubTab] = useState('ibadah'); 
 
+
+
             
+
+
 
             const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'auto');
 
+
+
             const [resolvedTheme, setResolvedTheme] = useState('light');
+
             
+
             useEffect(() => {
+
   const cacheKey = "nr_pro_cache";
 
+
+
   const cached = localStorage.getItem(cacheKey);
+
   if (cached) {
+
     try {
+
       const parsed = JSON.parse(cached);
+
       if (Date.now() - parsed.time < 10 * 60 * 1000) {
+
         setIsPro(parsed.pro);
+
       }
+
     } catch {}
+
   }
 
-  fetch(
-    "https://noorrahma-api.pembang001.workers.dev/pro-status?uid=" + userId
-  )
-    .then(res => res.json())
-    .then(data => {
-      setIsPro(data.pro);
 
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          pro: data.pro,
-          time: Date.now()
-        })
-      );
+
+  fetch(
+
+    "https://noorrahma-api.pembang001.workers.dev/pro-status?uid=" + userId
+
+  )
+
+    .then(res => res.json())
+
+    .then(data => {
+
+  setIsPro(data.pro);
+
+  localStorage.setItem(
+    cacheKey,
+    JSON.stringify({
+      pro: data.pro,
+      time: Date.now()
     })
+  );
+
+  // 🔑 dipakai halaman statis (kiblat, hijriah, dll)
+  localStorage.setItem("nr_is_pro", data.pro ? "1" : "0");
+
+})
+
     .catch(() => setIsPro(false));
+
 }, []);
+
+
 
             useEffect(() => {
 
+
+
             
+
                 const root = window.document.documentElement;
+
+
 
                 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
+
+
                 const applyTheme = () => {
+
+
 
                     const isSystemDark = mediaQuery.matches;
 
+
+
                     let active = 'light';
+
+
 
                     if (theme === 'dark' || (theme === 'auto' && isSystemDark)) { root.classList.add('dark'); active = 'dark'; } 
 
+
+
                     else { root.classList.remove('dark'); active = 'light'; }
+
+
 
                     setResolvedTheme(active); localStorage.setItem('app_theme', theme);
 
+
+
                 };
+
+
 
                 applyTheme();
 
+
+
                 mediaQuery.addEventListener('change', applyTheme);
 
+
+
                 return () => mediaQuery.removeEventListener('change', applyTheme);
+
+
 
             }, [theme]);
 
 
 
+
+
+
+
             const toggleTheme = () => {
+
+
 
                 setTheme(prev => {
 
+
+
                     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+
 
                     if (prev === 'auto') return isSystemDark ? 'light' : 'dark';
 
+
+
                     if (prev === 'dark') return 'light';
+
+
 
                     return 'auto';
 
+
+
                 });
 
+
+
             };
+
             
+
             const requestNotifPermission = async () => {
 
+
+
   if (!("Notification" in window)) {
+
     alert("Browser tidak mendukung notifikasi");
+
     return;
+
   }
+
+
 
   const perm = await Notification.requestPermission();
 
+
+
   if (perm === "granted") {
+
     setNotifEnabled(true);
+
     localStorage.setItem("nr_notif_enabled", "1");
+
     alert("Notif shalat aktif ✅");
+
   } else {
+
     alert("Notif ditolak");
+
   }
+
 };
 
+
+
 const [notifEnabled, setNotifEnabled] = useState(
+
   () => localStorage.getItem("nr_notif_enabled") === "1"
+
 );
+
+
 
             // DATA STATES
 
+
+
             const [members, setMembers] = useState([{ id: 1, name: 'Ayah', log: {} }, { id: 2, name: 'Ibu', log: {} }]);
+
+
 
             const [dailyNotes, setDailyNotes] = useState({});
 
+
+
             const [mealPlan, setMealPlan] = useState({});
+
+
 
             const [activeMealWeek, setActiveMealWeek] = useState(1);
 
+
+
            
+
             const [prayerCity, setPrayerCity] = useState('Jakarta');
+
+
 
             const [prayerTimes, setPrayerTimes] = useState(null);
 
+
+
             const [prayerOffsets, setPrayerOffsets] = useState({}); // STATE BARU: OFFSETS WAKTU
+
             
+
             const [dailyQuote, setDailyQuote] = useState(null);
+
             
+
             
+
+
 
             const [prayerError, setPrayerError] = useState(null);
 
+
+
             const [prayerCoords, setPrayerCoords] = useState(null);
+
+
 
             const [nextPrayerInfo, setNextPrayerInfo] = useState(null);
 
+
+
             const [editingPrayer, setEditingPrayer] = useState(null); // UNTUK UI EDIT
+
             
+
             const [showPrayerPopup, setShowPrayerPopup] = useState(false);
+
+
 
             const [surahList, setSurahList] = useState([]);
 
+
+
             const [selectedSurah, setSelectedSurah] = useState(null);
+
+
 
             const [surahTafsir, setSurahTafsir] = useState(null);
 
+
+
             const [activeTafsirAyat, setActiveTafsirAyat] = useState(null);
+
+
 
             const [searchSurah, setSearchSurah] = useState('');
 
+
+
             const [tasbihCount, setTasbihCount] = useState(0);
+
+
 
             const [isTasbihFullScreen, setIsTasbihFullScreen] = useState(false);
 
+
+
             const [openDoaId, setOpenDoaId] = useState(null);
+
+
 
             const [playingAyatIndex, setPlayingAyatIndex] = useState(null);
 
+
+
             const [quranTargetDays, setQuranTargetDays] = useState(30);
+
+
 
             const audioRef = useRef(null);
 
 
 
+
+
+
+
             // HELPER: ADJUST TIME STRING
+
+
 
             const adjustTime = (timeStr, offset = 0) => {
 
+
+
                 if (!timeStr) return "--:--";
+
+
 
                 if (!offset) return timeStr;
 
+
+
                 const [h, m] = timeStr.split(':').map(Number);
+
+
 
                 const date = new Date();
 
+
+
                 date.setHours(h, m + offset, 0);
 
+
+
                 return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+
 
             };
 
 
 
+
+
+
+
             useEffect(() => {
+
+
 
                 if (activeTab === 'quran' && selectedSurah && playingAyatIndex !== null) {
 
+
+
                     const el = document.getElementById(`ayat-${playingAyatIndex}`);
+
+
 
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
+
+
                 }
+
+
 
             }, [playingAyatIndex, activeTab]);
 
 
 
+
+
+
+
             const prayerMap = [
+
+
 
                 { l: 'Subuh', k: 'Fajr' }, { l: 'Terbit', k: 'Sunrise' }, { l: 'Dhuha', k: 'Dhuha' },
 
+
+
                 { l: 'Dzuhur', k: 'Dhuhr' }, { l: 'Ashar', k: 'Asr' }, { l: 'Maghrib', k: 'Maghrib' }, { l: 'Isya', k: 'Isha' }
+
+
 
             ];
 
 
 
+
+
+
+
             useEffect(() => {
+
+
 
                 const calculateCountdown = () => {
 
+
+
                     const targetDate = new Date('2026-02-18');
+
+
 
                     targetDate.setHours(0, 0, 0, 0); 
 
+
+
                     const today = new Date();
+
+
 
                     today.setHours(0, 0, 0, 0);
 
+
+
                     const diffTime = targetDate - today;
+
+
 
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+
+
                     if (diffDays > 0) { setRamadanCountdownText(`H-${diffDays} Menuju Ramadhan`); setIsRamadhanActive(false); } 
+
+
 
                     else if (diffDays <= 0 && diffDays > -31) { setRamadanCountdownText("Marhaban Ya Ramadhan"); setIsRamadhanActive(true); } 
 
+
+
                     else { setRamadanCountdownText(""); setIsRamadhanActive(false); }
+
+
 
                 };
 
+
+
                 calculateCountdown();
+
+
 
             }, []);
 
+
+
 useEffect(() => {
+
+
 
   if (!isPro || !notifEnabled || !prayerTimes) return;
 
+
+
   if (!navigator.serviceWorker) return;
+
+
 
   navigator.serviceWorker.ready.then(reg => {
 
+
+
     reg.active?.postMessage({
+
       type: "SET_PRAYERS",
+
       city: prayerCity,
+
       times: prayerTimes,
+
       offsets: prayerOffsets
+
     });
+
+
 
   });
 
+
+
 }, [isPro, notifEnabled, prayerTimes, prayerOffsets]);
 
+
+
             useEffect(() => {
+
   if (!prayerTimes) return;
 
+
+
   const timer = setInterval(() => {
+
     const now = new Date();
 
+
+
     const trackedPrayers = [
+
       { name: 'Subuh', key: 'Fajr' },
+
       { name: 'Dzuhur', key: 'Dhuhr' },
+
       { name: 'Ashar', key: 'Asr' },
+
       { name: 'Maghrib', key: 'Maghrib' },
+
       { name: 'Isya', key: 'Isha' },
+
     ];
 
+
+
     let next = null;
+
     let nextDate = null;
 
+
+
     for (const p of trackedPrayers) {
+
       const finalTime = adjustTime(
+
         prayerTimes[p.key],
+
         prayerOffsets[p.key]
+
       );
 
+
+
       const [h, m] = finalTime.split(':').map(Number);
+
+
 
       const d = new Date();
+
       d.setHours(h, m, 0, 0);
 
+
+
       if (d > now) {
+
         next = { ...p, time: finalTime };
+
         nextDate = d;
+
         break;
+
       }
+
     }
 
+
+
     if (!next) {
+
       const p = trackedPrayers[0];
+
       const finalTime = adjustTime(
+
         prayerTimes[p.key],
+
         prayerOffsets[p.key]
+
       );
+
+
 
       const [h, m] = finalTime.split(':').map(Number);
 
+
+
       nextDate = new Date();
+
       nextDate.setDate(nextDate.getDate() + 1);
+
       nextDate.setHours(h, m, 0, 0);
 
+
+
       next = { ...p, time: finalTime };
+
     }
+
+
 
     const diffMs = nextDate - now;
 
+
+
     const h = Math.floor(diffMs / 3600000);
+
     const m = Math.floor((diffMs % 3600000) / 60000);
+
     const s = Math.floor((diffMs % 60000) / 1000);
 
+
+
     setNextPrayerInfo({
+
       name: next.name,
+
       time: next.time,
+
       countdown: `${h > 0 ? h + 'j ' : ''}${m}m ${s}s`
+
     });
+
+
 
   }, 1000);
 
+
+
   return () => clearInterval(timer);
+
 }, [prayerTimes, prayerOffsets]);
+
+
+
+
 
 
 
             const updateCityName = async (lat, lng) => {
 
+
+
                 try {
+
+
 
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
 
+
+
                     const data = await res.json();
+
+
 
                     const name = data.address.city || data.address.town || data.address.county || data.address.village || "Lokasi GPS Terdeteksi";
 
+
+
                     setPrayerCity(name); return name;
+
+
 
                 } catch (error) { setPrayerCity("Lokasi GPS Terdeteksi"); return "Lokasi GPS Terdeteksi"; }
 
+
+
             };
+
             
+
             useEffect(() => {
+
   fetch("/quotes/index.json")
+
     .then(res => res.json())
+
     .then(data => {
+
       if (!Array.isArray(data) || data.length === 0) return;
+
+
 
       const todayKey = new Date().toISOString().slice(0, 10);
 
+
+
       const saved = localStorage.getItem("nr_daily_quote");
 
+
+
       if (saved) {
+
         const parsed = JSON.parse(saved);
+
         if (parsed.date === todayKey) {
+
           setDailyQuote(parsed.quote);
+
           return;
+
         }
+
       }
 
+
+
       const idx = new Date().getDate() % data.length;
+
       const quote = data[idx];
+
+
 
       setDailyQuote(quote);
 
+
+
       localStorage.setItem(
+
         "nr_daily_quote",
+
         JSON.stringify({
+
           date: todayKey,
+
           quote
+
         })
+
       );
+
     })
+
     .catch(err => {
+
       console.log("Quote load failed", err);
+
     });
+
 }, []);
+
+
 
             useEffect(() => {
 
+
+
                 const handleInstallPrompt = (e) => { 
+
+
 
                     e.preventDefault(); setDeferredPrompt(e); 
 
+
+
                     setTimeout(() => { if (!window.matchMedia('(display-mode: standalone)').matches) setShowInstallPopup(true); }, 1000);
+
+
 
                 };
 
+
+
                 window.addEventListener('beforeinstallprompt', handleInstallPrompt);
 
+
+
                 if (typeof window !== 'undefined') audioRef.current = new Audio();
+
+
 
                 const load = (key, def) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } };
 
 
 
+
+
+
+
                 setMembers(load('ramadan_v5_members', [{ id: 1, name: 'Ayah', log: {} }, { id: 2, name: 'Ibu', log: {} }]));
+
+
 
                 setDailyNotes(load('ramadan_v5_notes', {}));
 
+
+
                 setMealPlan(load('ramadan_v5_meals', {}));
+
+
 
                 setTasbihCount(load('ramadan_v5_tasbih', 0));
 
+
+
                 setQuranTargetDays(load('ramadan_v5_quran_target', 30));
+
+
 
                 setPrayerOffsets(load('ramadan_v5_offsets', {}));
 
 
 
+
+
+
+
                 const savedCity = localStorage.getItem('ramadan_v5_city') || 'Jakarta';
+
+
 
                 const savedCoords = load('ramadan_v5_coords', null);
 
+
+
                 if (savedCoords) { setPrayerCoords(savedCoords); updateCityName(savedCoords.lat, savedCoords.lng); fetchPrayerTimes(null, savedCoords); } 
+
+
 
                 else { setPrayerCity(savedCity); fetchPrayerTimes(savedCity, null); }
 
+
+
                 fetchSurahList(); setIsReady(true);
 
+
+
                 return () => { window.removeEventListener('beforeinstallprompt', handleInstallPrompt); if (audioRef.current) audioRef.current.pause(); };
+
+
 
             }, []);
 
 
 
+
+
+
+
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_members', JSON.stringify(members)); }, [members, isReady]);
+
+
 
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_notes', JSON.stringify(dailyNotes)); }, [dailyNotes, isReady]);
 
+
+
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_meals', JSON.stringify(mealPlan)); }, [mealPlan, isReady]);
+
+
 
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_tasbih', JSON.stringify(tasbihCount)); }, [tasbihCount, isReady]);
 
+
+
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_quran_target', JSON.stringify(quranTargetDays)); }, [quranTargetDays, isReady]);
+
+
 
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_offsets', JSON.stringify(prayerOffsets)); }, [prayerOffsets, isReady]);
 
+
+
             useEffect(() => { if(isReady && !prayerCoords) localStorage.setItem('ramadan_v5_city', prayerCity); }, [prayerCity, isReady, prayerCoords]);
+
+
 
             useEffect(() => { if(isReady) localStorage.setItem('ramadan_v5_coords', JSON.stringify(prayerCoords)); }, [prayerCoords, isReady]);
 
 
 
+
+
+
+
             const handleInstallClick = async () => {
+
+
 
                 if (!deferredPrompt) return;
 
+
+
                 deferredPrompt.prompt();
+
+
 
                 const { outcome } = await deferredPrompt.userChoice;
 
+
+
                 if (outcome === 'accepted') setDeferredPrompt(null);
+
+
 
                 setShowInstallPopup(false);
 
+
+
             };
+
+
+
+
 
 
 
             const fetchPrayerTimes = async (city, coords) => {
 
+
+
                 setIsLoading(true); setPrayerError(null);
+
+
 
                 try {
 
+
+
                     let url = coords ? `https://api.aladhan.com/v1/timings?latitude=${coords.lat}&longitude=${coords.lng}&method=20` : `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city || 'Jakarta')}&country=Indonesia&method=20`;
+
+
 
                     const res = await fetch(url); const data = await res.json();
 
+
+
                     if (data.code === 200 && data.data) {
+
+
 
                         const t = data.data.timings;
 
+
+
                         if (t.Sunrise) { const [h, m] = t.Sunrise.split(':').map(Number); const sD = new Date(); sD.setHours(h, m + 20, 0); t.Dhuha = `${String(sD.getHours()).padStart(2, '0')}:${String(sD.getMinutes()).padStart(2, '0')}`; }
+
+
 
                         setPrayerTimes(t);
 
+
+
                     } else { setPrayerError("Jadwal tidak ditemukan"); setPrayerTimes(null); }
+
+
 
                 } catch (e) { setPrayerError("Gagal memuat data"); } finally { setIsLoading(false); }
 
+
+
             };
+
+
+
+
 
 
 
             const handleManualSearch = () => { setPrayerCoords(null); fetchPrayerTimes(prayerCity, null); };
 
+
+
             const handleUseGPS = () => {
+
+
 
                 setIsLoading(true); setPrayerError(null);
 
+
+
                 if (navigator.geolocation) {
+
+
 
                     navigator.geolocation.getCurrentPosition((pos) => { const c = { lat: pos.coords.latitude, lng: pos.coords.longitude }; setPrayerCoords(c); updateCityName(c.lat, c.lng); fetchPrayerTimes(null, c); }, () => { setPrayerError("Gagal mendeteksi lokasi."); setIsLoading(false); });
 
+
+
                 } else { setPrayerError("Browser tidak mendukung GPS."); setIsLoading(false); }
+
+
 
             };
 
 
 
+
+
+
+
             const handleTasbihTap = () => { setTasbihCount(c => c + 1); if (navigator.vibrate) navigator.vibrate(40); };
+
+
 
             const togglePlayAyat = (idx) => { if (playingAyatIndex === idx) { setPlayingAyatIndex(null); if (audioRef.current) audioRef.current.pause(); } else setPlayingAyatIndex(idx); };
 
+
+
             
+
+
 
             useEffect(() => {
 
+
+
                 const audio = audioRef.current; if (!audio) return;
+
+
 
                 const play = () => { if (selectedSurah && playingAyatIndex !== null) { const a = selectedSurah.ayat[playingAyatIndex]; const url = a.audio['05'] || a.audio['01'] || Object.values(a.audio)[0]; if (url) { audio.src = url; audio.play().catch(() => setPlayingAyatIndex(null)); } } };
 
+
+
                 play();
+
+
 
                 const ended = () => { if (selectedSurah && playingAyatIndex < selectedSurah.ayat.length - 1) setPlayingAyatIndex(p => p + 1); else setPlayingAyatIndex(null); };
 
+
+
                 audio.addEventListener('ended', ended); return () => audio.removeEventListener('ended', ended);
+
+
 
             }, [playingAyatIndex, selectedSurah]);
 
 
 
+
+
+
+
             const fetchSurahList = async () => { try { const res = await fetch('https://equran.id/api/v2/surat'); const d = await res.json(); if (d.code === 200) setSurahList(d.data); } catch (e) {} };
+
+
 
             const fetchSurahDetail = async (n) => { setIsLoading(true); try { const [rs, rt] = await Promise.all([fetch(`https://equran.id/api/v2/surat/${n}`), fetch(`https://equran.id/api/v2/tafsir/${n}`)]); const ds = await rs.json(); const dt = await rt.json(); if (ds.code === 200) { setSelectedSurah(ds.data); setSurahTafsir(dt.data); setPlayingAyatIndex(null); } } catch (e) {} finally { setIsLoading(false); } };
 
 
 
+
+
+
+
             const handleAddMember = (n) => { if (!n.trim()) return; setMembers([...members, { id: Date.now(), name: n, log: {} }]); };
 
+
+
             const toggleTask = (mId, tK) => { setMembers(prev => prev.map(m => { if (m.id === mId) { const cLog = m.log || {}; const dLog = cLog[currentDay] || {}; return { ...m, log: { ...cLog, [currentDay]: { ...dLog, [tK]: !dLog[tK] } } }; } return m; })); };
+
+
 
             const updateMeal = (w, d, t, v) => { setMealPlan(prev => ({ ...prev, [w]: { ...(prev[w] || {}), [d]: { ...(prev[w]?.[d] || {}), [t]: v } } })); };
 
 
 
+
+
+
+
             const tasks = [
+
+
 
                 { k: 'fasting', l: 'Puasa', i: 'Moon', color: 'text-orange-500' }, { k: 'tarawih', l: 'Tarawih', i: 'Star', color: 'text-purple-500' },
 
+
+
                 { k: 'quran', l: 'Tilawah', i: 'BookOpen', color: 'text-emerald-500' }, { k: 'juzamma', l: 'Juz Amma', i: 'BookOpen', color: 'text-teal-500' },
+
+
 
                 { k: 'saving', l: 'Sedekah', i: 'Wallet', color: 'text-blue-500' }, { k: 'subuh', l: 'Subuh', i: 'Sun', color: 'text-cyan-600' }, 
 
+
+
                 { k: 'dzuhur', l: 'Dzuhur', i: 'Sun', color: 'text-yellow-600' }, { k: 'ashar', l: 'Ashar', i: 'Sun', color: 'text-orange-600' }, 
+
+
 
                 { k: 'maghrib', l: 'Maghrib', i: 'Moon', color: 'text-indigo-600' }, { k: 'isya', l: 'Isya', i: 'Moon', color: 'text-blue-800' },
 
+
+
             ];
+
+
+
+
 
 
 
             const doaList = [
 
+
+
                 { id: 1, category: "Ramadhan", title: "Niat Puasa", arabic: "نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ هَذِهِ السَّنَةِ لِلّٰهِ تَعَالَى", latin: "Nawaitu shauma ghadin 'an adaa'i fardhi syahri Ramadhaana haadzihis sanati lillaahi ta'aala.", artinya: "Aku berniat puasa esok hari untuk menunaikan fardhu di bulan Ramadhan tahun ini, karena Allah Ta'ala." },
+
+
 
                 { id: 2, category: "Ramadhan", title: "Doa Berbuka", arabic: "اَللّٰهُمَّ لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ بِرَحْمَتِكَ يَا اَرْحَمَ الرَّحِمِيْنَ", latin: "Allahumma laka shumtu wa bika aamantu wa 'alaa rizqika afthartu birahmatika yaa arhamar raahimiin.", artinya: "Ya Allah, untuk-Mu aku berpuasa, dan kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka. Dengan rahmat-Mu wahai Dzat Yang Maha Penyayang." },
 
+
+
                 { id: 3, category: "Ramadhan", title: "Niat Zakat Fitrah (Keluarga)", arabic: "نَوَيْتُ أَنْ أُخْرِجَ زَكَاةَ الْفِطْرِ عَنِّى وَعَنْ جَمِيْعِ مَا يَلْزَمُنِى نَفَقَاتُهُمْ شَرْعًا fardhan lillahi ta'aala.", latin: "Nawaytu an ukhrija zakaata al-fitri 'anni wa 'an jamii'i maa yalzamunii nafaqatuhum syar'an fardhan lillahi ta'aala.", artinya: "Aku niat mengeluarkan zakat fitrah untuk diriku dan seluruh orang yang nafkahnya menjadi tanggunganku, fardhu karena Allah Ta'ala." },
+
+
 
                 { id: 4, category: "Ramadhan", title: "Doa Qunut Witir", arabic: "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ ، وَعَافِنِي فِيمَنْ عَافَيْتَ ، وَتَوَلَّني فِيمَنْ تَوَلَّيتَ ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ ، وَقِنِي شَرَّ مَا قَضَيْتَ", latin: "Allahummahdinii fiiman hadait, wa 'aafinii fiiman 'aafait, wa tawallanii fiiman towallait, wa baarik lii fiimaa a'thait, wa qinii syarra maa qadhait.", artinya: "Ya Allah, berilah aku petunjuk sebagaimana orang yang Engkau beri petunjuk, berilah aku kesehatan sebagaimana orang yang Engkau beri kesehatan, uruslah aku sebagaimana orang yang Engkau urus, berkahilah apa yang Engkau berikan kepadaku, dan lindungilah aku dari keburukan takdir-Mu." },
 
+
+
                 { id: 5, category: "Ramadhan", title: "Doa Khatam Qur'an", arabic: "اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً", latin: "Allahummarhamni bil quran wa'jalhu li imaman wa nuran wa hudan wa rahmah.", artinya: "Ya Allah, rahmatilah aku dengan Al-Qur'an dan jadikanlah ia sebagai imam, cahaya, petunjuk, dan rahmat bagiku." },
+
+
 
                 { id: 6, category: "Ramadhan", title: "Lailatul Qadar", arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي", latin: "Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'annii.", artinya: "Ya Allah, sesungguhnya Engkau Maha Pemaaf dan senang memaafkan, maka maafkanlah kesalahanku." }
 
+
+
             ];
+
+
+
+
 
 
 
@@ -827,448 +1647,893 @@ useEffect(() => {
 
 
 
+
+
+
+
             return (
+
+
 
                 <div className="min-h-screen pb-24 md:pb-10 font-sans text-slate-800 dark:text-slate-100">
 
+
+
                     
+
+
 
                     {/* MODAL INSTALL PWA */}
 
+
+
                     {showInstallPopup && deferredPrompt && (
+
+
 
                         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in">
 
+
+
                             <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative border border-emerald-100 dark:border-slate-800 text-center animate-in zoom-in">
+
+
 
                                 <button onClick={() => setShowInstallPopup(false)} className="absolute top-4 right-4 text-slate-400"><Icon name="X" size={24} /></button>
 
+
+
                                 <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-2xl flex items-center justify-center mx-auto mb-6"><Icon name="Download" size={40} className="text-emerald-600 dark:text-emerald-400" /></div>
+
+
 
                                 <h3 className="text-xl font-bold mb-2">Pasang NoorRahma</h3>
 
+
+
                                 <p className="text-sm text-slate-500 mb-8 leading-relaxed">Akses jadwal shalat dan Al-Qur'an lebih cepat langsung dari layar utama Anda.</p>
+
+
 
                                 <div className="space-y-3">
 
+
+
                                     <button onClick={handleInstallClick} className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95">Install Sekarang</button>
+
+
 
                                     <button onClick={() => setShowInstallPopup(false)} className="w-full py-3 text-slate-400 text-xs font-semibold">Mungkin Nanti</button>
 
+
+
                                 </div>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     )}
+
+
+
+
 
 
 
                     {/* MODAL DONASI */}
 
+
+
                     {showDonation && (
+
+
 
                         <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setShowDonation(false)}>
 
+
+
                             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+
+
 
                                 <button onClick={() => setShowDonation(false)} className="absolute top-4 right-4 text-slate-400"><Icon name="X" size={24} /></button>
 
+
+
                                 <div className="text-center">
+
+
 
                                     <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-400 mb-2">Dukung Kami</h3>
 
+
+
                                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 leading-relaxed text-center">Bantu kami menjaga aplikasi ini tetap gratis dan bebas iklan selamanya.</p>
+
+
 
                                     <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl mb-4 border border-dashed border-slate-300 dark:border-slate-700">
 
+
+
                                         <img src="qris.jpg" alt="QRIS Donasi" className="w-full h-auto rounded-lg mix-blend-multiply dark:mix-blend-normal" />
+
+
 
                                     </div>
 
+
+
                                     <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Pindai QRIS untuk Donasi</p>
+
                                     <div className="mt-4 space-y-2">
 
+
+
   {/* Telegram */}
+
   <button
+
     onClick={() =>
+
       window.open(
+
         "https://t.me/noorrahma_support_bot?start=" + userId,
+
         "_blank"
+
       )
+
     }
+
     className="w-full flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-3 rounded-xl shadow-sm transition-all"
+
   >
+
     📲 Konfirmasi via Telegram
+
   </button>
 
+
+
   {/* WhatsApp */}
+
   <button
+
     onClick={() =>
+
       window.open(
+
         "https://wa.me/6288287398495?text=" +
+
           encodeURIComponent(
+
             `Halo admin NoorRahma, saya sudah donasi.\n\nUID: ${userId}`
+
           ),
+
         "_blank"
+
       )
+
     }
+
     className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-3 rounded-xl shadow-sm transition-all"
+
   >
+
     💬 Konfirmasi via WhatsApp
+
   </button>
+
+
 
 </div>
 
+
+
                                 </div>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     )}
+
                     
+
                     {showPrayerPopup && prayerTimes && (
 
+
+
   <div
+
     className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-4"
+
     onClick={() => setShowPrayerPopup(false)}
+
   >
+
+
 
     <div
+
       onClick={e => e.stopPropagation()}
+
       className="bg-white dark:bg-slate-900 rounded-2xl p-4 w-full max-w-md"
+
     >
 
+
+
       <h3 className="font-bold text-center mb-3">
+
         Jadwal Shalat — {prayerCity}
+
       </h3>
+
       
+
       {isPro && (
+
   <button
+
     onClick={() =>
+
       notifEnabled
+
         ? (
+
             setNotifEnabled(false),
+
             localStorage.setItem("nr_notif_enabled", "0")
+
           )
+
         : requestNotifPermission()
+
     }
+
     className={`
+
       w-full mb-3 py-2 rounded-xl text-xs font-bold transition
+
       ${
+
         notifEnabled
+
           ? "bg-emerald-600 text-white"
+
           : "bg-slate-200 dark:bg-slate-700 text-slate-700"
+
       }
+
     `}
+
   >
+
     {notifEnabled
+
       ? "🔔 Notifikasi Shalat Aktif"
+
       : "🔕 Aktifkan Notifikasi Shalat"}
+
   </button>
+
 )}
+
+
 
       <div className="space-y-3">
 
+
+
         {prayerMap.map(({ l, k }) => {
 
+
+
           const offset = prayerOffsets[k] || 0;
+
           const finalTime = adjustTime(prayerTimes[k], offset);
+
           const isEditing = editingPrayer === k;
+
+
 
           return (
 
+
+
             <div
+
               key={k}
+
               className="bg-slate-100 dark:bg-slate-800 rounded-xl p-3"
+
             >
+
+
 
               <div className="flex justify-between items-center">
 
+
+
                 <span className="font-medium">{l}</span>
+
+
 
                 <div className="flex items-center gap-2">
 
+
+
                   <span className="font-mono font-bold">
+
                     {finalTime}
+
                   </span>
 
+
+
                   <button
+
                     onClick={() =>
+
                       setEditingPrayer(isEditing ? null : k)
+
                     }
+
                     className="text-emerald-600 text-sm"
+
                   >
+
                     ✏️
+
                   </button>
 
+
+
                 </div>
+
+
 
               </div>
 
+
+
               {isEditing && (
+
+
 
                 <div className="mt-3 flex items-center gap-2">
 
+
+
                   <button
+
                     onClick={() =>
+
                       setPrayerOffsets({
+
                         ...prayerOffsets,
+
                         [k]: offset - 1
+
                       })
+
                     }
+
                     className="px-3 py-1 bg-white dark:bg-slate-700 rounded text-xs"
+
                   >
+
                     −1
+
                   </button>
+
+
 
                   <span className="text-xs font-mono w-8 text-center">
+
                     {offset > 0 ? `+${offset}` : offset}
+
                   </span>
 
-                  <button
-                    onClick={() =>
-                      setPrayerOffsets({
-                        ...prayerOffsets,
-                        [k]: offset + 1
-                      })
-                    }
-                    className="px-3 py-1 bg-white dark:bg-slate-700 rounded text-xs"
-                  >
-                    +1
-                  </button>
+
 
                   <button
+
                     onClick={() =>
+
                       setPrayerOffsets({
+
                         ...prayerOffsets,
-                        [k]: 0
+
+                        [k]: offset + 1
+
                       })
+
                     }
-                    className="ml-auto text-[10px] text-red-500 font-bold"
+
+                    className="px-3 py-1 bg-white dark:bg-slate-700 rounded text-xs"
+
                   >
-                    Reset
+
+                    +1
+
                   </button>
+
+
+
+                  <button
+
+                    onClick={() =>
+
+                      setPrayerOffsets({
+
+                        ...prayerOffsets,
+
+                        [k]: 0
+
+                      })
+
+                    }
+
+                    className="ml-auto text-[10px] text-red-500 font-bold"
+
+                  >
+
+                    Reset
+
+                  </button>
+
+
 
                 </div>
 
+
+
               )}
+
+
 
             </div>
 
+
+
           );
+
+
 
         })}
 
+
+
       </div>
 
+
+
       <button
+
         onClick={() => setShowPrayerPopup(false)}
+
         className="mt-4 w-full bg-emerald-600 text-white py-2 rounded-xl font-bold"
+
       >
+
         Tutup
+
       </button>
+
+
 
     </div>
 
+
+
   </div>
+
+
 
 )}
 
+
+
                     {/* MODAL TAFSIR */}
+
+
 
                     {activeTafsirAyat && (
 
+
+
                         <div className="fixed inset-0 z-[70] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center animate-in fade-in" onClick={() => setActiveTafsirAyat(null)}>
+
+
 
                             <div className="bg-white dark:bg-slate-900 w-full max-w-md max-h-[90vh] overflow-hidden rounded-t-[2.5rem] sm:rounded-3xl shadow-2xl relative animate-in slide-in-from-bottom" onClick={e => e.stopPropagation()}>
 
+
+
                                 <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-3 mb-1 sm:hidden"></div>
+
+
 
                                 <div className="p-5 border-b border-slate-50 dark:border-slate-800 flex justify-between items-center">
 
+
+
                                     <div className="flex flex-col"><h3 className="font-bold text-emerald-800 dark:text-emerald-400 text-base">Tafsir Lengkap</h3><p className="text-[10px] text-slate-400 font-bold uppercase">{selectedSurah?.namaLatin} : {activeTafsirAyat.nomorAyat}</p></div>
+
+
 
                                     <button onClick={() => setActiveTafsirAyat(null)} className="p-2.5 bg-slate-50 dark:bg-slate-800 rounded-full transition-all active:scale-90 shadow-sm"><Icon name="X" size={20} /></button>
 
+
+
                                 </div>
+
+
 
                                 <div className="p-6 overflow-y-auto max-h-[calc(90vh-85px)] no-scrollbar scroll-smooth">
 
+
+
                                     <div className="mb-8 text-center sm:text-right"><p className="font-serif text-4xl leading-[2.2]" dir="rtl">{activeTafsirAyat.teksArab}</p></div>
+
+
 
                                     <div className="mb-10 relative"><div className="absolute -left-4 top-0 bottom-0 w-1.5 bg-emerald-500/20 rounded-full"></div><div className="pl-2"><h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2">Terjemahan</h4><p className="text-[15px] italic leading-relaxed">"{activeTafsirAyat.teksIndonesia}"</p></div></div>
 
+
+
                                     <div className="bg-slate-50 dark:bg-slate-850/40 rounded-[2rem] p-7 border border-slate-100 dark:border-slate-800 relative"><h4 className="text-[11px] font-bold text-emerald-700 dark:text-emerald-500 mb-5 uppercase tracking-[0.2em]">Penjelasan Tafsir</h4><div className="text-[16px] leading-[1.8] space-y-5 text-justify">{(surahTafsir?.tafsir?.find(t => t.ayat === activeTafsirAyat.nomorAyat)?.teks || "Tafsir tidak tersedia.").split('\n').map((para, i) => <p key={i}>{para}</p>)}</div></div>
+
+
 
                                     <div className="h-10"></div>
 
+
+
                                 </div>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     )}
+
+
+
+
 
 
 
                     {/* TASBIH OVERLAY */}
 
+
+
                     {isTasbihFullScreen && (
+
+
 
                         <div className="fixed inset-0 z-50 bg-slate-900 text-white flex flex-col items-center justify-center cursor-pointer select-none animate-in zoom-in" onClick={handleTasbihTap}>
 
+
+
                             <div className="absolute top-6 right-6 z-50"><button onClick={(e) => { e.stopPropagation(); setIsTasbihFullScreen(false); }} className="p-3 bg-white/10 rounded-full border border-white/20"><Icon name="Minimize2" size={28} /></button></div>
+
+
 
                             <div className="flex flex-col items-center gap-8"><div className="flex flex-col items-center gap-2 opacity-50"><Icon name="Fingerprint" size={48} /><h2 className="text-xl font-bold uppercase tracking-widest">Tasbih</h2></div><div className="text-[10rem] font-mono font-bold leading-none text-emerald-400">{tasbihCount}</div><p className="text-sm opacity-40 animate-pulse tracking-widest">KETUK LAYAR</p></div>
 
+
+
                             <div className="absolute bottom-12 z-50"><button onClick={(e) => { e.stopPropagation(); setTasbihCount(0); }} className="p-4 bg-red-500/20 text-red-400 rounded-full border border-red-500/30"><Icon name="RotateCcw" size={32}/></button></div>
 
+
+
                         </div>
+
+
 
                     )}
 
 
 
+
+
+
+
                     {/* HEADER */}
+
+
 
                     <header className="bg-emerald-700 dark:bg-emerald-950 text-white py-2 px-4 sticky top-0 z-20 shadow-md">
 
+
+
                         <div className="max-w-md mx-auto flex justify-between items-center">
+
+
 
                             <div className="flex items-center gap-2">
 
+
+
                                 <button onClick={toggleTheme} className="p-1.5 bg-emerald-800 dark:bg-emerald-900 rounded-full flex items-center justify-center min-w-[32px] min-h-[32px]">{resolvedTheme === 'dark' ? <Icon name="Moon" className="text-yellow-300" size={16} /> : <Icon name="Sun" className="text-yellow-400" size={16} />}</button>
+
+
 
                                 <div><h1 className="text-base font-bold leading-none">NoorRahma</h1><p className="text-[10px] opacity-80">Teman Ibadah Muslim</p>{ramadanCountdownText && <p className="text-[9px] text-yellow-300 font-bold mt-0.5 animate-pulse">{ramadanCountdownText}</p>}</div>
 
+
+
                             </div>
+
+
 
                             {deferredPrompt ? <button onClick={handleInstallClick} className="flex items-center gap-1 bg-white text-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm animate-pulse"><Icon name="Download" size={12} /> Install</button> : <div className="text-[10px] font-bold bg-emerald-800 dark:bg-emerald-900 px-3 py-1 rounded-full border border-emerald-600">1447 H</div>}
 
+
+
                         </div>
+
+
 
                     </header>
 
 
 
+
+
+
+
                     <main className="max-w-md mx-auto p-4 space-y-6 scroll-smooth-container">
+
+
 
                         {/* TAB SHALAT */}
 
+
+
                         {activeTab === 'shalat' && (
+
+
 
                         <div className="space-y-4 animate-in">
 
+
+
                             <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+
+
 
                                 <div className="flex gap-2 items-center">
 
+
+
                                     <button onClick={handleUseGPS} className={`p-2 rounded-lg border transition-all ${prayerCoords ? 'bg-emerald-100 border-emerald-200 text-emerald-700' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 text-slate-400'}`}><Icon name="Locate" size={18}/></button>
+
+
 
                                     <div className="flex-1 relative">
 
+
+
                                         <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-red-500"><Icon name="MapPin" size={14}/></div>
+
+
 
                                         <input type="text" value={prayerCity} onChange={(e) => { setPrayerCity(e.target.value); if (prayerCoords) setPrayerCoords(null); }} placeholder="Cari Kota..." className="w-full pl-8 pr-4 py-1.5 border dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800" />
 
+
+
                                     </div>
+
+
 
                                     <button onClick={handleManualSearch} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase" disabled={isLoading}>Cari</button>
 
+
+
                                 </div>
+
+
 
                                 {prayerError && <div className="mt-1 text-[10px] text-red-500 flex items-center gap-1"><Icon name="AlertTriangle" size={10}/> {prayerError}</div>}
 
+
+
                             </div>
+
                             
+
                             {/* ===== PRO WIDGET COMPACT ===== */}
+
 {isPro && prayerTimes && nextPrayerInfo && (
+
   <div
+
     onClick={() => setShowPrayerPopup(true)}
+
     className="
+
       bg-gradient-to-r from-emerald-600 to-teal-600
+
       text-white px-4 py-3 rounded-2xl shadow-md
+
       flex items-center justify-between
+
       cursor-pointer active:scale-95 transition
+
     "
+
   >
+
     <div className="flex flex-col leading-tight">
+
       <span className="text-[10px] uppercase tracking-widest opacity-80 font-bold">
+
         Shalat Berikutnya
+
       </span>
+
+
 
       <span className="text-sm font-semibold">
+
         {nextPrayerInfo.name}
+
       </span>
+
     </div>
+
+
 
     <div className="text-right">
+
       <div className="font-mono text-lg font-bold">
+
         {nextPrayerInfo.time}
+
       </div>
+
+
 
       <div className="text-[10px] opacity-90 font-mono">
+
         ⏳ {nextPrayerInfo.countdown}
+
       </div>
+
     </div>
+
   </div>
+
 )}
+
+
 
 {isPro && dailyQuote && (
+
   <div className="
+
     bg-white dark:bg-slate-900
+
     border border-slate-100 dark:border-slate-800
+
     rounded-2xl p-4 shadow-sm
+
   ">
+
     <p className="italic text-sm leading-relaxed">
+
       “{dailyQuote.text}”
+
     </p>
+
+
 
     <p className="mt-2 text-right text-[10px] text-slate-500 font-semibold">
+
       — {dailyQuote.source}
+
     </p>
+
   </div>
+
 )}
 
+
+
 {/* ===== PRO GRID FEATURES ===== */}
+
 {isPro && (
+
   <div className="grid grid-cols-2 gap-3">
 
+
+
     {/* KALENDER HIJRIYAH */}
+
     <div
+
       onClick={() => location.href = "/hijriah/"}
+
       className="bg-white dark:bg-slate-900
+
       border border-slate-100 dark:border-slate-800
+
       rounded-2xl p-4 shadow-sm
+
       text-center cursor-pointer active:scale-95"
+
     >
+
       📅
+
       <h4 className="font-bold text-sm mt-2">Kalender Hijriah</h4>
+
       <p className="text-[10px] text-slate-500">
+
         Puasa Sunnah & Hari Besar
+
       </p>
+
     </div>
 
+
+
     {/* ASMAUL HUSNA */}
+
     <div
+
       onClick={() => location.href = "/asmaulhusna/"}
+
       className="bg-white dark:bg-slate-900
+
       border border-slate-100 dark:border-slate-800
+
       rounded-2xl p-4 shadow-sm
+
       text-center cursor-pointer active:scale-95"
+
     >
+
       ✨
+
       <h4 className="font-bold text-sm mt-2">Asmaul Husna</h4>
+
       <p className="text-[10px] text-slate-500">
+
         Hafalan 99 Nama Allah
+
       </p>
+
     </div>
+
     
     {/* KIBLAT COMPASS */}
+
     {isPro && (
 <div
  onClick={()=>location.href="/kiblat/"}
@@ -1284,354 +2549,706 @@ useEffect(() => {
 )}
 
   </div>
+
 )}
+
+
 
                             {!isPro && prayerTimes && (
 
+
+
                             <div className="space-y-3">
+
+
 
                                 <div className="bg-slate-800 dark:bg-slate-900 rounded-2xl p-3 text-white shadow-lg relative overflow-hidden">
 
+
+
                                     <div className="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
+
+
 
                                         <div><h3 className="text-[10px] opacity-60 uppercase font-bold">Jadwal Shalat</h3><p className="text-sm font-bold truncate max-w-[150px]">{prayerCity}</p></div>
 
+
+
                                         <div className="text-right"><p className="text-[10px] opacity-60 font-bold uppercase">Koreksi</p><p className="text-[10px]">Lokal (Masjid)</p></div>
 
+
+
                                     </div>
+
+
 
                                     <div className="grid grid-cols-1 gap-1.5">
 
+
+
                                     {prayerMap.map(({ l, k }) => {
+
+
 
                                         const original = prayerTimes[k];
 
+
+
                                         const offset = prayerOffsets[k] || 0;
+
+
 
                                         const finalTime = adjustTime(original, offset);
 
+
+
                                         const isEditing = editingPrayer === k;
 
+
+
                                         return (
+
+
 
                                         <div key={k} className="bg-white/5 px-3 py-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors flex flex-col gap-1">
 
+
+
                                             <div className="flex justify-between items-center">
+
+
 
                                                 <div className="flex items-center gap-2">
 
+
+
                                                     <span className="font-medium text-xs opacity-90">{l}</span>
+
+
 
                                                     <button onClick={() => setEditingPrayer(isEditing ? null : k)} className={`p-1 rounded-md transition-colors ${offset !== 0 ? 'text-yellow-400' : 'text-white/20 hover:text-white'}`}>
 
+
+
                                                         <Icon name="Edit3" size={10} />
+
+
 
                                                     </button>
 
+
+
                                                 </div>
+
+
 
                                                 <span className="font-bold font-mono text-base">{finalTime}</span>
 
+
+
                                             </div>
+
+
 
                                             {isEditing && (
 
+
+
                                                 <div className="flex items-center justify-between gap-2 mt-1 py-1 px-2 bg-black/20 rounded border border-white/10 animate-in">
+
+
 
                                                     <span className="text-[9px] uppercase font-bold opacity-50">Sesuaikan (Menit):</span>
 
+
+
                                                     <div className="flex items-center gap-3">
+
+
 
                                                         <button onClick={() => setPrayerOffsets({...prayerOffsets, [k]: (prayerOffsets[k]||0) - 1})} className="w-5 h-5 flex items-center justify-center bg-white/10 rounded-full text-xs">-</button>
 
+
+
                                                         <span className="text-xs font-bold font-mono w-4 text-center">{offset > 0 ? `+${offset}` : offset}</span>
+
+
 
                                                         <button onClick={() => setPrayerOffsets({...prayerOffsets, [k]: (prayerOffsets[k]||0) + 1})} className="w-5 h-5 flex items-center justify-center bg-white/10 rounded-full text-xs">+</button>
 
+
+
                                                         <button onClick={() => setPrayerOffsets({...prayerOffsets, [k]: 0})} className="ml-1 text-[8px] font-bold text-red-400 uppercase tracking-tighter">Reset</button>
+
+
 
                                                     </div>
 
+
+
                                                 </div>
+
+
 
                                             )}
 
+
+
                                         </div>
+
+
 
                                         );
 
+
+
                                     })}
+
+
 
                                     </div>
 
+
+
                                 </div>
+
+
 
                             </div>
 
+
+
                             )}
 
+
+
 {!prayerTimes && (
+
   <div className="text-center p-8 text-slate-400 text-sm">
+
     {isLoading ? "Memuat..." : "Cari kota Anda."}
+
   </div>
+
 )}
+
+
 
 </div>
+
 )}
 
+
+
 {/* TAB QURAN */}
+
 {activeTab === 'quran' && (
+
+
 
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-[600px] animate-in">
 
+
+
                             <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 border-b border-emerald-100 dark:border-emerald-900 flex items-center gap-2">
+
+
 
                                 {selectedSurah && <button onClick={() => { setSelectedSurah(null); setPlayingAyatIndex(null); if(audioRef.current) audioRef.current.pause(); }} className="p-1"><Icon name="ArrowLeft" size={18} className="text-emerald-700 dark:text-emerald-400"/></button>}
 
+
+
                                 <span className="font-bold text-emerald-800 dark:text-emerald-400 text-sm">{selectedSurah ? `QS. ${selectedSurah.namaLatin}` : "Al-Qur'an Digital"}</span>
 
+
+
                             </div>
+
+
 
                             <div className="flex-1 overflow-y-auto p-0 no-scrollbar scroll-smooth">
 
+
+
                             {!selectedSurah ? (
+
+
 
                                 <div>
 
+
+
                                     <div className="p-4 bg-gradient-to-br from-emerald-600 to-teal-700 text-white m-4 rounded-xl shadow-lg">
+
+
 
                                         <div className="flex justify-between items-start mb-3">
 
+
+
                                             <div><h3 className="text-sm font-bold flex items-center gap-1.5"><Icon name="Target" size={16}/> Target Khatam</h3><p className="text-[10px] opacity-80">Rencanakan khatam Quran-mu</p></div>
+
+
 
                                             <div className="text-right font-bold text-2xl">{Math.ceil(604 / (quranTargetDays || 1))}<span className="text-[9px] uppercase ml-1 opacity-70">Hal/Hari</span></div>
 
+
+
                                         </div>
+
+
 
                                         <div className="flex items-center gap-2 bg-white/20 p-2 rounded-lg"><span className="text-[10px]">Selesai dalam:</span><input type="number" value={quranTargetDays} onChange={(e) => setQuranTargetDays(Math.max(1, parseInt(e.target.value)||1))} className="w-12 bg-transparent text-sm font-bold text-right focus:outline-none" /><span className="text-[10px]">Hari</span></div>
 
+
+
                                     </div>
+
+
 
                                     <div className="p-3 sticky top-0 bg-white dark:bg-slate-900 z-10 border-b border-slate-50 dark:border-slate-800"><input type="text" placeholder="Cari surat..." className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-emerald-500" onChange={(e) => setSearchSurah(e.target.value.toLowerCase())}/></div>
 
+
+
                                     <div className="divide-y dark:divide-slate-800">
+
+
 
                                         {surahList.filter(s => s.namaLatin.toLowerCase().includes(searchSurah)).map(s => (
 
+
+
                                             <button key={s.nomor} onClick={() => fetchSurahDetail(s.nomor)} className="w-full text-left p-4 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group">
+
+
 
                                                 <div className="flex items-center gap-3"><div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">{s.nomor}</div><div><h4 className="font-bold text-sm">{s.namaLatin}</h4><p className="text-[10px] text-slate-400">{s.arti} • {s.jumlahAyat} ayat</p></div></div>
 
+
+
                                                 <span className="font-serif text-slate-300 group-hover:text-emerald-600 text-lg">{s.nama}</span>
+
+
 
                                             </button>
 
+
+
                                         ))}
+
+
 
                                     </div>
 
+
+
                                 </div>
+
+
 
                             ) : (
 
+
+
                                 <div className="p-4 space-y-6">
+
+
 
                                     <div className="text-center py-6 bg-slate-50 dark:bg-slate-800 rounded-xl font-serif text-2xl mb-4 dark:text-slate-200 shadow-sm border border-slate-100 dark:border-slate-700">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</div>
 
+
+
                                     {isLoading ? <div className="text-center py-10">Memuat...</div> : selectedSurah.ayat.map((a, index) => {
+
+
 
                                         const isP = playingAyatIndex === index;
 
+
+
                                         return (
+
+
 
                                         <div key={a.nomorAyat} id={`ayat-${index}`} onClick={() => setActiveTafsirAyat(a)} className={`group border-b dark:border-slate-800 pb-5 cursor-pointer transition-all duration-500 ${isP ? 'bg-emerald-50/50 dark:bg-emerald-900/20 -mx-4 px-4 py-5 rounded border-emerald-100' : 'hover:bg-slate-50'}`}>
 
+
+
                                             <div className="mb-3 flex justify-between items-center"><div className="flex items-center gap-2"><span className={`text-[10px] w-6 h-6 flex items-center justify-center rounded-full font-bold ${isP ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-800'}`}>{a.nomorAyat}</span><span className="text-[9px] opacity-0 group-hover:opacity-60 text-emerald-600 uppercase font-bold tracking-tighter hidden sm:inline">Lihat Tafsir</span></div><button onClick={(e) => { e.stopPropagation(); togglePlayAyat(index); }} className={`p-1.5 rounded-full ${isP ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-500'}`}>{isP ? <Icon name="StopCircle" size={18}/> : <Icon name="PlayCircle" size={18}/>}</button></div>
+
+
 
                                             <p className="text-right font-serif text-4xl leading-[1.8] mb-4" dir="rtl">{a.teksArab}</p>
 
+
+
                                             <p className="text-xs text-emerald-700 font-medium mb-1.5 leading-relaxed">{a.teksLatin}</p>
+
+
 
                                             <p className="text-xs text-slate-500 italic leading-relaxed">"{a.teksIndonesia}"</p>
 
+
+
                                         </div>
+
+
 
                                         );
 
+
+
                                     })}
+
+
 
                                 </div>
 
+
+
                             )}
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                         )}
+
+
+
+
 
 
 
                         {/* TAB RAMADHAN */}
 
+
+
                         {activeTab === 'ramadhan' && (
+
+
 
                         <div className="space-y-4 animate-in">
 
+
+
                             {!isRamadhanActive ? (
+
+
 
                                 <div className="flex flex-col items-center justify-center py-20 px-6 text-center space-y-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
 
+
+
                                     <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 relative">
+
+
 
                                         <Icon name="Clock" size={48} /><div className="absolute -top-1 -right-1 bg-red-500 text-white p-1.5 rounded-full border-4 border-white dark:border-slate-900"><Icon name="X" size={12} strokeWidth={4} /></div>
 
+
+
                                     </div>
+
+
 
                                     <div><h2 className="text-lg font-bold">Menu Masih Terkunci</h2><p className="text-xs text-slate-500 mt-2 leading-relaxed">Fitur Planner Ibadah & Rencana Dapur akan terbuka otomatis pada 1 Ramadhan 1447 H.</p></div>
 
+
+
                                     {ramadanCountdownText && <div className="bg-emerald-50 dark:bg-emerald-950/40 px-6 py-3 rounded-2xl border border-emerald-100"><p className="text-sm font-bold text-emerald-700 uppercase tracking-widest">{ramadanCountdownText}</p></div>}
+
+
 
                                     <button onClick={() => setActiveTab('shalat')} className="text-xs font-bold text-slate-400 uppercase tracking-widest underline underline-offset-8">Kembali</button>
 
+
+
                                 </div>
+
+
 
                             ) : (
 
+
+
                                 <>
+
+
 
                                     <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800"><button onClick={() => setRamadhanSubTab('ibadah')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg ${ramadhanSubTab === 'ibadah' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' : 'text-slate-500'}`}><Icon name="Calendar" size={14}/> Ibadah</button><button onClick={() => setRamadhanSubTab('dapur')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg ${ramadhanSubTab === 'dapur' ? 'bg-white dark:bg-slate-800 text-orange-600 shadow-sm' : 'text-slate-500'}`}><Icon name="Utensils" size={14}/> Dapur</button></div>
 
+
+
                                     {ramadhanSubTab === 'ibadah' && (
+
+
 
                                         <div className="space-y-6 animate-in"><div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center"><div className="flex items-center justify-between w-full mb-4"><button onClick={() => setCurrentDay(d => Math.max(1, d - 1))} disabled={currentDay === 1} className="p-2 opacity-30 disabled:pointer-events-none"><Icon name="ChevronLeft" size={20}/></button><div className="text-center"><h2 className="text-xl font-bold text-emerald-800 dark:text-emerald-400">Hari ke-{currentDay}</h2></div><button onClick={() => setCurrentDay(d => Math.min(30, d + 1))} disabled={currentDay === 30} className="p-2 opacity-30 disabled:pointer-events-none"><Icon name="ChevronRight" size={20}/></button></div><div className="w-full bg-yellow-50 dark:bg-yellow-950/20 rounded-xl p-3 border border-yellow-100"><label className="flex items-center gap-2 text-xs font-bold text-yellow-700 mb-2"><Icon name="Edit3" size={14} /> PLANNER</label><textarea className="w-full bg-transparent text-sm focus:outline-none resize-none" rows="2" placeholder="Rencana hari ini..." value={dailyNotes[currentDay] || ''} onChange={(e) => setDailyNotes({ ...dailyNotes, [currentDay]: e.target.value })}></textarea></div></div><div className="space-y-4">{members.map(m => { const dl = m.log?.[currentDay] || {}; const comp = tasks.filter(t => dl[t.k]).length; const prog = Math.round((comp / tasks.length) * 100); return (<div key={m.id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"><div className="bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 border-b border-emerald-100 flex justify-between items-center"><span className="font-bold text-emerald-900 dark:text-emerald-400">{m.name}</span><div className="flex items-center gap-2"><span className="text-xs font-medium bg-white dark:bg-slate-800 px-2 py-1 rounded border border-emerald-200">{prog}%</span><button onClick={() => setMembers(members.filter(mem => mem.id !== m.id))} className="text-slate-400"><Icon name="Trash2" size={16} /></button></div></div><div className="p-4 grid grid-cols-2 gap-2">{tasks.map(t => { const isD = dl[t.k]; return (<button key={t.k} onClick={() => toggleTask(m.id, t.k)} className={`flex items-center gap-2 p-2 rounded-lg border text-xs text-left transition-all ${isD ? 'bg-emerald-100 border-emerald-200 text-emerald-800' : 'bg-white dark:bg-slate-800 border-slate-100 text-slate-500'}`}><div className={`shrink-0 ${isD ? 'text-emerald-600' : t.color}`}>{isD ? <Icon name="CheckCircle" size={16} /> : <Icon name={t.i} size={16} />}</div><span className={isD ? 'font-semibold' : ''}>{t.l}</span></button>); })}</div></div>); })}<div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 border-dashed flex gap-2"><input id="newMemberInput" type="text" placeholder="Nama..." className="flex-1 text-sm px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg focus:outline-emerald-500" onKeyPress={(e) => e.key === 'Enter' && handleAddMember(e.target.value)} /><button onClick={() => { const i = document.getElementById('newMemberInput'); if(i.value) { handleAddMember(i.value); i.value = ''; } }} className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Tambah</button></div></div></div>
 
+
+
                                     )}
+
+
 
                                     {ramadhanSubTab === 'dapur' && (
 
+
+
                                         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 animate-in"><h2 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-4"><Icon name="Utensils" className="text-orange-500" /> Menu Dapur</h2><div className="flex gap-2 mb-4 overflow-x-auto pb-1 no-scrollbar">{[1, 2, 3, 4].map(w => <button key={w} onClick={() => setActiveMealWeek(w)} className={`px-4 py-2 text-xs font-bold rounded-lg ${activeMealWeek === w ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>Minggu {w}</button>)}</div><div className="space-y-3">{['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map((d) => (<div key={d} className="border dark:border-slate-800 rounded-lg p-3"><h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 bg-slate-50 dark:bg-slate-800 p-1 rounded px-2">{d}</h3><div className="grid grid-cols-1 gap-2"><div className="flex items-center gap-2"><Icon name="Coffee" size={14} className="text-blue-400" /><input type="text" placeholder="Sahur..." className="flex-1 text-sm bg-transparent border-b dark:border-slate-700 focus:outline-none" value={mealPlan[activeMealWeek]?.[d]?.sahur || ''} onChange={(e) => updateMeal(activeMealWeek, d, 'sahur', e.target.value)}/></div><div className="flex items-center gap-2"><Icon name="Utensils" size={14} className="text-orange-400" /><input type="text" placeholder="Berbuka..." className="flex-1 text-sm bg-transparent border-b dark:border-slate-700 focus:outline-none" value={mealPlan[activeMealWeek]?.[d]?.iftar || ''} onChange={(e) => updateMeal(activeMealWeek, d, 'iftar', e.target.value)}/></div></div></div>))}</div></div>
+
+
 
                                     )}
 
+
+
                                 </>
+
+
 
                             )}
 
+
+
                         </div>
 
+
+
                         )}
+
+
+
+
 
 
 
                         {/* TAB LAINNYA */}
 
+
+
                         {activeTab === 'doa' && (
 
+
+
                         <div className="space-y-6">
+
                             <div className="w-full">
+
+
 
   {!isPro ? (
 
+
+
     /* ================= NON PRO ================= */
 
+
+
     <button
+
       onClick={() => setShowDonation(true)}
+
       className="w-full flex items-center justify-center gap-2 text-xs font-bold
+
       bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+
       px-4 py-3 rounded-xl hover:bg-amber-200 dark:hover:bg-amber-900/50
+
       transition-colors border border-amber-200 dark:border-amber-800 shadow-sm"
+
     >
+
       <Icon name="Coffee" size={16} /> TRAKTIR KOPI (SUPPORT)
+
     </button>
+
+
 
   ) : (
 
+
+
     /* ================= PRO ================= */
 
+
+
     <div className="w-full bg-gradient-to-r from-emerald-600 to-teal-600
+
       text-white text-xs font-bold py-3 rounded-xl shadow-lg
+
       flex items-center justify-center gap-2"
+
     >
+
       <Icon name="Star" size={16} />
+
       AKUN PRO AKTIF
+
     </div>
+
+
 
   )}
 
+
+
 </div>
+
                             <div onClick={() => setIsTasbihFullScreen(true)} className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white text-center shadow-lg relative cursor-pointer active:scale-[0.98] transition-transform">
+
+
 
                                 <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="Fingerprint" size={100} /></div><div className="absolute top-3 right-3 opacity-50 flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest"><Icon name="Maximize2" size={14} /> Full Screen</div>
 
+
+
                                 <h2 className="text-sm font-bold opacity-70 mb-4 uppercase tracking-widest">Tasbih Digital</h2><div className="text-6xl font-mono font-bold mb-6 tracking-widest">{tasbihCount}</div>
+
+
 
                                 <div className="flex justify-center gap-6 items-center"><button onClick={(e) => { e.stopPropagation(); setTasbihCount(0); }} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><Icon name="RotateCcw" size={16} /></button><button onClick={(e) => { e.stopPropagation(); handleTasbihTap(); }} className="w-20 h-20 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center justify-center active:scale-95 transition-transform"><Icon name="Plus" size={32} /></button></div>
 
+
+
                             </div>
+
+
 
                             <div className="space-y-3">
 
+
+
                                 <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2"><Icon name="BookOpen" size={20} className="text-emerald-600 dark:text-emerald-400"/> Pilihan Doa</h3>
+
+
 
                                 {doaList.map((item) => {
 
+
+
                                     const isOpen = openDoaId === item.id;
+
+
 
                                     return (
 
+
+
                                     <div key={item.id} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+
+
 
                                         <button onClick={() => setOpenDoaId(isOpen ? null : item.id)} className={`w-full flex justify-between items-center p-4 text-left transition-colors ${isOpen ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800' : 'bg-white dark:bg-slate-900'}`}>
 
+
+
                                             <div className="flex flex-col"><span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">{item.category}</span><span className="font-bold text-sm">{item.title}</span></div>
+
+
 
                                             {isOpen ? <Icon name="ChevronUp" size={20} className="text-emerald-600"/> : <Icon name="ChevronDown" size={20} className="text-slate-400"/>}
 
+
+
                                         </button>
+
+
 
                                         {isOpen && (<div className="p-5 border-t dark:border-emerald-900 animate-in slide-in-from-top-2 fade-in"><p className="text-right text-2xl font-serif leading-loose mb-4" dir="rtl">{item.arabic}</p><div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border-l-4 border-emerald-400"><p className="text-sm text-emerald-700 font-medium italic mb-2">"{item.latin}"</p><p className="text-sm text-slate-600 dark:text-slate-400">{item.artinya}</p></div></div>)}
 
+
+
                                     </div>
+
+
 
                                     );
 
+
+
                                 })}
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                         )}
+
+
 
                     </main>
 
 
 
+
+
+
+
                     {/* NAVBAR FOOTER */}
+
+
 
                     <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-950 border-t dark:border-slate-800 z-30 shadow-lg"><div className="flex justify-around pt-1 pb-0">{[{ id: 'shalat', label: isPro ? 'Ibadah' : 'Shalat', icon: 'Clock' }, { id: 'quran', label: "Qur'an", icon: 'BookOpen' }, { id: 'ramadhan', label: 'Ramadhan', icon: 'Moon' }, { id: 'doa', label: 'Lainnya', icon: 'Menu' }].map(tab => (<button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex flex-col items-center p-2 rounded-xl transition-all duration-300 ${activeTab === tab.id ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 -translate-y-2 border border-emerald-100' : 'text-slate-400'}`}><Icon name={tab.icon} size={20} strokeWidth={activeTab === tab.id ? 2.5 : 2} /><span className="text-[10px] font-bold mt-1">{tab.label}</span></button>))}</div><div className="w-full text-center pb-1 pb-safe -mt-1"><p className="text-[9px] text-slate-300 font-medium">&copy;2026 Project by Esel Store</p></div></nav>
 
+
+
                 </div>
 
+
+
             );
+
+
 
         };
 
 
 
+
+
+
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
+
+
 
         root.render(<App />);
 
+
+
     </script>
+
     
+
     <script>
+
 if ("serviceWorker" in navigator) {
+
   navigator.serviceWorker.register("/sw.js");
+
 }
+
 </script>
+
+
 
 </body>
 
+
+
 </html>
+
