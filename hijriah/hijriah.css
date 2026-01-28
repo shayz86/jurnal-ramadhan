@@ -135,3 +135,68 @@ body{
  color:white;
  font-size:16px;
 }
+
+/* ================= POPUP PUASA ================= */
+
+.puasa-popup {
+  position: fixed;
+  inset: 0;
+  background: #062f36;
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+}
+
+.puasa-popup.show {
+  display: flex;
+}
+
+/* header */
+
+.puasa-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #083b42;
+}
+
+.puasa-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+}
+
+.puasa-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* list */
+
+.puasa-list {
+  padding: 14px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* card */
+
+.puasa-item {
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.puasa-item h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.puasa-item span {
+  font-size: 13px;
+  opacity: 0.75;
+}
