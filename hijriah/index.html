@@ -2,8 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Kalender Hijriah</title>
 
 <link rel="stylesheet" href="hijriah.css" />
@@ -11,129 +10,161 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="hijri-header">
-  <button onclick="history.back()">←</button>
+<header class="topbar">
+  <button onclick="history.back()" class="back">←</button>
   <h1>Kalender Hijriah</h1>
-  <button id="openPuasa">📅</button>
+
+  <button id="openPuasa" class="calendarBtn">📅</button>
 </header>
 
-<!-- MONTH NAV -->
-<div class="hijri-month-nav">
+<section class="monthNav">
   <button id="prevMonth">‹</button>
-  <div id="monthTitle">Sha'ban 1447 H</div>
+  <h2 id="monthTitle">-</h2>
   <button id="nextMonth">›</button>
+</section>
+
+<div class="weekday">
+  <span>Sen</span>
+  <span>Sel</span>
+  <span>Rab</span>
+  <span>Kam</span>
+  <span>Jum</span>
+  <span>Sab</span>
+  <span>Min</span>
 </div>
 
-<!-- WEEK -->
-<div class="hijri-weekdays">
-  <div>Sen</div><div>Sel</div><div>Rab</div>
-  <div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div>
+<div id="calendarGrid" class="calendar-grid"></div>
+
+<!-- ================= POPUP PUASA ================= -->
+
+<div id="puasaPopup" class="popup">
+ <div class="popupBox">
+   <h3>Puasa Sunnah</h3>
+
+   <ul>
+     <li>✔ Senin & Kamis</li>
+     <li>✔ Ayyamul Bidh (13-15)</li>
+     <li>✔ Puasa Daud</li>
+     <li>✔ Puasa Arafah</li>
+     <li>✔ Puasa Asyura</li>
+   </ul>
+
+   <button onclick="closePuasa()">Tutup</button>
+ </div>
 </div>
 
-<!-- GRID -->
-<div class="hijri-grid" id="calendarGrid"></div>
-
-<!-- POPUP PUASA -->
-<div class="puasa-popup" id="puasaPopup">
-  <div class="puasa-card">
-    <h3>📜 Jadwal Puasa Sunnah</h3>
-
-    <ul>
-      <li>🕌 Senin & Kamis</li>
-      <li>🌕 Ayyamul Bidh (13–15)</li>
-      <li>🕋 Puasa Daud</li>
-      <li>📅 Puasa Asyura</li>
-      <li>🌙 Puasa Arafah</li>
-    </ul>
-
-    <button onclick="closePuasa()">Tutup</button>
-  </div>
-</div>
+<!-- ================= SCRIPT ================= -->
 
 <script>
 
-const arabNums = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
 
 function toArabic(num){
-  return num.toString().split("").map(n=>arabNums[n]).join("");
+ return num.toString().split("").map(n=>arabNums[n]).join("");
 }
 
-const hijriMonths = [
+const hijriMonths=[
  "Muharram","Safar","Rabi'ul Awal","Rabi'ul Akhir",
  "Jumadal Ula","Jumadal Akhirah",
  "Rajab","Sha'ban","Ramadhan",
  "Syawal","Dzulqa'dah","Dzulhijjah"
 ];
 
-let currentMonth = 7;
-let currentYear = 1447;
+const grid=document.getElementById("calendarGrid");
+const monthTitle=document.getElementById("monthTitle");
 
-const monthTitle = document.getElementById("monthTitle");
-const grid = document.getElementById("calendarGrid");
+function getHijriParts(date){
+
+ const fmt=new Intl.DateTimeFormat(
+  "en-TN-u-ca-islamic",
+  {day:"numeric",month:"numeric",year:"numeric"}
+ );
+
+ const parts=fmt.formatToParts(date);
+ const obj={};
+
+ parts.forEach(p=>{
+  if(p.type!=="literal") obj[p.type]=parseInt(p.value);
+ });
+
+ return obj;
+}
+
+let baseDate=new Date();
+
+/* ================= RENDER ================= */
 
 function renderCalendar(){
 
-  monthTitle.textContent =
-    hijriMonths[currentMonth] + " " + currentYear + " H";
+ grid.innerHTML="";
 
-  grid.innerHTML = "";
+ const hijri=getHijriParts(baseDate);
 
-  const daysInMonth = 30;
-  const startOffset = 3;
+ const hMonth=hijri.month-1;
+ const hYear=hijri.year;
+ const today=hijri.day;
 
-  for(let i=0;i<startOffset;i++){
-    grid.appendChild(document.createElement("div"));
+ monthTitle.textContent=
+  hijriMonths[hMonth]+" "+hYear+" H";
+
+ // cari tanggal masehi awal bulan hijriah
+ const firstDayDate=new Date(baseDate);
+ firstDayDate.setDate(
+  baseDate.getDate()-(today-1)
+ );
+
+ const startOffset=firstDayDate.getDay()===0
+  ?6:firstDayDate.getDay()-1;
+
+ for(let i=0;i<startOffset;i++){
+  grid.appendChild(document.createElement("div"));
+ }
+
+ const daysInMonth=30;
+
+ for(let d=1;d<=daysInMonth;d++){
+
+  const cell=document.createElement("div");
+  cell.className="hijri-day";
+
+  const g=document.createElement("div");
+  g.className="greg";
+
+  const mDate=new Date(firstDayDate);
+  mDate.setDate(firstDayDate.getDate()+d-1);
+
+  g.textContent=mDate.getDate();
+
+  const h=document.createElement("div");
+  h.className="hijri";
+  h.textContent=toArabic(d);
+
+  if(d===today){
+   cell.classList.add("today");
   }
 
-  for(let d=1; d<=daysInMonth; d++){
-
-    const cell = document.createElement("div");
-    cell.className = "hijri-day";
-
-    const greg = document.createElement("div");
-    greg.className = "greg";
-    greg.textContent = d;
-
-    const hijri = document.createElement("div");
-    hijri.className = "hijri";
-    hijri.textContent = toArabic(d);
-
-    if(d===28){
-      cell.classList.add("today");
-    }
-
-    cell.appendChild(greg);
-    cell.appendChild(hijri);
-    grid.appendChild(cell);
-  }
+  cell.append(g,h);
+  grid.appendChild(cell);
+ }
 }
 
 renderCalendar();
 
-/* NAV */
+/* ================= NAV ================= */
 
-document.getElementById("prevMonth").onclick = ()=>{
- currentMonth--;
- if(currentMonth<0){
-   currentMonth=11;
-   currentYear--;
- }
+document.getElementById("prevMonth").onclick=()=>{
+ baseDate.setDate(baseDate.getDate()-30);
  renderCalendar();
 };
 
-document.getElementById("nextMonth").onclick = ()=>{
- currentMonth++;
- if(currentMonth>11){
-   currentMonth=0;
-   currentYear++;
- }
+document.getElementById("nextMonth").onclick=()=>{
+ baseDate.setDate(baseDate.getDate()+30);
  renderCalendar();
 };
 
-/* POPUP */
+/* ================= POPUP ================= */
 
-const popup = document.getElementById("puasaPopup");
+const popup=document.getElementById("puasaPopup");
 
 document.getElementById("openPuasa").onclick=()=>{
  popup.classList.add("show");
