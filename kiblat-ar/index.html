@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kiblat AR</title>
+
+<meta name="theme-color" content="#047857" />
+
+<style>
+html,body{
+  margin:0;
+  background:black;
+  color:white;
+  font-family:system-ui;
+  overflow:hidden;
+}
+
+video{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  pointer-events:none;
+}
+
+header{
+  background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  pointer-events:auto;
+}
+
+header button{
+  background:none;
+  border:none;
+  color:white;
+  font-size:20px;
+}
+
+.center{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.arrow{
+  font-size:90px;
+  transform-origin:center;
+  transition:transform .1s linear;
+  filter:drop-shadow(0 0 20px rgba(34,197,94,.9));
+}
+
+.footer{
+  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+  padding:18px;
+  text-align:center;
+}
+
+.deg{
+  font-size:22px;
+  font-weight:bold;
+}
+
+.warn{
+  font-size:12px;
+  opacity:.7;
+}
+</style>
+</head>
+<body>
+
+<video id="camera" autoplay playsinline muted></video>
+
+<div class="overlay">
+
+<header>
+  <button onclick="history.back()">←</button>
+  <h3>Kiblat AR</h3>
+</header>
+
+<div class="center">
+  <div id="arrow" class="arrow">⬆️</div>
+</div>
+
+<div class="footer">
+  <div class="deg" id="deg">0°</div>
+  <div class="warn">Arahkan HP hingga panah lurus ke depan</div>
+</div>
+
+</div>
+
+<script>
+/* ================= PRO GUARD ================= */
+
+const cache=localStorage.getItem("nr_pro_cache");
+
+if(!cache || !JSON.parse(cache).pro){
+ alert("Fitur ini khusus akun PRO");
+ location.href="/";
+}
+
+/* ================= CAMERA ================= */
+
+navigator.mediaDevices.getUserMedia({
+ video:{ facingMode:"environment" },
+ audio:false
+}).then(stream=>{
+ document.getElementById("camera").srcObject=stream;
+});
+
+/* ================= KIBLAT ================= */
+
+const KAABA={lat:21.4225,lon:39.8262};
+
+let userLat,userLon,qibla=0;
+
+const arrow=document.getElementById("arrow");
+const degTxt=document.getElementById("deg");
+
+function rad(d){return d*Math.PI/180;}
+function deg(r){return r*180/Math.PI;}
+
+function bearing(lat1,lon1,lat2,lon2){
+ const φ1=rad(lat1);
+ const φ2=rad(lat2);
+ const dλ=rad(lon2-lon1);
+
+ const y=Math.sin(dλ);
+ const x=Math.cos(φ1)*Math.tan(φ2)-Math.sin(φ1)*Math.cos(dλ);
+
+ return (deg(Math.atan2(y,x))+360)%360;
+}
+
+navigator.geolocation.getCurrentPosition(pos=>{
+ userLat=pos.coords.latitude;
+ userLon=pos.coords.longitude;
+
+ qibla=bearing(userLat,userLon,KAABA.lat,KAABA.lon);
+});
+
+/* ================= SENSOR ================= */
+
+function orientationHandler(e){
+
+ let heading;
+
+ if(e.webkitCompassHeading){
+  heading=e.webkitCompassHeading;
+ }else{
+  heading=360-e.alpha;
+ }
+
+ const diff=(qibla-heading+360)%360;
+
+ arrow.style.transform=`rotate(${diff}deg)`;
+ degTxt.textContent=`${Math.round(diff)}°`;
+}
+
+if(
+ typeof DeviceOrientationEvent!=="undefined" &&
+ typeof DeviceOrientationEvent.requestPermission==="function"
+){
+ DeviceOrientationEvent.requestPermission()
+ .then(p=>{
+  if(p==="granted"){
+   window.addEventListener("deviceorientation",orientationHandler,true);
+  }
+ });
+}else{
+ window.addEventListener("deviceorientationabsolute",orientationHandler,true);
+ window.addEventListener("deviceorientation",orientationHandler,true);
+}
+</script>
+
+</body>
+</html>
