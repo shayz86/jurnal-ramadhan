@@ -91,6 +91,8 @@ header button{
  padding:10px 16px;
  border-radius:14px;
  font-weight:600;
+ margin-top:10px;
+ width:90%;
 }
 </style>
 </head>
@@ -132,6 +134,10 @@ header button{
 <div id="gpsTxt" class="status">GPS: ...</div>
 <div id="sensorTxt" class="status">Sensor: ...</div>
 
+<button class="btn" onclick="openGoogleQibla()">
+🌍 Gunakan Google Qibla Finder
+</button>
+
 <button class="btn" onclick="stopCompass()">Tutup</button>
 
 </div>
@@ -171,12 +177,13 @@ function bearing(lat1,lon1,lat2,lon2){
  )*180/Math.PI+360)%360;
 }
 
-let watchId=null;
 let qibla=0;
 let lastAngle=null;
 
 const arrow=document.getElementById("arrow");
 const degTxt=document.getElementById("degTxt");
+const gpsTxt=document.getElementById("gpsTxt");
+const sensorTxt=document.getElementById("sensorTxt");
 
 function smoothAngle(target){
  if(lastAngle===null){
@@ -217,17 +224,30 @@ function handleOri(e){
 
  if(!heading)return;
 
- sensorTxt.textContent="Sensor: OK";
-
  const raw=(qibla-heading+360)%360;
  const smooth=smoothAngle(raw);
 
  arrow.style.transform=`rotate(${smooth}deg)`;
  degTxt.textContent=Math.round(smooth)+"°";
+
+ sensorTxt.textContent="Sensor: OK";
+
+ if(lastAngle && Math.abs(lastAngle - smooth) > 25){
+  sensorTxt.textContent="Sensor: Tidak stabil ⚠️";
+ }
 }
 
 function stopCompass(){
  location.reload();
+}
+
+/* ================= GOOGLE QIBLA ================= */
+
+function openGoogleQibla(){
+ window.open(
+  "https://qiblafinder.withgoogle.com/",
+  "_blank"
+ );
 }
 
 /* ================= KALIBRASI ================= */
