@@ -8,13 +8,30 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-html,body{
- height:100%;
- margin:0;
+body{font-family:system-ui}
+
+/* bubble animation */
+.msg-enter {
+  animation: pop .25s ease-out both;
 }
-body{
- font-family:system-ui;
- overflow:hidden;
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* avatar */
+.bot-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  object-fit: cover;
 }
 </style>
 </head>
@@ -181,6 +198,65 @@ function newChat(){
 /* ================= RENDER ================= */
 
 function bubble(text,role,loading=false){
+
+ const wrap=document.createElement("div");
+
+ wrap.className=
+  role==="user"
+   ?"flex justify-end msg-enter"
+   :"flex items-end gap-2 msg-enter";
+
+ const box=document.createElement("div");
+
+ box.className=
+  role==="user"
+   ?"bg-emerald-600 text-white px-4 py-3 rounded-2xl max-w-[85%] leading-relaxed text-sm"
+   :"bg-white px-4 py-3 rounded-2xl shadow max-w-[80%] leading-relaxed text-sm";
+
+ box.innerText=text;
+ box.style.whiteSpace="pre-line";
+
+ /* ===== avatar bot ===== */
+
+ if(role==="assistant"){
+
+   const avatar=document.createElement("img");
+   avatar.src="/assistant/bot.png";
+   avatar.className="bot-avatar";
+
+   wrap.appendChild(avatar);
+ }
+
+ wrap.appendChild(box);
+
+ if(role==="assistant" && !loading){
+
+  const tools=document.createElement("div");
+  tools.className="flex gap-3 mt-1 text-xs opacity-50";
+
+  const bm=document.createElement("button");
+  bm.textContent="🔖";
+  bm.onclick=()=>bookmark(text);
+
+  const sh=document.createElement("button");
+  sh.textContent="📤";
+  sh.onclick=()=>share(text);
+
+  tools.append(bm,sh);
+
+  const toolsWrap=document.createElement("div");
+  toolsWrap.append(box,tools);
+
+  if(role==="assistant"){
+    wrap.replaceChild(toolsWrap,box);
+  }
+ }
+
+ chatWrap.appendChild(wrap);
+ chatWrap.scrollTop=chatWrap.scrollHeight;
+
+ return wrap;
+}
 
  const wrap=document.createElement("div");
 
