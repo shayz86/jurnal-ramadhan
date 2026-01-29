@@ -225,7 +225,12 @@ async function fetchAnswer(q){
     })
   });
 
-  const d=await r.json();
+  let d;
+try{
+ d = await r.json();
+}catch{
+ throw new Error("invalid json");
+}
 
   chatWrap.lastChild.remove();
 
