@@ -449,12 +449,12 @@
 
             return "auto";
           });
-        };
-        
+        };        
+
         const VAPID_PUBLIC_KEY =
   "BKP7Hxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
-        const requestNotifPermission = async () => {
+const requestNotifPermission = async () => {
 
   if (!("serviceWorker" in navigator)) {
     alert("Browser tidak mendukung Service Worker");
@@ -470,23 +470,27 @@
 
   const reg = await navigator.serviceWorker.ready;
 
-  // 🔐 subscribe push
-  const sub = await reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: VAPID_PUBLIC_KEY
-  });
+  try {
 
-  // kirim ke worker
-  await fetch("https://noorrahma-api.pembang001.workers.dev/push/subscribe", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      uid: userId,
-      sub,
-      city: prayerCity,
-      coords: prayerCoords
-    })
-  });
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: VAPID_PUBLIC_KEY,
+    });
+
+    await fetch("https://noorrahma-api.pembang001.workers.dev/push/subscribe", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        uid: userId,
+        sub,
+        city: prayerCity,
+        coords: prayerCoords,
+      }),
+    });
+
+  } catch (e) {
+    console.log("Push subscribe failed", e);
+  }
 
   setNotifEnabled(true);
   localStorage.setItem("nr_notif_enabled", "1");
@@ -494,18 +498,6 @@
   alert("Notif shalat aktif ✅");
 };
 
-          const perm = await Notification.requestPermission();
-
-          if (perm === "granted") {
-            setNotifEnabled(true);
-
-            localStorage.setItem("nr_notif_enabled", "1");
-
-            alert("Notif shalat aktif ✅");
-          } else {
-            alert("Notif ditolak");
-          }
-        };
 
         const [notifEnabled, setNotifEnabled] = useState(
           () => localStorage.getItem("nr_notif_enabled") === "1",
