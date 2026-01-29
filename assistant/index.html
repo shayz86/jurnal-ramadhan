@@ -2,17 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 
 <title>Smart Assistant — NoorRahma PRO</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
-tailwind.config={
- darkMode:"class",
- theme:{extend:{}}
-}
+tailwind.config={darkMode:"class"}
 </script>
 
 <style>
@@ -23,8 +20,7 @@ body{font-family:system-ui}
 
 <body class="bg-slate-50 dark:bg-slate-950">
 
-<!-- ================= PRO GUARD ================= -->
-
+<!-- ===== PRO GUARD ===== -->
 <script>
 if(localStorage.getItem("nr_is_pro")!=="1"){
  alert("🔒 Fitur khusus akun PRO");
@@ -32,22 +28,34 @@ if(localStorage.getItem("nr_is_pro")!=="1"){
 }
 </script>
 
-<!-- ================= APP ================= -->
-
 <header class="sticky top-0 z-20 bg-emerald-700 text-white p-3 flex items-center gap-3">
 <button onclick="history.back()">←</button>
 <h2 class="font-bold">Smart Islamic Assistant</h2>
 </header>
 
 <main id="messages"
- class="h-[calc(100vh-140px)] overflow-y-auto p-4 space-y-4 chat-scroll">
+ class="h-[calc(100vh-170px)] overflow-y-auto p-4 space-y-4 chat-scroll">
 </main>
 
-<!-- ================= INPUT ================= -->
+<!-- ===== QUICK CHIPS ===== -->
+<div class="px-3 py-2 flex gap-2 overflow-x-auto text-xs bg-white dark:bg-slate-900">
+ <button class="chip">🕌 Waktu shalat</button>
+ <button class="chip">🤲 Doa harian</button>
+ <button class="chip">🌙 Puasa sunnah</button>
+ <button class="chip">📖 Tafsir ayat</button>
+</div>
 
+<!-- ===== INPUT BAR ===== -->
 <footer class="fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t p-3">
 
 <div class="flex gap-2 max-w-md mx-auto">
+
+<button
+ id="micBtn"
+ onclick="startVoice()"
+ class="bg-slate-200 px-3 py-3 rounded-xl">
+🎙
+</button>
 
 <input
  id="msgInput"
@@ -73,17 +81,12 @@ Stop
 </div>
 </footer>
 
-<!-- ================= SCRIPT ================= -->
-
 <script>
-
 const messages=document.getElementById("messages");
 const input=document.getElementById("msgInput");
-const sendBtn=document.getElementById("sendBtn");
 const stopBtn=document.getElementById("stopBtn");
 
 /* ===== HISTORY ===== */
-
 let history=JSON.parse(
  localStorage.getItem("nr_assistant_history")||"[]"
 );
@@ -91,11 +94,9 @@ let history=JSON.parse(
 history.forEach(addBubble);
 
 /* ===== STREAM CTRL ===== */
-
 let controller=null;
 
 /* ===== UI ===== */
-
 function addBubble(msg){
 
  const div=document.createElement("div");
@@ -103,9 +104,19 @@ function addBubble(msg){
   (msg.from==="user"
    ?"ml-auto bg-emerald-600 text-white"
    :"mr-auto bg-white dark:bg-slate-800")
-  +" max-w-[80%] p-3 rounded-2xl shadow";
+  +" max-w-[80%] p-3 rounded-2xl shadow relative";
 
- div.innerText=msg.text;
+ div.innerHTML=`<div>${msg.text}</div>`;
+
+ if(msg.from==="bot"){
+  const speak=document.createElement("button");
+  speak.innerText="🔊";
+  speak.className="absolute bottom-1 right-2 text-xs opacity-60";
+  speak.onclick=()=>speechSynthesis.speak(
+   new SpeechSynthesisUtterance(msg.text)
+  );
+  div.appendChild(speak);
+ }
 
  messages.appendChild(div);
  messages.scrollTop=messages.scrollHeight;
@@ -150,7 +161,6 @@ async function sendToAI(text){
  addTyping();
 
  controller=new AbortController();
-
  stopBtn.classList.remove("hidden");
 
  const bubble=document.createElement("div");
@@ -158,11 +168,8 @@ async function sendToAI(text){
   "mr-auto bg-white dark:bg-slate-800 max-w-[80%] p-3 rounded-2xl shadow";
 
  const body=document.createElement("div");
-
  bubble.appendChild(body);
-
  messages.appendChild(bubble);
- messages.scrollTop=messages.scrollHeight;
 
  try{
 
@@ -187,9 +194,7 @@ async function sendToAI(text){
 
    const chunk=decoder.decode(value);
    final+=chunk;
-
    body.innerText=final;
-   messages.scrollTop=messages.scrollHeight;
   }
 
   history.push({from:"bot",text:final,time:Date.now()});
@@ -207,7 +212,6 @@ async function sendToAI(text){
 }
 
 /* ===== STOP ===== */
-
 function stopAI(){
  if(controller){
   controller.abort();
@@ -216,12 +220,41 @@ function stopAI(){
  stopBtn.classList.add("hidden");
 }
 
-/* ENTER SEND */
+/* ===== VOICE INPUT ===== */
 
+let recog;
+
+function startVoice(){
+
+ if(!("webkitSpeechRecognition"in window)){
+  alert("Browser tidak mendukung voice input");
+  return;
+ }
+
+ recog=new webkitSpeechRecognition();
+ recog.lang="id-ID";
+ recog.start();
+
+ recog.onresult=e=>{
+  input.value=e.results[0][0].transcript;
+  sendMsg();
+ };
+}
+
+/* ===== CHIPS ===== */
+
+document.querySelectorAll(".chip").forEach(c=>{
+ c.className+=" bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap";
+ c.onclick=()=>{
+  input.value=c.innerText;
+  input.focus();
+ };
+});
+
+/* ENTER */
 input.addEventListener("keydown",e=>{
  if(e.key==="Enter")sendMsg();
 });
-
 </script>
 
 </body>
