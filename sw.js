@@ -2,13 +2,9 @@
 // ===== PWA CORE ===============
 // ===============================
 
-self.addEventListener("install", () => {
-  console.log("[SW] Installed");
-  self.skipWaiting();
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", e => {
-  console.log("[SW] Activated");
   e.waitUntil(self.clients.claim());
 });
 
@@ -20,8 +16,6 @@ self.addEventListener("fetch", e => {
 // ===== NOTIF SHALAT PRO ========
 // ===============================
 
-console.log("[SW] Prayer engine loaded");
-
 let prayerData = null;
 let firedToday = {};
 
@@ -32,7 +26,7 @@ const LABELS = {
   Dhuhr: "Dzuhur",
   Asr: "Ashar",
   Maghrib: "Maghrib",
-  Isha: "Isya"
+  Isha: "Isya",
 };
 
 function parseTime(timeStr, offset = 0) {
@@ -46,13 +40,18 @@ function parseTime(timeStr, offset = 0) {
   return d;
 }
 
+console.log("[SW] Running prayer checker");
+
+// ===============================
+// ===== PRAYER CHECKER =========
+// ===============================
+
 function checkPrayerTimes() {
   if (!prayerData) return;
 
   const now = new Date();
 
   PRAYER_KEYS.forEach(k => {
-
     const base = prayerData.times[k];
     if (!base) return;
 
@@ -60,23 +59,21 @@ function checkPrayerTimes() {
 
     const target = parseTime(base, offset);
 
-    // reset setiap hari
     const todayKey = new Date().toDateString();
     firedToday[todayKey] ??= {};
 
-    // kalau sudah lewat hari ini, geser ke besok
+    // kalau sudah lewat hari ini → skip
     if (target < now) return;
 
     const diff = target - now;
 
-    // trigger kalau 0–30 detik sebelum
+    // trigger 0–30 detik sebelum
     if (diff <= 30000 && diff >= 0) {
-
       if (firedToday[todayKey][k]) return;
 
       firedToday[todayKey][k] = true;
 
-      console.log("[SW] Trigger notif:", k, target);
+      console.log("[SW] Trigger notif:", k);
 
       self.registration.showNotification("Waktu Shalat", {
         body: `${LABELS[k]} — ${prayerData.city || ""}`,
@@ -84,11 +81,9 @@ function checkPrayerTimes() {
         badge: "/icon-192.png",
         tag: "shalat-" + k,
         renotify: true,
-        vibrate: [200, 100, 200]
+        vibrate: [200, 100, 200],
       });
-
     }
-
   });
 }
 
@@ -100,21 +95,23 @@ setInterval(checkPrayerTimes, 30000);
 // ===============================
 
 self.addEventListener("message", e => {
-
   const data = e.data;
-
-  console.log("[SW] Message received:", data);
 
   if (!data) return;
 
+  console.log("[SW] Message:", data);
+
+  // 🔥 KEEP ALIVE PING
+  if (data.type === "PING") {
+    console.log("[SW] ping alive");
+    return;
+  }
+
   if (data.type === "SET_PRAYERS") {
-
-    console.log("[SW] SET_PRAYERS payload:", data);
-
     prayerData = {
       times: data.times,
       offsets: data.offsets || {},
-      city: data.city
+      city: data.city,
     };
 
     firedToday = {};
@@ -123,10 +120,9 @@ self.addEventListener("message", e => {
   }
 
   if (data.type === "CLEAR_PRAYERS") {
-    console.log("[SW] CLEAR_PRAYERS");
-
     prayerData = null;
     firedToday = {};
-  }
 
+    console.log("[SW] Prayer data cleared");
+  }
 });
