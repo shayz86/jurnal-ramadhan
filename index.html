@@ -367,6 +367,14 @@
         const [resolvedTheme, setResolvedTheme] = useState("light");
 
         useEffect(() => {
+        setInterval(() => {
+  if (!navigator.serviceWorker) return;
+
+  navigator.serviceWorker.ready.then(r => {
+    r.active?.postMessage({ type: "PING" });
+  });
+
+}, 20000);
           const cacheKey = "nr_pro_cache";
 
           const cached = localStorage.getItem(cacheKey);
@@ -834,6 +842,8 @@ const sendAssistant = () => {
             if (audioRef.current) audioRef.current.pause();
           };
         }, []);
+        
+        
 
         useEffect(() => {
           if (isReady) localStorage.setItem("ramadan_v5_members", JSON.stringify(members));
