@@ -14,11 +14,23 @@ body{font-family:system-ui}
 <body class="bg-slate-100">
 
 <script>
+/* ================= CONFIG ================= */
+
+const API="https://noorrahma-api.pembang001.workers.dev";
+const UID=localStorage.getItem("nr_uid");
+let sessionId=localStorage.getItem("nr_ai_session");
+
 /* ================= PRO GUARD ================= */
 
 if(localStorage.getItem("nr_is_pro")!=="1"){
   alert("Fitur PRO 🔒");
   location.href="/";
+}
+
+/* session baru jika belum ada */
+if(!sessionId){
+ sessionId="sess-"+Date.now();
+ localStorage.setItem("nr_ai_session",sessionId);
 }
 </script>
 
@@ -31,7 +43,8 @@ if(localStorage.getItem("nr_is_pro")!=="1"){
 
 <!-- ============ SESSION MODAL ============ -->
 
-<div id="sessionModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+<div id="sessionModal"
+class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
 
 <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm space-y-4">
 
@@ -52,12 +65,13 @@ Chat Baru
 
 <!-- ============ CHAT ============ -->
 
-<div id="chatWrap" class="flex-1 overflow-y-auto p-4 space-y-3 hidden"></div>
+<div id="chatWrap"
+class="flex-1 overflow-y-auto p-4 space-y-3 hidden"></div>
 
 <!-- ============ QUICK BUTTONS ============ -->
 
 <div class="px-4 pb-2 flex gap-2 overflow-x-auto">
-<button onclick="sendQuick('Waktu shalat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🕌 Waktu shalat</button>
+<button onclick="sendQuick('Waktu shalat hari ini')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🕌 Waktu shalat</button>
 <button onclick="sendQuick('Doa harian')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🤲 Doa</button>
 <button onclick="sendQuick('Puasa sunnah')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🌙 Puasa</button>
 <button onclick="sendQuick('Tafsir ayat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">📖 Tafsir</button>
@@ -99,7 +113,6 @@ let recog;
 if(history.length){
  modal.classList.remove("hidden");
 }else{
- modal.classList.add("hidden");
  chatWrap.classList.remove("hidden");
 }
 
@@ -111,14 +124,17 @@ function resumeChat(){
 
 function newChat(){
  history=[];
+ sessionId="sess-"+Date.now();
+ localStorage.setItem("nr_ai_session",sessionId);
  localStorage.removeItem("nr_ai_history");
+
  modal.classList.add("hidden");
  chatWrap.classList.remove("hidden");
 }
 
 /* ================= RENDER ================= */
 
-function bubble(text,role,id){
+function bubble(text,role){
 
  const wrap=document.createElement("div");
  wrap.className=
@@ -139,7 +155,7 @@ function bubble(text,role,id){
  if(role==="assistant"){
 
   const tools=document.createElement("div");
-  tools.className="flex gap-2 mt-2 text-xs";
+  tools.className="flex gap-3 mt-2 text-xs opacity-70";
 
   const bm=document.createElement("button");
   bm.textContent="🔖";
@@ -149,8 +165,8 @@ function bubble(text,role,id){
   sh.textContent="📤";
   sh.onclick=()=>share(text);
 
-  box.appendChild(tools);
   tools.append(bm,sh);
+  box.appendChild(tools);
  }
 
  chatWrap.appendChild(wrap);
@@ -166,7 +182,6 @@ function sendMessage(){
 
  push("user",text);
  input.value="";
-
  fetchAnswer(text);
 }
 
@@ -188,24 +203,25 @@ async function fetchAnswer(q){
  bubble("⏳ Memproses...","assistant");
 
  try{
-  const r=await fetch(
-   "https://noorrahma-api.pembang001.workers.dev/assistant/offline",
-   {
+  const r=await fetch(API+"/assistant/ai",{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({prompt:q})
-   }
-  );
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      uid:UID,
+      prompt:q,
+      sessionId
+    })
+  });
 
   const d=await r.json();
 
   chatWrap.lastChild.remove();
 
-  push("assistant",d.answer);
+  push("assistant",d.answer||"⚠️ Tidak ada jawaban.");
 
- }catch{
+ }catch(e){
   chatWrap.lastChild.remove();
-  push("assistant","⚠️ Backend belum aktif.");
+  push("assistant","⚠️ AI gagal dipanggil.");
  }
 }
 
@@ -214,6 +230,17 @@ async function fetchAnswer(q){
 function bookmark(text){
  bookmarks.push({id:Date.now(),text});
  localStorage.setItem("nr_ai_bookmarks",JSON.stringify(bookmarks));
+
+ fetch(API+"/assistant/bookmark",{
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body:JSON.stringify({
+    action:"add",
+    uid:UID,
+    text
+  })
+ });
+
  alert("Disimpan 👍");
 }
 
@@ -247,7 +274,6 @@ function startVoice(){
  recog.interimResults=false;
 
  recognizing=true;
-
  recog.start();
 
  recog.onresult=e=>{
@@ -264,7 +290,6 @@ function renderHistory(){
  chatWrap.innerHTML="";
  history.forEach(m=>bubble(m.text,m.role));
 }
-
 </script>
 
 </body>
