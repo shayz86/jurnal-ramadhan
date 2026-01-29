@@ -18,12 +18,14 @@ body{font-family:system-ui}
 
 const API="https://noorrahma-api.pembang001.workers.dev";
 
+/* UID */
 let UID = localStorage.getItem("nr_uid");
 if(!UID){
  UID="uid-"+Date.now();
  localStorage.setItem("nr_uid",UID);
 }
 
+/* Session */
 let sessionId=localStorage.getItem("nr_ai_session");
 
 /* ================= PRO GUARD ================= */
@@ -162,7 +164,6 @@ function bubble(text,role,loading=false){
    :"bg-white px-4 py-3 rounded-2xl shadow max-w-[80%]";
 
  box.textContent=text;
-
  wrap.appendChild(box);
 
  if(role==="assistant" && !loading){
@@ -244,6 +245,7 @@ async function fetchAnswer(q){
 
  }catch(err){
 
+  console.error(err);
   loadingBubble.remove();
   push("assistant","⚠️ AI gagal dipanggil.");
  }
