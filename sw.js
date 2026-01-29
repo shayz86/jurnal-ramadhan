@@ -12,117 +12,83 @@ self.addEventListener("fetch", e => {
   e.respondWith(fetch(e.request));
 });
 
-// ===============================
-// ===== NOTIF SHALAT PRO ========
-// ===============================
-
-let prayerData = null;
-let firedToday = {};
-
-const PRAYER_KEYS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-
-const LABELS = {
-  Fajr: "Subuh",
-  Dhuhr: "Dzuhur",
-  Asr: "Ashar",
-  Maghrib: "Maghrib",
-  Isha: "Isya",
-};
-
-function parseTime(timeStr, offset = 0) {
-  const [h, m] = timeStr.split(":").map(Number);
-
-  const d = new Date();
-  d.setSeconds(0, 0);
-  d.setMinutes(m + offset);
-  d.setHours(h);
-
-  return d;
-}
-
-console.log("[SW] Running prayer checker");
 
 // ===============================
-// ===== PRAYER CHECKER =========
+// ===== PUSH NOTIFICATION ======
 // ===============================
 
-function checkPrayerTimes() {
-  if (!prayerData) return;
+console.log("[SW] Loaded & ready for push");
 
-  const now = new Date();
+// TERIMA PUSH DARI SERVER / WORKER CRON
+self.addEventListener("push", e => {
 
-  PRAYER_KEYS.forEach(k => {
-    const base = prayerData.times[k];
-    if (!base) return;
+  let data = {};
 
-    const offset = prayerData.offsets?.[k] || 0;
+  try {
+    data = e.data.json();
+  } catch (err) {
+    console.warn("[SW] Push parse failed", err);
+  }
 
-    const target = parseTime(base, offset);
+  const title = data.title || "Waktu Shalat";
 
-    const todayKey = new Date().toDateString();
-    firedToday[todayKey] ??= {};
+  const opts = {
+    body: data.body || "",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: data.tag || "shalat",
+    renotify: true,
+    vibrate: [200, 100, 200],
+    data
+  };
 
-    // kalau sudah lewat hari ini → skip
-    if (target < now) return;
+  console.log("[SW] Push received:", data);
 
-    const diff = target - now;
+  e.waitUntil(
+    self.registration.showNotification(title, opts)
+  );
+});
 
-    // trigger 0–30 detik sebelum
-    if (diff <= 30000 && diff >= 0) {
-      if (firedToday[todayKey][k]) return;
 
-      firedToday[todayKey][k] = true;
+// ===============================
+// ===== NOTIF CLICK ============
+// ===============================
 
-      console.log("[SW] Trigger notif:", k);
+self.addEventListener("notificationclick", e => {
 
-      self.registration.showNotification("Waktu Shalat", {
-        body: `${LABELS[k]} — ${prayerData.city || ""}`,
-        icon: "/icon-192.png",
-        badge: "/icon-192.png",
-        tag: "shalat-" + k,
-        renotify: true,
-        vibrate: [200, 100, 200],
-      });
-    }
-  });
-}
+  e.notification.close();
 
-// cek tiap 30 detik
-setInterval(checkPrayerTimes, 30000);
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true })
+      .then(clients => {
+        for (const c of clients) {
+          if (c.url.includes("noorrahma")) {
+            return c.focus();
+          }
+        }
+        return self.clients.openWindow("/");
+      })
+  );
+
+});
+
 
 // ===============================
 // ===== MESSAGE HANDLER =========
 // ===============================
 
 self.addEventListener("message", e => {
+
   const data = e.data;
 
   if (!data) return;
 
   console.log("[SW] Message:", data);
 
-  // 🔥 KEEP ALIVE PING
+  // KEEP-ALIVE / DEBUG
   if (data.type === "PING") {
     console.log("[SW] ping alive");
     return;
   }
 
-  if (data.type === "SET_PRAYERS") {
-    prayerData = {
-      times: data.times,
-      offsets: data.offsets || {},
-      city: data.city,
-    };
-
-    firedToday = {};
-
-    console.log("[SW] Prayer data updated", prayerData);
-  }
-
-  if (data.type === "CLEAR_PRAYERS") {
-    prayerData = null;
-    firedToday = {};
-
-    console.log("[SW] Prayer data cleared");
-  }
 });
