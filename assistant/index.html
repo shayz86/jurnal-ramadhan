@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 
 <title>Smart Assistant — NoorRahma PRO</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <script>
 tailwind.config={darkMode:"class"}
 </script>
@@ -30,16 +29,38 @@ if(localStorage.getItem("nr_is_pro")!=="1"){
 }
 </script>
 
-<header class="sticky top-0 z-20 bg-emerald-700 text-white p-3 flex items-center gap-3">
+<header class="sticky top-0 bg-emerald-700 text-white p-3 flex items-center gap-3">
 <button onclick="history.back()">←</button>
 <h2 class="font-bold">Smart Islamic Assistant</h2>
 </header>
 
+<!-- ================= ENTRY SCREEN ================= -->
+
+<div id="entryScreen"
+ class="p-6 space-y-5 text-center">
+
+<h3 class="font-bold text-lg">🤖 Smart Assistant</h3>
+
+<button onclick="resumeChat()"
+ class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">
+Lanjut Chat Terakhir
+</button>
+
+<button onclick="newChat()"
+ class="w-full bg-slate-200 py-3 rounded-xl font-bold">
+Chat Baru
+</button>
+
+</div>
+
+<!-- ================= CHAT UI ================= -->
+
+<div id="chatUI" class="hidden">
+
 <main id="messages"
- class="h-[calc(100vh-190px)] overflow-y-auto p-4 space-y-4 chat-scroll">
+ class="h-[calc(100vh-220px)] overflow-y-auto p-4 space-y-4 chat-scroll">
 </main>
 
-<!-- ===== QUICK CHIPS ===== -->
 <div class="px-3 py-2 flex gap-2 overflow-x-auto text-xs bg-white dark:bg-slate-900">
  <button class="chip">🕌 Waktu shalat</button>
  <button class="chip">🤲 Doa harian</button>
@@ -47,17 +68,16 @@ if(localStorage.getItem("nr_is_pro")!=="1"){
  <button class="chip">📖 Tafsir ayat</button>
 </div>
 
-<!-- ===== INPUT BAR ===== -->
 <footer class="fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t p-3">
 
 <div class="flex gap-2 max-w-md mx-auto">
 
-<button id="micBtn" onclick="startVoice()"
+<button id="micBtn"
+ onclick="startVoice()"
  class="bg-slate-200 px-3 py-3 rounded-xl">🎙</button>
 
 <input id="msgInput"
- type="text"
- placeholder="Tanya tentang ibadah, fiqh, puasa..."
+ placeholder="Tanya tentang ibadah..."
  class="flex-1 border rounded-xl px-4 py-3 text-sm"/>
 
 <button onclick="sendMsg()"
@@ -74,11 +94,45 @@ Stop
 </div>
 </footer>
 
+</div>
+
 <script>
 /* ===================== */
+
 const messages=document.getElementById("messages");
 const input=document.getElementById("msgInput");
 const stopBtn=document.getElementById("stopBtn");
+
+const entryScreen=document.getElementById("entryScreen");
+const chatUI=document.getElementById("chatUI");
+
+/* ===== CHAT CONTROL ===== */
+
+function resumeChat(){
+ entryScreen.classList.add("hidden");
+ chatUI.classList.remove("hidden");
+ history.forEach(addBubble);
+}
+
+function newChat(){
+ if(confirm("Mulai chat baru?")){
+  history=[];
+  localStorage.removeItem("nr_assistant_history");
+  messages.innerHTML="";
+  resumeChat();
+ }
+}
+
+/* ===== HISTORY ===== */
+
+let history=JSON.parse(
+ localStorage.getItem("nr_assistant_history")||"[]"
+);
+
+/* ===== VOICE LOCK ===== */
+
+let voiceActive=false;
+let speaking=false;
 
 /* ===== OFFLINE FAQ ===== */
 
@@ -86,19 +140,7 @@ const offlineFAQ=[
  {k:"shalat",v:"Shalat wajib lima waktu: Subuh, Dzuhur, Ashar, Maghrib, Isya."},
  {k:"wudhu",v:"Wudhu: niat, basuh wajah, tangan, usap kepala, kaki, tertib."},
  {k:"puasa",v:"Puasa Ramadhan wajib bagi muslim baligh dan mampu."},
- {k:"zakat",v:"Zakat fitrah dikeluarkan sebelum Idul Fitri."},
- {k:"tayammum",v:"Tayammum dengan debu bersih ketika tidak ada air."},
 ];
-
-/* ===== HISTORY ===== */
-
-let history=JSON.parse(
- localStorage.getItem("nr_assistant_history")||"[]"
-);
-history.forEach(addBubble);
-
-/* ===== STREAM CTRL ===== */
-let controller=null;
 
 /* ===================== */
 
@@ -113,35 +155,32 @@ function addBubble(msg){
 
  div.innerHTML=`<div>${msg.text}</div>`;
 
- if(msg.refs){
-  const r=document.createElement("div");
-  r.className="mt-3 p-2 rounded ref-box text-xs";
-  r.innerHTML=msg.refs;
-  div.appendChild(r);
- }
-
  if(msg.from==="bot"){
+
   const speak=document.createElement("button");
   speak.innerText="🔊";
   speak.className="absolute bottom-1 right-2 text-xs opacity-60";
-  speak.onclick=()=>speechSynthesis.speak(
-   new SpeechSynthesisUtterance(msg.text)
-  );
+
+  speak.onclick=()=>{
+
+   if(speaking)return;
+
+   speaking=true;
+   voiceActive=false;
+
+   const u=new SpeechSynthesisUtterance(msg.text);
+   u.lang="id-ID";
+
+   u.onend=()=>speaking=false;
+
+   speechSynthesis.speak(u);
+  };
+
   div.appendChild(speak);
  }
 
  messages.appendChild(div);
  messages.scrollTop=messages.scrollHeight;
-}
-
-/* ===== FALLBACK FAQ ===== */
-
-function searchFAQ(q){
- q=q.toLowerCase();
- for(const f of offlineFAQ){
-  if(q.includes(f.k))return f.v;
- }
- return null;
 }
 
 /* ===== SEND ===== */
@@ -151,7 +190,7 @@ function sendMsg(){
  const text=input.value.trim();
  if(!text)return;
 
- const obj={from:"user",text,time:Date.now()};
+ const obj={from:"user",text};
  history.push(obj);
  localStorage.setItem("nr_assistant_history",JSON.stringify(history));
  addBubble(obj);
@@ -160,22 +199,20 @@ function sendMsg(){
  sendToAI(text);
 }
 
-/* ===== AI STREAM ===== */
+/* ===== AI ===== */
 
 async function sendToAI(text){
 
- const faq=searchFAQ(text);
+ const faq=offlineFAQ.find(f=>text.toLowerCase().includes(f.k));
  if(!navigator.onLine && faq){
-  addBubble({from:"bot",text:faq});
+  addBubble({from:"bot",text:faq.v});
   return;
  }
 
- controller=new AbortController();
  stopBtn.classList.remove("hidden");
 
  const bubble=document.createElement("div");
- bubble.className=
-  "mr-auto bg-white dark:bg-slate-800 max-w-[80%] p-3 rounded-2xl shadow";
+ bubble.className="mr-auto bg-white dark:bg-slate-800 max-w-[80%] p-3 rounded-2xl shadow";
 
  const body=document.createElement("div");
  bubble.appendChild(body);
@@ -186,75 +223,41 @@ async function sendToAI(text){
   const res=await fetch("/api/assistant",{
    method:"POST",
    headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({prompt:text}),
-   signal:controller.signal
+   body:JSON.stringify({prompt:text})
   });
 
   const reader=res.body.getReader();
   const decoder=new TextDecoder();
 
   let final="";
-  let refs="";
 
   while(true){
-
    const {value,done}=await reader.read();
    if(done)break;
 
    const chunk=decoder.decode(value);
    final+=chunk;
    body.innerText=final;
-
-   const ayatMatch=chunk.match(/\[AYAT:(\d+):(\d+)\]/);
-   if(ayatMatch){
-    loadAyat(ayatMatch[1],ayatMatch[2],bubble);
-   }
   }
 
-  history.push({from:"bot",text:final,refs});
+  history.push({from:"bot",text:final});
   localStorage.setItem("nr_assistant_history",JSON.stringify(history));
 
- }catch(e){
+ }catch{
 
-  const faq=searchFAQ(text);
   addBubble({
    from:"bot",
-   text:faq||"⚠️ Offline & tidak ada data lokal."
+   text:"⚠️ Tidak bisa terhubung ke server."
   });
 
  }
 
  stopBtn.classList.add("hidden");
- controller=null;
-}
-
-/* ===== AYAT FETCH ===== */
-
-async function loadAyat(s,a,wrap){
-
- try{
-  const r=await fetch(`https://equran.id/api/v2/ayat/${s}/${a}`);
-  const d=await r.json();
-
-  const box=document.createElement("div");
-  box.className="mt-3 p-3 rounded ref-box text-xs";
-
-  box.innerHTML=
-   `<b>QS ${s}:${a}</b><br>
-    <div class="text-right text-lg">${d.data.teksArab}</div>
-    <div class="italic">${d.data.teksIndonesia}</div>`;
-
-  wrap.appendChild(box);
-
- }catch{}
 }
 
 /* ===== STOP ===== */
+
 function stopAI(){
- if(controller){
-  controller.abort();
-  controller=null;
- }
  stopBtn.classList.add("hidden");
 }
 
@@ -262,19 +265,24 @@ function stopAI(){
 
 function startVoice(){
 
+ if(speaking)return;
+
  if(!("webkitSpeechRecognition"in window)){
-  alert("Browser tidak mendukung voice");
+  alert("Voice tidak didukung");
   return;
  }
 
  const rec=new webkitSpeechRecognition();
  rec.lang="id-ID";
+ voiceActive=true;
  rec.start();
 
  rec.onresult=e=>{
+  if(!voiceActive)return;
   input.value=e.results[0][0].transcript;
-  sendMsg();
  };
+
+ rec.onend=()=>voiceActive=false;
 }
 
 /* ===== CHIPS ===== */
