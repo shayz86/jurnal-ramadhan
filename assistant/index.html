@@ -2,189 +2,211 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
 <title>Smart Islamic Assistant — NoorRahma</title>
 
-<meta name="theme-color" content="#4f46e5" />
+<meta name="theme-color" content="#047857"/>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
-tailwind.config = {
-  darkMode: "class",
-};
+tailwind.config={
+ darkMode:"class",
+ theme:{extend:{
+  colors:{ slate:{850:"#1e293b",950:"#020617"} }
+ }}
+}
 </script>
 
 <style>
-body { -webkit-tap-highlight-color:none }
-.chat-scroll::-webkit-scrollbar { display:none }
-.chat-scroll { scrollbar-width:none }
+body{font-family:system-ui}
+.hidden{display:none}
 </style>
-
 </head>
 
-<body class="bg-slate-100 dark:bg-slate-950">
-
-<div id="app" class="max-w-md mx-auto min-h-screen flex flex-col">
-
-<!-- ================= HEADER ================= -->
-<header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-4 flex justify-between items-center shadow-lg">
-
-<button onclick="history.back()" class="bg-white/20 px-3 py-1.5 rounded-xl text-sm font-bold">
-← Kembali
-</button>
-
-<h1 class="font-bold">Smart Assistant</h1>
-
-<div class="text-xs font-bold bg-black/20 px-3 py-1 rounded-full">
-PRO
-</div>
-
-</header>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
 
 <!-- ================= PRO BLOCK ================= -->
-<div id="blocked" class="hidden flex-1 flex items-center justify-center p-8 text-center">
 
-<div class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl">
+<div id="blocked" class="hidden min-h-screen flex items-center justify-center p-6">
+ <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-sm text-center shadow-xl">
+  <div class="text-5xl mb-4">🔒</div>
+  <h2 class="font-bold text-lg mb-2">Fitur PRO</h2>
+  <p class="text-sm text-slate-500 mb-6">
+   Smart Islamic Assistant hanya tersedia untuk akun PRO.
+  </p>
 
-<h2 class="text-xl font-bold mb-3">Fitur PRO</h2>
-<p class="text-sm text-slate-500 mb-5">
-Smart Islamic Assistant hanya tersedia untuk akun PRO.
-</p>
+  <button onclick="location.href='/'"
+   class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold w-full">
+   Kembali ke Home
+  </button>
+ </div>
+</div>
 
-<button onclick="location.href='/'"
-class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold">
-Kembali
-</button>
+<!-- ================= CHAT UI ================= -->
+
+<div id="chat" class="hidden flex flex-col min-h-screen">
+
+<header class="bg-emerald-700 text-white p-4 flex items-center justify-between shadow-md">
+ <div class="flex items-center gap-3">
+  <button onclick="history.back()">←</button>
+  <h1 class="font-bold">Smart Islamic Assistant</h1>
+ </div>
+
+ <button onclick="clearChat()" class="text-xs opacity-80">
+  🗑 Reset
+ </button>
+</header>
+
+<main id="messages" class="flex-1 p-4 space-y-4 overflow-y-auto"></main>
+
+<!-- chips -->
+<div class="px-4 pb-2 flex gap-2 overflow-x-auto text-xs">
+ <button class="chip">🕌 Waktu shalat</button>
+ <button class="chip">📖 Tafsir ayat</button>
+ <button class="chip">🌙 Puasa sunnah</button>
+ <button class="chip">🤲 Doa harian</button>
+</div>
+
+<footer class="p-3 border-t dark:border-slate-800 flex gap-2">
+ <input id="input"
+  placeholder="Tanya seputar ibadah..."
+  class="flex-1 bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-emerald-500"/>
+
+ <button onclick="sendMsg()"
+  class="bg-emerald-600 text-white px-4 py-3 rounded-xl font-bold">
+  Kirim
+ </button>
+</footer>
 
 </div>
 
-</div>
-
-<!-- ================= CHAT ================= -->
-<div id="chat" class="hidden flex-1 flex flex-col">
-
-<div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll"></div>
-
-<!-- suggested -->
-<div id="suggested" class="px-4 pb-2 flex gap-2 overflow-x-auto text-xs">
-</div>
-
-<!-- input -->
-<div class="bg-white dark:bg-slate-900 border-t dark:border-slate-800 p-3 flex gap-2">
-
-<input id="input"
-placeholder="Tanya seputar ibadah..."
-class="flex-1 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm outline-none"/>
-
-<button onclick="sendMessage()"
-class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold">
-Kirim
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ================= SCRIPT ================= -->
 <script>
-const isPro = localStorage.getItem("nr_is_pro")==="1";
+/* ================= PRO GUARD ================= */
 
-const blocked = document.getElementById("blocked");
-const chat = document.getElementById("chat");
+const isPro=localStorage.getItem("nr_is_pro")==="1";
+const blocked=document.getElementById("blocked");
+const chat=document.getElementById("chat");
 
 if(!isPro){
-  blocked.classList.remove("hidden");
+ blocked.classList.remove("hidden");
 }else{
-  chat.classList.remove("hidden");
+ chat.classList.remove("hidden");
 }
 
-const messagesEl = document.getElementById("messages");
-const inputEl = document.getElementById("input");
-const suggestedEl = document.getElementById("suggested");
+/* ================= STATE ================= */
 
-let historyChat = JSON.parse(localStorage.getItem("nr_assistant_chat")||"[]");
+let history=JSON.parse(localStorage.getItem("nr_assistant_history")||"[]");
 
-const suggestions = [
- "Bagaimana niat shalat?",
- "Kapan waktu dhuha?",
- "Apa itu zakat fitrah?",
- "Berapa rakaat tarawih?",
- "Apa doa berbuka?",
-];
+const messages=document.getElementById("messages");
+const input=document.getElementById("input");
 
-suggestions.forEach(t=>{
-  const b=document.createElement("button");
-  b.textContent=t;
-  b.className="bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap";
-  b.onclick=()=>{ inputEl.value=t; sendMessage(); }
-  suggestedEl.appendChild(b);
-});
+/* ================= UI ================= */
 
-function render(){
- messagesEl.innerHTML="";
- historyChat.forEach(m=>{
-  addBubble(m.role,m.text,false);
- });
- scrollBottom();
-}
-render();
+function renderBubble(text,from="bot",save=true){
+ const wrap=document.createElement("div");
 
-function addBubble(role,text,save=true){
- const div=document.createElement("div");
- div.className=role==="user"
- ? "bg-indigo-600 text-white self-end px-4 py-2 rounded-2xl max-w-[80%]"
- : "bg-white dark:bg-slate-900 px-4 py-2 rounded-2xl shadow max-w-[80%]";
+ wrap.className=
+  from==="user"
+   ?"bg-emerald-600 text-white ml-auto max-w-[80%] p-3 rounded-2xl"
+   :"bg-white dark:bg-slate-900 mr-auto max-w-[80%] p-3 rounded-2xl shadow";
 
- div.textContent=text;
- messagesEl.appendChild(div);
+ wrap.innerHTML=`
+  <div>${text}</div>
+  <div class="text-[9px] opacity-50 mt-1">${new Date().toLocaleTimeString()}</div>
+ `;
+
+ messages.appendChild(wrap);
+ messages.scrollTop=messages.scrollHeight;
 
  if(save){
-  historyChat.push({role,text});
-  localStorage.setItem("nr_assistant_chat",JSON.stringify(historyChat));
+  history.push({from,text,time:Date.now()});
+  localStorage.setItem("nr_assistant_history",JSON.stringify(history));
  }
-
- scrollBottom();
 }
 
-function scrollBottom(){
- messagesEl.scrollTop=messagesEl.scrollHeight;
+/* ================= LOAD HISTORY ================= */
+
+function loadHistory(){
+ if(history.length){
+  history.forEach(m=>renderBubble(m.text,m.from,false));
+ }else{
+  renderBubble(
+   "Assalamu’alaikum 😊 Saya Smart Islamic Assistant. Silakan tanya seputar ibadah, Qur’an, puasa, atau zakat."
+  );
+ }
 }
 
-async function sendMessage(){
- const text=inputEl.value.trim();
- if(!text) return;
+loadHistory();
 
- inputEl.value="";
- addBubble("user",text);
+/* ================= SEND ================= */
 
- const loader=document.createElement("div");
- loader.className="italic text-slate-400 text-sm";
- loader.textContent="Assistant sedang mengetik...";
- messagesEl.appendChild(loader);
- scrollBottom();
+function sendMsg(){
+ const q=input.value.trim();
+ if(!q)return;
 
- // ⚠️ nanti bisa dihubungkan ke API AI
+ renderBubble(q,"user");
+ input.value="";
+
+ showTyping();
+
+ sendToAI(q);
+}
+
+/* ================= TYPING ================= */
+
+let typingBubble=null;
+
+function showTyping(){
+ typingBubble=document.createElement("div");
+ typingBubble.className="italic opacity-60";
+ typingBubble.innerText="Mengetik...";
+ messages.appendChild(typingBubble);
+ messages.scrollTop=messages.scrollHeight;
+}
+
+function hideTyping(){
+ if(typingBubble) typingBubble.remove();
+}
+
+/* ================= AI PLACEHOLDER ================= */
+
+function sendToAI(text){
+
+ // nanti ganti fetch API di sini 👇
+
  setTimeout(()=>{
-   loader.remove();
-   const reply=mockAnswer(text);
-   addBubble("bot",reply);
- },900);
+  hideTyping();
+
+  renderBubble(
+   "🤖 Jawaban AI akan muncul di sini ketika backend siap. Saat ini UI & history sudah aktif."
+  );
+
+ },1000);
+
 }
 
-function mockAnswer(q){
- q=q.toLowerCase();
+/* ================= CLEAR ================= */
 
- if(q.includes("niat")) return "Niat shalat cukup di dalam hati saat takbiratul ihram.";
- if(q.includes("dhuha")) return "Waktu dhuha dimulai setelah matahari naik sekitar 15 menit hingga sebelum dzuhur.";
- if(q.includes("tarawih")) return "Shalat tarawih biasanya 8 atau 20 rakaat menurut mazhab.";
- if(q.includes("zakat")) return "Zakat fitrah wajib sebelum Idul Fitri sebesar makanan pokok ±2,5kg.";
- if(q.includes("buka")) return "Doa berbuka: Allahumma laka shumtu...";
-
- return "Pertanyaan bagus 😊 insyaAllah akan kami tambahkan jawaban lengkapnya.";
+function clearChat(){
+ if(confirm("Hapus semua percakapan?")){
+  history=[];
+  localStorage.removeItem("nr_assistant_history");
+  messages.innerHTML="";
+  loadHistory();
+ }
 }
+
+/* ================= CHIPS ================= */
+
+document.querySelectorAll(".chip").forEach(c=>{
+ c.className+=" bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap";
+ c.onclick=()=>{
+  input.value=c.innerText;
+  input.focus();
+ };
+});
 </script>
 
 </body>
