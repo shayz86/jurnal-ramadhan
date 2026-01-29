@@ -2,9 +2,13 @@
 // ===== PWA CORE ===============
 // ===============================
 
-self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("install", () => {
+  console.log("[SW] Installed");
+  self.skipWaiting();
+});
 
 self.addEventListener("activate", e => {
+  console.log("[SW] Activated");
   e.waitUntil(self.clients.claim());
 });
 
@@ -15,6 +19,8 @@ self.addEventListener("fetch", e => {
 // ===============================
 // ===== NOTIF SHALAT PRO ========
 // ===============================
+
+console.log("[SW] Prayer engine loaded");
 
 let prayerData = null;
 let firedToday = {};
@@ -70,6 +76,8 @@ function checkPrayerTimes() {
 
       firedToday[todayKey][k] = true;
 
+      console.log("[SW] Trigger notif:", k, target);
+
       self.registration.showNotification("Waktu Shalat", {
         body: `${LABELS[k]} — ${prayerData.city || ""}`,
         icon: "/icon-192.png",
@@ -94,9 +102,14 @@ setInterval(checkPrayerTimes, 30000);
 self.addEventListener("message", e => {
 
   const data = e.data;
+
+  console.log("[SW] Message received:", data);
+
   if (!data) return;
 
   if (data.type === "SET_PRAYERS") {
+
+    console.log("[SW] SET_PRAYERS payload:", data);
 
     prayerData = {
       times: data.times,
@@ -110,6 +123,8 @@ self.addEventListener("message", e => {
   }
 
   if (data.type === "CLEAR_PRAYERS") {
+    console.log("[SW] CLEAR_PRAYERS");
+
     prayerData = null;
     firedToday = {};
   }
