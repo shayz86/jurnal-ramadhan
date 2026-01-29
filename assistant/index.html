@@ -45,7 +45,7 @@ if (!sessionId) {
 }
 </script>
 
-<div class="fixed inset-0 flex flex-col bg-slate-100">
+<div class="h-screen flex flex-col overflow-hidden">
 
 <!-- ================= HEADER ================= -->
 
@@ -58,7 +58,7 @@ if (!sessionId) {
 
 <div
   id="chatWrap"
-  class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 overscroll-contain"
+  class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50"
 ></div>
 
 <!-- ================= QUICK BUTTONS ================= -->
@@ -115,7 +115,6 @@ if (!history.length) {
     "• 🤲 Doa\n" +
     "• 🌙 Puasa\n" +
     "• 📖 Tafsir\n\n" +
-    "• Atau Pertanyaan Lainnya !" +
     "Apa yang ingin Anda ketahui hari ini?";
 
   history.push({ role: "assistant", text: intro });
