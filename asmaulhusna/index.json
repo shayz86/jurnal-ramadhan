@@ -1,0 +1,72 @@
+[
+  {"number":1,"arab":"الرَّحْمٰن","latin":"Ar Rahman","meaning":"Yang Maha Pengasih"},
+  {"number":2,"arab":"الرَّحِيْم","latin":"Ar Rahiim","meaning":"Yang Maha Penyayang"},
+  {"number":3,"arab":"الْمَلِك","latin":"Al Malik","meaning":"Yang Maha Merajai"},
+  {"number":4,"arab":"الْقُدُّوس","latin":"Al Quddus","meaning":"Yang Maha Suci"},
+  {"number":5,"arab":"السَّلَام","latin":"As Salaam","meaning":"Yang Maha Memberi Kesejahteraan"},
+  {"number":6,"arab":"الْمُؤْمِن","latin":"Al Mu’min","meaning":"Yang Maha Memberi Keamanan"},
+  {"number":7,"arab":"الْمُهَيْمِن","latin":"Al Muhaimin","meaning":"Yang Maha Memelihara"},
+  {"number":8,"arab":"الْعَزِيز","latin":"Al ‘Aziz","meaning":"Yang Maha Perkasa"},
+  {"number":9,"arab":"الْجَبَّار","latin":"Al Jabbar","meaning":"Yang Maha Memaksa"},
+  {"number":10,"arab":"الْمُتَكَبِّر","latin":"Al Mutakabbir","meaning":"Yang Maha Megah"},
+
+  {"number":11,"arab":"الْخَالِق","latin":"Al Khaliq","meaning":"Yang Maha Pencipta"},
+  {"number":12,"arab":"الْبَارِئ","latin":"Al Baari’","meaning":"Yang Maha Mengadakan"},
+  {"number":13,"arab":"الْمُصَوِّر","latin":"Al Mushawwir","meaning":"Yang Maha Membentuk"},
+  {"number":14,"arab":"الْغَفَّار","latin":"Al Ghaffar","meaning":"Yang Maha Pengampun"},
+  {"number":15,"arab":"الْقَهَّار","latin":"Al Qahhar","meaning":"Yang Maha Menundukkan"},
+
+  {"number":16,"arab":"الْوَهَّاب","latin":"Al Wahhab","meaning":"Yang Maha Pemberi"},
+  {"number":17,"arab":"الرَّزَّاق","latin":"Ar Razzaq","meaning":"Yang Maha Pemberi Rezeki"},
+  {"number":18,"arab":"الْفَتَّاح","latin":"Al Fattah","meaning":"Yang Maha Pembuka"},
+  {"number":19,"arab":"الْعَلِيم","latin":"Al ‘Alim","meaning":"Yang Maha Mengetahui"},
+  {"number":20,"arab":"الْقَابِض","latin":"Al Qaabidh","meaning":"Yang Maha Menyempitkan"},
+
+  {"number":21,"arab":"الْبَاسِط","latin":"Al Baasith","meaning":"Yang Maha Melapangkan"},
+  {"number":22,"arab":"الْخَافِض","latin":"Al Khaafidh","meaning":"Yang Maha Merendahkan"},
+  {"number":23,"arab":"الرَّافِع","latin":"Ar Raafi’","meaning":"Yang Maha Meninggikan"},
+  {"number":24,"arab":"الْمُعِزّ","latin":"Al Mu’izz","meaning":"Yang Maha Memuliakan"},
+  {"number":25,"arab":"الْمُذِلّ","latin":"Al Mudzill","meaning":"Yang Maha Menghinakan"},
+
+  {"number":26,"arab":"السَّمِيع","latin":"As Sami’","meaning":"Yang Maha Mendengar"},
+  {"number":27,"arab":"الْبَصِير","latin":"Al Bashir","meaning":"Yang Maha Melihat"},
+  {"number":28,"arab":"الْحَكَم","latin":"Al Hakam","meaning":"Yang Maha Menetapkan"},
+  {"number":29,"arab":"الْعَدْل","latin":"Al ‘Adl","meaning":"Yang Maha Adil"},
+  {"number":30,"arab":"اللَّطِيف","latin":"Al Lathiif","meaning":"Yang Maha Lembut"},
+
+  {"number":31,"arab":"الْخَبِير","latin":"Al Khabiir","meaning":"Yang Maha Mengetahui"},
+  {"number":32,"arab":"الْحَلِيم","latin":"Al Haliim","meaning":"Yang Maha Penyantun"},
+  {"number":33,"arab":"الْعَظِيم","latin":"Al ‘Azhiim","meaning":"Yang Maha Agung"},
+  {"number":34,"arab":"الْغَفُور","latin":"Al Ghafuur","meaning":"Yang Maha Pengampun"},
+  {"number":35,"arab":"الشَّكُور","latin":"As Syakuur","meaning":"Yang Maha Mensyukuri"},
+
+  {"number":36,"arab":"الْعَلِيّ","latin":"Al ‘Aliyy","meaning":"Yang Maha Tinggi"},
+  {"number":37,"arab":"الْكَبِير","latin":"Al Kabiir","meaning":"Yang Maha Besar"},
+  {"number":38,"arab":"الْحَفِيظ","latin":"Al Hafiizh","meaning":"Yang Maha Menjaga"},
+  {"number":39,"arab":"المُقيِت","latin":"Al Muqiit","meaning":"Yang Maha Memelihara"},
+  {"number":40,"arab":"الْحسِيب","latin":"Al Hasiib","meaning":"Yang Maha Menghisab"},
+
+  {"number":41,"arab":"الْجَلِيل","latin":"Al Jaliil","meaning":"Yang Maha Mulia"},
+  {"number":42,"arab":"الْكَرِيم","latin":"Al Kariim","meaning":"Yang Maha Pemurah"},
+  {"number":43,"arab":"الرَّقِيب","latin":"Ar Raqiib","meaning":"Yang Maha Mengawasi"},
+  {"number":44,"arab":"الْمُجِيب","latin":"Al Mujiib","meaning":"Yang Maha Mengabulkan"},
+  {"number":45,"arab":"الْوَاسِع","latin":"Al Waasi’","meaning":"Yang Maha Luas"},
+
+  {"number":46,"arab":"الْحَكِيم","latin":"Al Hakiim","meaning":"Yang Maha Bijaksana"},
+  {"number":47,"arab":"الْوَدُود","latin":"Al Waduud","meaning":"Yang Maha Mengasihi"},
+  {"number":48,"arab":"الْمَجِيد","latin":"Al Majiid","meaning":"Yang Maha Mulia"},
+  {"number":49,"arab":"الْبَاعِث","latin":"Al Baa’its","meaning":"Yang Maha Membangkitkan"},
+  {"number":50,"arab":"الشَّهِيد","latin":"As Syahiid","meaning":"Yang Maha Menyaksikan"},
+
+  {"number":51,"arab":"الْحَق","latin":"Al Haqq","meaning":"Yang Maha Benar"},
+  {"number":52,"arab":"الْوَكِيل","latin":"Al Wakiil","meaning":"Yang Maha Mengurus"},
+  {"number":53,"arab":"الْقَوِيّ","latin":"Al Qawiyy","meaning":"Yang Maha Kuat"},
+  {"number":54,"arab":"الْمَتِين","latin":"Al Matiin","meaning":"Yang Maha Kokoh"},
+  {"number":55,"arab":"الْوَلِيّ","latin":"Al Waliyy","meaning":"Yang Maha Melindungi"},
+
+  {"number":56,"arab":"الْحَمِيد","latin":"Al Hamiid","meaning":"Yang Maha Terpuji"},
+  {"number":57,"arab":"الْمُحْصِي","latin":"Al Muhshii","meaning":"Yang Maha Menghitung"},
+  {"number":58,"arab":"الْمُبْدِئ","latin":"Al Mubdi’","meaning":"Yang Maha Memulai"},
+  {"number":59,"arab":"الْمُعِيد","latin":"Al Mu’iid","meaning":"Yang Maha Mengembalikan"},
+  {"number":60,"arab":"الْمُحْيِي","latin":"Al Muhyii","meaning":"Yang Maha Menghidupkan"}
+]
