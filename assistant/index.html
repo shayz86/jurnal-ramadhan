@@ -15,36 +15,24 @@ html,body{
 body{
  font-family:system-ui;
  overflow:hidden;
+ background:#f1f5f9;
 }
 
-/* ==== animation ==== */
-.msg-enter{
- animation: pop .18s ease-out both;
+/* mobile vh fix */
+:root{
+ --vh:1vh;
 }
 
-@keyframes pop{
- from{
-  opacity:0;
-  transform:translateY(6px);
- }
- to{
-  opacity:1;
-  transform:none;
- }
-}
-
-/* ==== bot avatar ==== */
-.bot-avatar{
- width:34px;
- height:34px;
- border-radius:9999px;
- object-fit:cover;
- flex-shrink:0;
+.app-root{
+ height:calc(var(--vh) * 100);
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
 }
 </style>
 </head>
 
-<body class="bg-slate-100 h-screen">
+<body>
 
 <script>
 /* ================= CONFIG ================= */
@@ -76,7 +64,7 @@ if(!sessionId){
 </script>
 
 <!-- ROOT -->
-<div class="h-screen flex flex-col overflow-hidden">
+<div class="app-root">
 
 <!-- HEADER -->
 <header class="bg-emerald-700 text-white p-4 flex items-center gap-3 shrink-0">
@@ -140,6 +128,15 @@ Kirim
 </div>
 
 <script>
+/* ========== FIX ANDROID HEIGHT ========== */
+
+function setVH(){
+ const vh = window.innerHeight * 0.01;
+ document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+setVH();
+window.addEventListener("resize",setVH);
+
 /* ================= STATE ================= */
 
 const chatWrap=document.getElementById("chatWrap");
@@ -159,13 +156,13 @@ if(history.length){
  chatWrap.classList.remove("hidden");
 
  const intro =
- "👋 Assalamu’alaikum!\n\n" +
- "Saya Smart Islamic Assistant.\n\n" +
- "Silakan tanya:\n" +
- "• 🕌 Waktu shalat\n" +
- "• 🤲 Doa\n" +
- "• 🌙 Puasa\n" +
- "• 📖 Tafsir\n\n" +
+ "👋 Assalamu’alaikum!\n\n"+
+ "Saya Smart Islamic Assistant.\n\n"+
+ "Silakan tanya:\n"+
+ "• 🕌 Waktu shalat\n"+
+ "• 🤲 Doa\n"+
+ "• 🌙 Puasa\n"+
+ "• 📖 Tafsir\n\n"+
  "Apa yang ingin Anda ketahui hari ini?";
 
  history.push({ role:"assistant", text:intro });
@@ -194,8 +191,8 @@ function newChat(){
  chatWrap.innerHTML="";
 
  const intro =
- "👋 Assalamu’alaikum!\n\n" +
- "Saya Smart Islamic Assistant.\n\n" +
+ "👋 Assalamu’alaikum!\n\n"+
+ "Saya Smart Islamic Assistant.\n\n"+
  "Silakan tanya tentang ibadah 🙏";
 
  history.push({ role:"assistant", text:intro });
@@ -211,8 +208,15 @@ function bubble(text,role,loading=false){
 
  wrap.className=
   role==="user"
-   ?"flex justify-end msg-enter"
-   :"flex items-start gap-2 msg-enter";
+   ?"flex justify-end"
+   :"flex justify-start gap-2";
+
+ if(role==="assistant"){
+   const img=document.createElement("img");
+   img.src="/assistant/bot.png";
+   img.className="w-9 h-9 rounded-full shrink-0";
+   wrap.appendChild(img);
+ }
 
  const box=document.createElement("div");
 
@@ -223,13 +227,6 @@ function bubble(text,role,loading=false){
 
  box.innerText=text;
  box.style.whiteSpace="pre-line";
-
- if(role==="assistant"){
-   const avatar=document.createElement("img");
-   avatar.src="/assistant/bot.png";
-   avatar.className="bot-avatar";
-   wrap.appendChild(avatar);
- }
 
  wrap.appendChild(box);
 
@@ -301,7 +298,39 @@ async function fetchAnswer(q){
  }
 }
 
+/* ================= VOICE ================= */
+
+function startVoice(){
+
+ if(recognizing)return;
+
+ const SpeechRecognition=
+  window.SpeechRecognition||window.webkitSpeechRecognition;
+
+ if(!SpeechRecognition){
+  alert("Voice tidak didukung");
+  return;
+ }
+
+ recog=new SpeechRecognition();
+ recog.lang="id-ID";
+ recog.interimResults=false;
+
+ recognizing=true;
+ recog.start();
+
+ recog.onresult=e=>{
+  const t=e.results[0][0].transcript;
+  document.getElementById("input").value=t;
+ };
+
+ recog.onend=()=>recognizing=false;
+}
+
+/* ================= INIT ================= */
+
 function renderHistory(){
+
  chatWrap.innerHTML="";
  history.forEach(m=>bubble(m.text,m.role));
 }
