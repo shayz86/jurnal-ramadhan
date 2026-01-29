@@ -68,5 +68,239 @@
   {"number":57,"arab":"الْمُحْصِي","latin":"Al Muhshii","meaning":"Yang Maha Menghitung"},
   {"number":58,"arab":"الْمُبْدِئ","latin":"Al Mubdi’","meaning":"Yang Maha Memulai"},
   {"number":59,"arab":"الْمُعِيد","latin":"Al Mu’iid","meaning":"Yang Maha Mengembalikan"},
-  {"number":60,"arab":"الْمُحْيِي","latin":"Al Muhyii","meaning":"Yang Maha Menghidupkan"}
+  {"number":60,"arab":"الْمُحْيِي","latin":"Al Muhyii","meaning":"Yang Maha Menghidupkan"},
+{
+  "number": 61,
+  "arab": "الْمُمِيت",
+  "latin": "Al Mumīt",
+  "meaning": "Yang Maha Mematikan"
+},
+{
+  "number": 62,
+  "arab": "الْحَيّ",
+  "latin": "Al Ḥayy",
+  "meaning": "Yang Maha Hidup"
+},
+{
+  "number": 63,
+  "arab": "الْقَيُّوم",
+  "latin": "Al Qayyūm",
+  "meaning": "Yang Maha Berdiri Sendiri"
+},
+{
+  "number": 64,
+  "arab": "الْوَاجِد",
+  "latin": "Al Wājid",
+  "meaning": "Yang Maha Menemukan"
+},
+{
+  "number": 65,
+  "arab": "الْمَاجِد",
+  "latin": "Al Mājid",
+  "meaning": "Yang Maha Mulia"
+},
+{
+  "number": 66,
+  "arab": "الْوَاحِد",
+  "latin": "Al Wāḥid",
+  "meaning": "Yang Maha Esa"
+},
+{
+  "number": 67,
+  "arab": "الصَّمَد",
+  "latin": "Aṣ Ṣamad",
+  "meaning": "Yang Maha Dibutuhkan"
+},
+{
+  "number": 68,
+  "arab": "الْقَادِر",
+  "latin": "Al Qādir",
+  "meaning": "Yang Maha Kuasa"
+},
+{
+  "number": 69,
+  "arab": "الْمُقْتَدِر",
+  "latin": "Al Muqtadir",
+  "meaning": "Yang Maha Menentukan"
+},
+{
+  "number": 70,
+  "arab": "الْمُقَدِّم",
+  "latin": "Al Muqaddim",
+  "meaning": "Yang Maha Mendahulukan"
+},
+{
+  "number": 71,
+  "arab": "الْمُؤَخِّر",
+  "latin": "Al Mu’akhkhir",
+  "meaning": "Yang Maha Mengakhirkan"
+},
+{
+  "number": 72,
+  "arab": "الأوّل",
+  "latin": "Al Awwal",
+  "meaning": "Yang Maha Awal"
+},
+{
+  "number": 73,
+  "arab": "الآخِر",
+  "latin": "Al Ākhir",
+  "meaning": "Yang Maha Akhir"
+},
+{
+  "number": 74,
+  "arab": "الظَّاهِر",
+  "latin": "Aẓ Ẓāhir",
+  "meaning": "Yang Maha Nyata"
+},
+{
+  "number": 75,
+  "arab": "الْبَاطِن",
+  "latin": "Al Bāṭin",
+  "meaning": "Yang Maha Tersembunyi"
+},
+{
+  "number": 76,
+  "arab": "الْوَالِي",
+  "latin": "Al Wālī",
+  "meaning": "Yang Maha Memerintah"
+},
+{
+  "number": 77,
+  "arab": "الْمُتَعَالِي",
+  "latin": "Al Muta‘ālī",
+  "meaning": "Yang Maha Tinggi"
+},
+{
+  "number": 78,
+  "arab": "الْبَرّ",
+  "latin": "Al Barr",
+  "meaning": "Yang Maha Baik"
+},
+{
+  "number": 79,
+  "arab": "التَّوَّاب",
+  "latin": "At Tawwāb",
+  "meaning": "Yang Maha Penerima Taubat"
+},
+{
+  "number": 80,
+  "arab": "الْمُنْتَقِم",
+  "latin": "Al Muntaqim",
+  "meaning": "Yang Maha Membalas"
+},
+{
+  "number": 81,
+  "arab": "العَفُوّ",
+  "latin": "Al ‘Afūw",
+  "meaning": "Yang Maha Pemaaf"
+},
+{
+  "number": 82,
+  "arab": "الرَّؤُوف",
+  "latin": "Ar Ra’ūf",
+  "meaning": "Yang Maha Pengasih"
+},
+{
+  "number": 83,
+  "arab": "مَالِكُ الْمُلْك",
+  "latin": "Mālikul Mulk",
+  "meaning": "Yang Maha Penguasa Kerajaan"
+},
+{
+  "number": 84,
+  "arab": "ذُو الْجَلَالِ وَالْإِكْرَام",
+  "latin": "Dhūl Jalāli wal Ikrām",
+  "meaning": "Yang Maha Mulia dan Pemurah"
+},
+{
+  "number": 85,
+  "arab": "الْمُقْسِط",
+  "latin": "Al Muqsith",
+  "meaning": "Yang Maha Adil"
+},
+{
+  "number": 86,
+  "arab": "الْجَامِع",
+  "latin": "Al Jāmi‘",
+  "meaning": "Yang Maha Mengumpulkan"
+},
+{
+  "number": 87,
+  "arab": "الْغَنِيّ",
+  "latin": "Al Ghaniyy",
+  "meaning": "Yang Maha Kaya"
+},
+{
+  "number": 88,
+  "arab": "الْمُغْنِي",
+  "latin": "Al Mughnī",
+  "meaning": "Yang Maha Memberi Kekayaan"
+},
+{
+  "number": 89,
+  "arab": "الْمَانِع",
+  "latin": "Al Māni‘",
+  "meaning": "Yang Maha Mencegah"
+},
+{
+  "number": 90,
+  "arab": "الضَّارّ",
+  "latin": "Aḍ Ḍārr",
+  "meaning": "Yang Maha Memberi Mudharat"
+},
+{
+  "number": 91,
+  "arab": "النَّافِع",
+  "latin": "An Nāfi‘",
+  "meaning": "Yang Maha Memberi Manfaat"
+},
+{
+  "number": 92,
+  "arab": "النُّور",
+  "latin": "An Nūr",
+  "meaning": "Yang Maha Bercahaya"
+},
+{
+  "number": 93,
+  "arab": "الْهَادِي",
+  "latin": "Al Hādī",
+  "meaning": "Yang Maha Pemberi Petunjuk"
+},
+{
+  "number": 94,
+  "arab": "الْبَدِيع",
+  "latin": "Al Badī‘",
+  "meaning": "Yang Maha Pencipta Tanpa Contoh"
+},
+{
+  "number": 95,
+  "arab": "الْبَاقِي",
+  "latin": "Al Bāqī",
+  "meaning": "Yang Maha Kekal"
+},
+{
+  "number": 96,
+  "arab": "الْوَارِث",
+  "latin": "Al Wārith",
+  "meaning": "Yang Maha Pewaris"
+},
+{
+  "number": 97,
+  "arab": "الرَّشِيد",
+  "latin": "Ar Rashīd",
+  "meaning": "Yang Maha Pandai"
+},
+{
+  "number": 98,
+  "arab": "الصَّبُور",
+  "latin": "Aṣ Ṣabūr",
+  "meaning": "Yang Maha Sabar"
+},
+{
+  "number": 99,
+  "arab": "اللّٰه",
+  "latin": "Allah",
+  "meaning": "Nama Allah Yang Maha Agung"
+}
 ]
