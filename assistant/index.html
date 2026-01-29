@@ -18,13 +18,14 @@ body{font-family:system-ui}
 
 const API="https://noorrahma-api.pembang001.workers.dev";
 const UID=localStorage.getItem("nr_uid");
+
 let sessionId=localStorage.getItem("nr_ai_session");
 
 /* ================= PRO GUARD ================= */
 
 if(localStorage.getItem("nr_is_pro")!=="1"){
-  alert("Fitur PRO 🔒");
-  location.href="/";
+ alert("Fitur PRO 🔒");
+ location.href="/";
 }
 
 /* session baru jika belum ada */
@@ -123,8 +124,10 @@ function resumeChat(){
 }
 
 function newChat(){
+
  history=[];
  sessionId="sess-"+Date.now();
+
  localStorage.setItem("nr_ai_session",sessionId);
  localStorage.removeItem("nr_ai_history");
 
@@ -137,19 +140,20 @@ function newChat(){
 function bubble(text,role){
 
  const wrap=document.createElement("div");
+
  wrap.className=
   role==="user"
    ?"flex justify-end"
    :"flex justify-start";
 
  const box=document.createElement("div");
+
  box.className=
   role==="user"
    ?"bg-emerald-600 text-white px-4 py-3 rounded-2xl max-w-[80%]"
    :"bg-white px-4 py-3 rounded-2xl shadow max-w-[80%]";
 
  box.textContent=text;
-
  wrap.appendChild(box);
 
  if(role==="assistant"){
@@ -176,23 +180,30 @@ function bubble(text,role){
 /* ================= SEND ================= */
 
 function sendMessage(){
+
  const input=document.getElementById("input");
  const text=input.value.trim();
+
  if(!text)return;
 
  push("user",text);
  input.value="";
+
  fetchAnswer(text);
 }
 
 function sendQuick(t){
+
  push("user",t);
  fetchAnswer(t);
 }
 
 function push(role,text){
+
  history.push({role,text});
+
  localStorage.setItem("nr_ai_history",JSON.stringify(history));
+
  bubble(text,role);
 }
 
@@ -203,6 +214,7 @@ async function fetchAnswer(q){
  bubble("⏳ Memproses...","assistant");
 
  try{
+
   const r=await fetch(API+"/assistant/ai",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
@@ -217,9 +229,14 @@ async function fetchAnswer(q){
 
   chatWrap.lastChild.remove();
 
-  push("assistant",d.answer||"⚠️ Tidak ada jawaban.");
+  if(d.error){
+    push("assistant","⚠️ "+d.error);
+  }else{
+    push("assistant",d.answer||"⚠️ Tidak ada jawaban.");
+  }
 
- }catch(e){
+ }catch(err){
+
   chatWrap.lastChild.remove();
   push("assistant","⚠️ AI gagal dipanggil.");
  }
@@ -228,6 +245,7 @@ async function fetchAnswer(q){
 /* ================= BOOKMARK ================= */
 
 function bookmark(text){
+
  bookmarks.push({id:Date.now(),text});
  localStorage.setItem("nr_ai_bookmarks",JSON.stringify(bookmarks));
 
@@ -247,6 +265,7 @@ function bookmark(text){
 /* ================= SHARE ================= */
 
 async function share(text){
+
  if(navigator.share){
   navigator.share({title:"NoorRahma Assistant",text});
  }else{
@@ -287,6 +306,7 @@ function startVoice(){
 /* ================= INIT ================= */
 
 function renderHistory(){
+
  chatWrap.innerHTML="";
  history.forEach(m=>bubble(m.text,m.role));
 }
