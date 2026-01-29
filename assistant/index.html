@@ -15,6 +15,8 @@ tailwind.config={darkMode:"class"}
 <style>
 body{font-family:system-ui}
 .chat-scroll::-webkit-scrollbar{display:none}
+.ref-box{background:#ecfdf5;border-left:4px solid #10b981}
+.dark .ref-box{background:#022c22}
 </style>
 </head>
 
@@ -34,7 +36,7 @@ if(localStorage.getItem("nr_is_pro")!=="1"){
 </header>
 
 <main id="messages"
- class="h-[calc(100vh-170px)] overflow-y-auto p-4 space-y-4 chat-scroll">
+ class="h-[calc(100vh-190px)] overflow-y-auto p-4 space-y-4 chat-scroll">
 </main>
 
 <!-- ===== QUICK CHIPS ===== -->
@@ -50,29 +52,20 @@ if(localStorage.getItem("nr_is_pro")!=="1"){
 
 <div class="flex gap-2 max-w-md mx-auto">
 
-<button
- id="micBtn"
- onclick="startVoice()"
- class="bg-slate-200 px-3 py-3 rounded-xl">
-🎙
-</button>
+<button id="micBtn" onclick="startVoice()"
+ class="bg-slate-200 px-3 py-3 rounded-xl">🎙</button>
 
-<input
- id="msgInput"
+<input id="msgInput"
  type="text"
  placeholder="Tanya tentang ibadah, fiqh, puasa..."
- class="flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-emerald-500"
-/>
+ class="flex-1 border rounded-xl px-4 py-3 text-sm"/>
 
-<button
- onclick="sendMsg()"
- id="sendBtn"
+<button onclick="sendMsg()"
  class="bg-emerald-600 text-white px-5 py-3 rounded-xl font-bold">
 Kirim
 </button>
 
-<button
- onclick="stopAI()"
+<button onclick="stopAI()"
  id="stopBtn"
  class="hidden bg-red-500 text-white px-4 py-3 rounded-xl font-bold">
 Stop
@@ -82,21 +75,33 @@ Stop
 </footer>
 
 <script>
+/* ===================== */
 const messages=document.getElementById("messages");
 const input=document.getElementById("msgInput");
 const stopBtn=document.getElementById("stopBtn");
 
+/* ===== OFFLINE FAQ ===== */
+
+const offlineFAQ=[
+ {k:"shalat",v:"Shalat wajib lima waktu: Subuh, Dzuhur, Ashar, Maghrib, Isya."},
+ {k:"wudhu",v:"Wudhu: niat, basuh wajah, tangan, usap kepala, kaki, tertib."},
+ {k:"puasa",v:"Puasa Ramadhan wajib bagi muslim baligh dan mampu."},
+ {k:"zakat",v:"Zakat fitrah dikeluarkan sebelum Idul Fitri."},
+ {k:"tayammum",v:"Tayammum dengan debu bersih ketika tidak ada air."},
+];
+
 /* ===== HISTORY ===== */
+
 let history=JSON.parse(
  localStorage.getItem("nr_assistant_history")||"[]"
 );
-
 history.forEach(addBubble);
 
 /* ===== STREAM CTRL ===== */
 let controller=null;
 
-/* ===== UI ===== */
+/* ===================== */
+
 function addBubble(msg){
 
  const div=document.createElement("div");
@@ -107,6 +112,13 @@ function addBubble(msg){
   +" max-w-[80%] p-3 rounded-2xl shadow relative";
 
  div.innerHTML=`<div>${msg.text}</div>`;
+
+ if(msg.refs){
+  const r=document.createElement("div");
+  r.className="mt-3 p-2 rounded ref-box text-xs";
+  r.innerHTML=msg.refs;
+  div.appendChild(r);
+ }
 
  if(msg.from==="bot"){
   const speak=document.createElement("button");
@@ -122,17 +134,14 @@ function addBubble(msg){
  messages.scrollTop=messages.scrollHeight;
 }
 
-function addTyping(){
- const t=document.createElement("div");
- t.id="typing";
- t.className="mr-auto bg-slate-200 dark:bg-slate-700 p-3 rounded-2xl w-24 animate-pulse";
- messages.appendChild(t);
- messages.scrollTop=messages.scrollHeight;
-}
+/* ===== FALLBACK FAQ ===== */
 
-function hideTyping(){
- const t=document.getElementById("typing");
- if(t)t.remove();
+function searchFAQ(q){
+ q=q.toLowerCase();
+ for(const f of offlineFAQ){
+  if(q.includes(f.k))return f.v;
+ }
+ return null;
 }
 
 /* ===== SEND ===== */
@@ -145,9 +154,7 @@ function sendMsg(){
  const obj={from:"user",text,time:Date.now()};
  history.push(obj);
  localStorage.setItem("nr_assistant_history",JSON.stringify(history));
-
  addBubble(obj);
-
  input.value="";
 
  sendToAI(text);
@@ -157,8 +164,11 @@ function sendMsg(){
 
 async function sendToAI(text){
 
- hideTyping();
- addTyping();
+ const faq=searchFAQ(text);
+ if(!navigator.onLine && faq){
+  addBubble({from:"bot",text:faq});
+  return;
+ }
 
  controller=new AbortController();
  stopBtn.classList.remove("hidden");
@@ -180,12 +190,11 @@ async function sendToAI(text){
    signal:controller.signal
   });
 
-  hideTyping();
-
   const reader=res.body.getReader();
   const decoder=new TextDecoder();
 
   let final="";
+  let refs="";
 
   while(true){
 
@@ -195,20 +204,49 @@ async function sendToAI(text){
    const chunk=decoder.decode(value);
    final+=chunk;
    body.innerText=final;
+
+   const ayatMatch=chunk.match(/\[AYAT:(\d+):(\d+)\]/);
+   if(ayatMatch){
+    loadAyat(ayatMatch[1],ayatMatch[2],bubble);
+   }
   }
 
-  history.push({from:"bot",text:final,time:Date.now()});
+  history.push({from:"bot",text:final,refs});
   localStorage.setItem("nr_assistant_history",JSON.stringify(history));
 
  }catch(e){
 
-  hideTyping();
-  body.innerText="⚠️ Gagal terhubung ke server AI.";
+  const faq=searchFAQ(text);
+  addBubble({
+   from:"bot",
+   text:faq||"⚠️ Offline & tidak ada data lokal."
+  });
 
  }
 
  stopBtn.classList.add("hidden");
  controller=null;
+}
+
+/* ===== AYAT FETCH ===== */
+
+async function loadAyat(s,a,wrap){
+
+ try{
+  const r=await fetch(`https://equran.id/api/v2/ayat/${s}/${a}`);
+  const d=await r.json();
+
+  const box=document.createElement("div");
+  box.className="mt-3 p-3 rounded ref-box text-xs";
+
+  box.innerHTML=
+   `<b>QS ${s}:${a}</b><br>
+    <div class="text-right text-lg">${d.data.teksArab}</div>
+    <div class="italic">${d.data.teksIndonesia}</div>`;
+
+  wrap.appendChild(box);
+
+ }catch{}
 }
 
 /* ===== STOP ===== */
@@ -220,22 +258,20 @@ function stopAI(){
  stopBtn.classList.add("hidden");
 }
 
-/* ===== VOICE INPUT ===== */
-
-let recog;
+/* ===== VOICE ===== */
 
 function startVoice(){
 
  if(!("webkitSpeechRecognition"in window)){
-  alert("Browser tidak mendukung voice input");
+  alert("Browser tidak mendukung voice");
   return;
  }
 
- recog=new webkitSpeechRecognition();
- recog.lang="id-ID";
- recog.start();
+ const rec=new webkitSpeechRecognition();
+ rec.lang="id-ID";
+ rec.start();
 
- recog.onresult=e=>{
+ rec.onresult=e=>{
   input.value=e.results[0][0].transcript;
   sendMsg();
  };
@@ -251,7 +287,6 @@ document.querySelectorAll(".chip").forEach(c=>{
  };
 });
 
-/* ENTER */
 input.addEventListener("keydown",e=>{
  if(e.key==="Enter")sendMsg();
 });
