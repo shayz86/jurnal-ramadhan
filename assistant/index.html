@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Smart Islamic Assistant</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body {
-  font-family: system-ui;
-}
+body{font-family:system-ui}
 </style>
 </head>
 
@@ -19,75 +17,91 @@ body {
 <script>
 /* ================= CONFIG ================= */
 
-const API = "https://noorrahma-app.pembang001.workers.dev";
+const API="https://noorrahma-app.pembang001.workers.dev";
 
 /* UID */
 let UID = localStorage.getItem("nr_uid");
-if (!UID) {
-  UID = "uid-" + Date.now();
-  localStorage.setItem("nr_uid", UID);
+if(!UID){
+ UID="uid-"+Date.now();
+ localStorage.setItem("nr_uid",UID);
 }
 
 /* Session */
-let sessionId = localStorage.getItem("nr_ai_session");
+let sessionId=localStorage.getItem("nr_ai_session");
 
 /* ================= PRO GUARD ================= */
 
-if (localStorage.getItem("nr_is_pro") !== "1") {
-  alert("Fitur PRO 🔒");
-  location.href = "/";
+if(localStorage.getItem("nr_is_pro")!=="1"){
+ alert("Fitur PRO 🔒");
+ location.href="/";
 }
 
 /* session baru jika belum ada */
-if (!sessionId) {
-  sessionId = "sess-" + Date.now();
-  localStorage.setItem("nr_ai_session", sessionId);
+if(!sessionId){
+ sessionId="sess-"+Date.now();
+ localStorage.setItem("nr_ai_session",sessionId);
 }
 </script>
 
+<!-- ROOT -->
 <div class="h-screen flex flex-col overflow-hidden">
 
-<!-- ================= HEADER ================= -->
-
+<!-- HEADER -->
 <header class="bg-emerald-700 text-white p-4 flex items-center gap-3 shrink-0">
-  <button onclick="history.back()">←</button>
-  <h2 class="font-bold">Smart Islamic Assistant</h2>
+<button onclick="history.back()">←</button>
+<h2 class="font-bold">Smart Islamic Assistant</h2>
 </header>
 
-<!-- ================= CHAT ================= -->
+<!-- ============ SESSION MODAL ============ -->
 
-<div
-  id="chatWrap"
-  class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50"
-></div>
+<div id="sessionModal"
+class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
 
-<!-- ================= QUICK BUTTONS ================= -->
+<div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm space-y-4">
 
-<div class="px-4 py-2 flex gap-2 overflow-x-auto bg-slate-50 shrink-0">
-  <button onclick="sendQuick('Waktu shalat hari ini')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🕌 Waktu shalat</button>
-  <button onclick="sendQuick('Doa harian')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🤲 Doa</button>
-  <button onclick="sendQuick('Puasa sunnah')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🌙 Puasa</button>
-  <button onclick="sendQuick('Tafsir ayat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">📖 Tafsir</button>
+<h3 class="font-bold text-lg">Mulai Percakapan</h3>
+
+<button onclick="resumeChat()"
+class="w-full bg-emerald-600 text-white py-3 rounded-xl">
+Lanjut Chat Terakhir
+</button>
+
+<button onclick="newChat()"
+class="w-full border py-3 rounded-xl">
+Chat Baru
+</button>
+
+</div>
 </div>
 
-<!-- ================= INPUT ================= -->
+<!-- ============ CHAT AREA ============ -->
+
+<div id="chatWrap"
+class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 hidden"></div>
+
+<!-- ============ QUICK BUTTONS ============ -->
+
+<div class="px-4 pb-2 flex gap-2 overflow-x-auto shrink-0">
+<button onclick="sendQuick('Waktu shalat hari ini')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🕌 Waktu shalat</button>
+<button onclick="sendQuick('Doa harian')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🤲 Doa</button>
+<button onclick="sendQuick('Puasa sunnah')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🌙 Puasa</button>
+<button onclick="sendQuick('Tafsir ayat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">📖 Tafsir</button>
+</div>
+
+<!-- ============ INPUT BAR ============ -->
 
 <div class="bg-white p-3 flex gap-2 items-center border-t shrink-0">
 
-  <button onclick="startVoice()" class="text-xl">🎙️</button>
+<button onclick="startVoice()" class="text-xl">🎙️</button>
 
-  <input
-    id="input"
-    placeholder="Tanya tentang ibadah..."
-    class="flex-1 border rounded-xl px-4 py-2 text-sm"
-  />
+<input id="input"
+placeholder="Tanya tentang ibadah..."
+class="flex-1 border rounded-xl px-4 py-2 text-sm">
 
-  <button
-    onclick="sendMessage()"
-    class="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold"
-  >
-    Kirim
-  </button>
+<button onclick="sendMessage()"
+class="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold">
+Kirim
+</button>
 
 </div>
 
@@ -96,209 +110,242 @@ if (!sessionId) {
 <script>
 /* ================= STATE ================= */
 
-const chatWrap = document.getElementById("chatWrap");
+const chatWrap=document.getElementById("chatWrap");
+const modal=document.getElementById("sessionModal");
 
-let history = JSON.parse(localStorage.getItem("nr_ai_history") || "[]");
-let bookmarks = JSON.parse(localStorage.getItem("nr_ai_bookmarks") || "[]");
+let history=JSON.parse(localStorage.getItem("nr_ai_history")||"[]");
+let bookmarks=JSON.parse(localStorage.getItem("nr_ai_bookmarks")||"[]");
 
-let recognizing = false;
+let recognizing=false;
 let recog;
 
-/* ================= INTRO MESSAGE ================= */
+/* ================= SESSION ================= */
 
-if (!history.length) {
-  const intro =
-    "👋 Assalamu’alaikum!\n\n" +
-    "Saya adalah Smart Islamic Assistant.\n\n" +
-    "Silakan tanya tentang:\n" +
-    "• 🕌 Waktu shalat\n" +
-    "• 🤲 Doa\n" +
-    "• 🌙 Puasa\n" +
-    "• 📖 Tafsir\n\n" +
-    "Apa yang ingin Anda ketahui hari ini?";
+if(history.length){
+ modal.classList.remove("hidden");
+}else{
+ chatWrap.classList.remove("hidden");
 
-  history.push({ role: "assistant", text: intro });
-  localStorage.setItem("nr_ai_history", JSON.stringify(history));
-  bubble(intro, "assistant");
-} else {
-  renderHistory();
+ const intro =
+ "👋 Assalamu’alaikum!\n\n" +
+ "Saya Smart Islamic Assistant.\n\n" +
+ "Silakan tanya:\n" +
+ "• 🕌 Waktu shalat\n" +
+ "• 🤲 Doa\n" +
+ "• 🌙 Puasa\n" +
+ "• 📖 Tafsir\n\n" +
+ "Apa yang ingin Anda ketahui hari ini?";
+
+ history.push({ role:"assistant", text:intro });
+ localStorage.setItem("nr_ai_history",JSON.stringify(history));
+ bubble(intro,"assistant");
+}
+
+/* ================= UI ================= */
+
+function resumeChat(){
+ modal.classList.add("hidden");
+ chatWrap.classList.remove("hidden");
+ renderHistory();
+}
+
+function newChat(){
+
+ history=[];
+ sessionId="sess-"+Date.now();
+
+ localStorage.setItem("nr_ai_session",sessionId);
+ localStorage.removeItem("nr_ai_history");
+
+ modal.classList.add("hidden");
+ chatWrap.classList.remove("hidden");
+ chatWrap.innerHTML="";
+
+ const intro =
+ "👋 Assalamu’alaikum!\n\n" +
+ "Saya Smart Islamic Assistant.\n\n" +
+ "Silakan tanya tentang ibadah 🙏";
+
+ history.push({ role:"assistant", text:intro });
+ localStorage.setItem("nr_ai_history",JSON.stringify(history));
+ bubble(intro,"assistant");
 }
 
 /* ================= RENDER ================= */
 
-function bubble(text, role, loading = false) {
+function bubble(text,role,loading=false){
 
-  const wrap = document.createElement("div");
+ const wrap=document.createElement("div");
 
-  wrap.className =
-    role === "user"
-      ? "flex justify-end"
-      : "flex justify-start";
+ wrap.className=
+  role==="user"
+   ?"flex justify-end"
+   :"flex justify-start";
 
-  const box = document.createElement("div");
+ const box=document.createElement("div");
 
-  box.className =
-    role === "user"
-      ? "bg-emerald-600 text-white px-4 py-3 rounded-2xl max-w-[85%]"
-      : "bg-white px-4 py-3 rounded-2xl shadow max-w-[85%] leading-relaxed text-sm";
+ box.className=
+  role==="user"
+   ?"bg-emerald-600 text-white px-4 py-3 rounded-2xl max-w-[85%] leading-relaxed text-sm"
+   :"bg-white px-4 py-3 rounded-2xl shadow max-w-[85%] leading-relaxed text-sm";
 
-  box.innerText = text;
-  box.style.whiteSpace = "pre-line";
+ box.innerText=text;
+ box.style.whiteSpace="pre-line";
 
-  wrap.appendChild(box);
+ wrap.appendChild(box);
 
-  if (role === "assistant" && !loading) {
+ if(role==="assistant" && !loading){
 
-    const tools = document.createElement("div");
-    tools.className = "flex gap-3 mt-2 text-xs opacity-60";
+  const tools=document.createElement("div");
+  tools.className="flex gap-3 mt-2 text-xs opacity-60";
 
-    const bm = document.createElement("button");
-    bm.textContent = "🔖";
-    bm.onclick = () => bookmark(text);
+  const bm=document.createElement("button");
+  bm.textContent="🔖";
+  bm.onclick=()=>bookmark(text);
 
-    const sh = document.createElement("button");
-    sh.textContent = "📤";
-    sh.onclick = () => share(text);
+  const sh=document.createElement("button");
+  sh.textContent="📤";
+  sh.onclick=()=>share(text);
 
-    tools.append(bm, sh);
-    wrap.appendChild(tools);
-  }
+  tools.append(bm,sh);
+  wrap.appendChild(tools);
+ }
 
-  chatWrap.appendChild(wrap);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
+ chatWrap.appendChild(wrap);
+ chatWrap.scrollTop=chatWrap.scrollHeight;
 
-  return wrap;
+ return wrap;
 }
 
 /* ================= SEND ================= */
 
-function sendMessage() {
+function sendMessage(){
 
-  const input = document.getElementById("input");
-  const text = input.value.trim();
-  if (!text) return;
+ const input=document.getElementById("input");
+ const text=input.value.trim();
+ if(!text)return;
 
-  input.value = "";
+ input.value="";
 
-  push("user", text);
-  fetchAnswer(text);
+ push("user",text);
+ fetchAnswer(text);
 }
 
-function sendQuick(t) {
-  push("user", t);
-  fetchAnswer(t);
+function sendQuick(t){
+ push("user",t);
+ fetchAnswer(t);
 }
 
-function push(role, text) {
+function push(role,text){
 
-  history.push({ role, text });
-  localStorage.setItem("nr_ai_history", JSON.stringify(history));
-  bubble(text, role);
+ history.push({role,text});
+ localStorage.setItem("nr_ai_history",JSON.stringify(history));
+ bubble(text,role);
 }
 
 /* ================= BACKEND ================= */
 
-async function fetchAnswer(q) {
+async function fetchAnswer(q){
 
-  const loadingBubble = bubble("⏳ Menjawab…", "assistant", true);
+ const loadingBubble=bubble("⏳ Memproses...","assistant",true);
 
-  try {
+ try{
 
-    const r = await fetch(API + "/assistant/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uid: UID,
-        prompt: q,
-        sessionId
-      })
-    });
+  const r=await fetch(API+"/assistant/ai",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      uid:UID,
+      prompt:q,
+      sessionId
+    })
+  });
 
-    const d = await r.json();
+  const d=await r.json();
 
-    loadingBubble.remove();
+  loadingBubble.remove();
 
-    if (d.error) {
-      push("assistant", "⚠️ " + d.error);
-    } else {
-      push("assistant", d.answer || "⚠️ Tidak ada jawaban.");
-    }
-
-  } catch (err) {
-
-    console.error(err);
-    loadingBubble.remove();
-    push("assistant", "⚠️ AI gagal dipanggil.");
+  if(d.error){
+    push("assistant","⚠️ "+d.error);
+  }else{
+    push("assistant",d.answer||"⚠️ Tidak ada jawaban.");
   }
+
+ }catch(err){
+
+  console.error(err);
+  loadingBubble.remove();
+  push("assistant","⚠️ AI gagal dipanggil.");
+ }
 }
 
 /* ================= BOOKMARK ================= */
 
-function bookmark(text) {
+function bookmark(text){
 
-  bookmarks.push({ id: Date.now(), text });
-  localStorage.setItem("nr_ai_bookmarks", JSON.stringify(bookmarks));
+ bookmarks.push({id:Date.now(),text});
+ localStorage.setItem("nr_ai_bookmarks",JSON.stringify(bookmarks));
 
-  fetch(API + "/assistant/bookmark", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "add",
-      uid: UID,
-      text
-    })
-  });
+ fetch(API+"/assistant/bookmark",{
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body:JSON.stringify({
+    action:"add",
+    uid:UID,
+    text
+  })
+ });
 
-  alert("Disimpan 👍");
+ alert("Disimpan 👍");
 }
 
 /* ================= SHARE ================= */
 
-async function share(text) {
+async function share(text){
 
-  if (navigator.share) {
-    navigator.share({ title: "NoorRahma Assistant", text });
-  } else {
-    await navigator.clipboard.writeText(text);
-    alert("Tersalin");
-  }
+ if(navigator.share){
+  navigator.share({title:"NoorRahma Assistant",text});
+ }else{
+  await navigator.clipboard.writeText(text);
+  alert("Tersalin");
+ }
 }
 
 /* ================= VOICE ================= */
 
-function startVoice() {
+function startVoice(){
 
-  if (recognizing) return;
+ if(recognizing)return;
 
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+ const SpeechRecognition=
+  window.SpeechRecognition||window.webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    alert("Voice tidak didukung");
-    return;
-  }
+ if(!SpeechRecognition){
+  alert("Voice tidak didukung");
+  return;
+ }
 
-  recog = new SpeechRecognition();
-  recog.lang = "id-ID";
-  recog.interimResults = false;
+ recog=new SpeechRecognition();
+ recog.lang="id-ID";
+ recog.interimResults=false;
 
-  recognizing = true;
-  recog.start();
+ recognizing=true;
+ recog.start();
 
-  recog.onresult = e => {
-    const t = e.results[0][0].transcript;
-    document.getElementById("input").value = t;
-  };
+ recog.onresult=e=>{
+  const t=e.results[0][0].transcript;
+  document.getElementById("input").value=t;
+ };
 
-  recog.onend = () => recognizing = false;
+ recog.onend=()=>recognizing=false;
 }
 
 /* ================= INIT ================= */
 
-function renderHistory() {
+function renderHistory(){
 
-  chatWrap.innerHTML = "";
-  history.forEach(m => bubble(m.text, m.role));
+ chatWrap.innerHTML="";
+ history.forEach(m=>bubble(m.text,m.role));
 }
 </script>
 
