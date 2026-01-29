@@ -8,11 +8,18 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body{font-family:system-ui}
+html,body{
+ height:100%;
+ margin:0;
+}
+body{
+ font-family:system-ui;
+ overflow:hidden;
+}
 </style>
 </head>
 
-<body class="bg-slate-100">
+<body class="bg-slate-100 h-screen">
 
 <script>
 /* ================= CONFIG ================= */
@@ -77,15 +84,15 @@ Chat Baru
 <!-- ============ CHAT AREA ============ -->
 
 <div id="chatWrap"
-class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 hidden"></div>
+class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 hidden overscroll-contain"></div>
 
 <!-- ============ QUICK BUTTONS ============ -->
 
-<div class="px-4 pb-2 flex gap-2 overflow-x-auto shrink-0">
-<button onclick="sendQuick('Waktu shalat hari ini')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🕌 Waktu shalat</button>
-<button onclick="sendQuick('Doa harian')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🤲 Doa</button>
-<button onclick="sendQuick('Puasa sunnah')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">🌙 Puasa</button>
-<button onclick="sendQuick('Tafsir ayat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs">📖 Tafsir</button>
+<div class="px-4 py-2 flex gap-2 overflow-x-auto shrink-0 bg-slate-100">
+<button onclick="sendQuick('Waktu shalat hari ini')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">🕌 Waktu shalat</button>
+<button onclick="sendQuick('Doa harian')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">🤲 Doa</button>
+<button onclick="sendQuick('Puasa sunnah')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">🌙 Puasa</button>
+<button onclick="sendQuick('Tafsir ayat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">📖 Tafsir</button>
 </div>
 
 <!-- ============ INPUT BAR ============ -->
@@ -277,75 +284,6 @@ async function fetchAnswer(q){
   loadingBubble.remove();
   push("assistant","⚠️ AI gagal dipanggil.");
  }
-}
-
-/* ================= BOOKMARK ================= */
-
-function bookmark(text){
-
- bookmarks.push({id:Date.now(),text});
- localStorage.setItem("nr_ai_bookmarks",JSON.stringify(bookmarks));
-
- fetch(API+"/assistant/bookmark",{
-  method:"POST",
-  headers:{ "Content-Type":"application/json" },
-  body:JSON.stringify({
-    action:"add",
-    uid:UID,
-    text
-  })
- });
-
- alert("Disimpan 👍");
-}
-
-/* ================= SHARE ================= */
-
-async function share(text){
-
- if(navigator.share){
-  navigator.share({title:"NoorRahma Assistant",text});
- }else{
-  await navigator.clipboard.writeText(text);
-  alert("Tersalin");
- }
-}
-
-/* ================= VOICE ================= */
-
-function startVoice(){
-
- if(recognizing)return;
-
- const SpeechRecognition=
-  window.SpeechRecognition||window.webkitSpeechRecognition;
-
- if(!SpeechRecognition){
-  alert("Voice tidak didukung");
-  return;
- }
-
- recog=new SpeechRecognition();
- recog.lang="id-ID";
- recog.interimResults=false;
-
- recognizing=true;
- recog.start();
-
- recog.onresult=e=>{
-  const t=e.results[0][0].transcript;
-  document.getElementById("input").value=t;
- };
-
- recog.onend=()=>recognizing=false;
-}
-
-/* ================= INIT ================= */
-
-function renderHistory(){
-
- chatWrap.innerHTML="";
- history.forEach(m=>bubble(m.text,m.role));
 }
 </script>
 
