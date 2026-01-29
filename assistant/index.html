@@ -17,7 +17,12 @@ body{font-family:system-ui}
 /* ================= CONFIG ================= */
 
 const API="https://noorrahma-api.pembang001.workers.dev";
-const UID=localStorage.getItem("nr_uid");
+
+let UID = localStorage.getItem("nr_uid");
+if(!UID){
+ UID="uid-"+Date.now();
+ localStorage.setItem("nr_uid",UID);
+}
 
 let sessionId=localStorage.getItem("nr_ai_session");
 
@@ -117,6 +122,8 @@ if(history.length){
  chatWrap.classList.remove("hidden");
 }
 
+/* ================= UI ================= */
+
 function resumeChat(){
  modal.classList.add("hidden");
  chatWrap.classList.remove("hidden");
@@ -133,11 +140,12 @@ function newChat(){
 
  modal.classList.add("hidden");
  chatWrap.classList.remove("hidden");
+ chatWrap.innerHTML="";
 }
 
 /* ================= RENDER ================= */
 
-function bubble(text,role){
+function bubble(text,role,loading=false){
 
  const wrap=document.createElement("div");
 
@@ -154,12 +162,13 @@ function bubble(text,role){
    :"bg-white px-4 py-3 rounded-2xl shadow max-w-[80%]";
 
  box.textContent=text;
+
  wrap.appendChild(box);
 
- if(role==="assistant"){
+ if(role==="assistant" && !loading){
 
   const tools=document.createElement("div");
-  tools.className="flex gap-3 mt-2 text-xs opacity-70";
+  tools.className="flex gap-3 mt-2 text-xs opacity-60";
 
   const bm=document.createElement("button");
   bm.textContent="🔖";
@@ -170,11 +179,13 @@ function bubble(text,role){
   sh.onclick=()=>share(text);
 
   tools.append(bm,sh);
-  box.appendChild(tools);
+  wrap.appendChild(tools);
  }
 
  chatWrap.appendChild(wrap);
- chatWrap.scrollTop=999999;
+ chatWrap.scrollTop=chatWrap.scrollHeight;
+
+ return wrap;
 }
 
 /* ================= SEND ================= */
@@ -183,17 +194,15 @@ function sendMessage(){
 
  const input=document.getElementById("input");
  const text=input.value.trim();
-
  if(!text)return;
 
- push("user",text);
  input.value="";
 
+ push("user",text);
  fetchAnswer(text);
 }
 
 function sendQuick(t){
-
  push("user",t);
  fetchAnswer(t);
 }
@@ -201,9 +210,7 @@ function sendQuick(t){
 function push(role,text){
 
  history.push({role,text});
-
  localStorage.setItem("nr_ai_history",JSON.stringify(history));
-
  bubble(text,role);
 }
 
@@ -211,7 +218,7 @@ function push(role,text){
 
 async function fetchAnswer(q){
 
- bubble("⏳ Memproses...","assistant");
+ const loadingBubble=bubble("⏳ Memproses...","assistant",true);
 
  try{
 
@@ -225,14 +232,9 @@ async function fetchAnswer(q){
     })
   });
 
-  let d;
-try{
- d = await r.json();
-}catch{
- throw new Error("invalid json");
-}
+  const d=await r.json();
 
-  chatWrap.lastChild.remove();
+  loadingBubble.remove();
 
   if(d.error){
     push("assistant","⚠️ "+d.error);
@@ -242,7 +244,7 @@ try{
 
  }catch(err){
 
-  chatWrap.lastChild.remove();
+  loadingBubble.remove();
   push("assistant","⚠️ AI gagal dipanggil.");
  }
 }
