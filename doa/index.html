@@ -102,10 +102,27 @@ header {
   color:#34d399;
 }
 
-.fav{
+/* ===== AUDIO BTN ===== */
+
+.audio-btn{
   position:absolute;
   right:12px;
   top:12px;
+  font-size:17px;
+  cursor:pointer;
+  opacity:.8;
+}
+
+.audio-btn.active{
+  color:#10b981;
+}
+
+/* ===== FAVORIT DIPINDAH ===== */
+
+.fav{
+  position:absolute;
+  right:12px;
+  bottom:12px;
   font-size:18px;
   cursor:pointer;
   opacity:.5;
@@ -139,7 +156,7 @@ header {
 <body>
 
 <div class="top-area">
-  <header>📿 Kumpulan Doa</header>
+  <header>📿 KUMPULAN DOA</header>
 
   <div class="search-wrap">
     <input id="search" placeholder="Cari doa, arti, latin..." />
@@ -431,6 +448,8 @@ function select(cat){
 
 search.oninput=render;
 
+/* ===== FAVORIT ===== */
+
 function toggleFav(i){
  if(favs.includes(i))
    favs=favs.filter(x=>x!==i);
@@ -440,7 +459,33 @@ function toggleFav(i){
  render();
 }
 
+/* ===== AUDIO ENGINE ===== */
+
+let speaking=null;
+
+function playAudio(i){
+
+ const doa=data[i];
+
+ if(speaking){
+  window.speechSynthesis.cancel();
+  speaking=null;
+ }
+
+ const u=new SpeechSynthesisUtterance(doa.arab);
+ u.lang="ar-SA";
+
+ speaking=i;
+
+ u.onend=()=>speaking=null;
+
+ window.speechSynthesis.speak(u);
+}
+
+/* ===== RENDER ===== */
+
 function render(){
+
  list.innerHTML="";
  const q=search.value.toLowerCase();
 
@@ -454,22 +499,32 @@ function render(){
   )
  )
  .forEach(d=>{
+
   const i=data.indexOf(d);
+
   const div=document.createElement("div");
   div.className="card";
 
   const favActive=favs.includes(i);
 
   div.innerHTML=`
-   <div class="fav ${favActive?"active":""}" onclick="toggleFav(${i})">❤</div>
+
+   <div class="audio-btn" onclick="playAudio(${i})">🔊</div>
+
+   <div class="fav ${favActive?"active":""}"
+     onclick="toggleFav(${i})">❤</div>
+
    <h4>${d.title}</h4>
    <div class="arab">${d.arab}</div>
    <div class="latin">${d.latin}</div>
    <div class="arti">${d.arti}</div>
+
   `;
 
   list.appendChild(div);
+
  });
+
 }
 
 render();
