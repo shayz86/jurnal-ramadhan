@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Tanya Ustadz AI - NoorRahma</title>
+
+<link rel="manifest" href="/manifest.json" />
+
+<style>
+body{
+  margin:0;
+  background:#020617;
+  color:white;
+  font-family:system-ui;
+}
+
+/* ===== HEADER ===== */
+
+header{
+  padding:18px;
+  text-align:center;
+  font-weight:bold;
+  font-size:18px;
+  background:linear-gradient(to right,#059669,#0ea5e9);
+}
+
+/* ===== CHAT ===== */
+
+.chat{
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding-bottom:90px;
+}
+
+.msg{
+  max-width:85%;
+  padding:12px 15px;
+  border-radius:18px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.user{
+  align-self:flex-end;
+  background:#1e293b;
+}
+
+.ai{
+  align-self:flex-start;
+  background:#064e3b;
+}
+
+/* ===== QUICK TOPIC ===== */
+
+.quick{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:10px 15px;
+}
+
+.quick button{
+  background:#0f172a;
+  border:1px solid #334155;
+  color:white;
+  padding:7px 14px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+}
+
+/* ===== INPUT ===== */
+
+.input-box{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#020617;
+  padding:12px;
+  display:flex;
+  gap:10px;
+  border-top:1px solid #1e293b;
+}
+
+.input-box textarea{
+  flex:1;
+  resize:none;
+  border-radius:14px;
+  border:1px solid #334155;
+  background:#020617;
+  color:white;
+  padding:10px;
+  font-size:13px;
+}
+
+.input-box button{
+  background:#10b981;
+  border:none;
+  padding:0 18px;
+  border-radius:14px;
+  color:black;
+  font-weight:bold;
+}
+
+/* ===== LOADING ===== */
+
+.typing{
+  font-size:13px;
+  opacity:.7;
+  animation:pulse 1.4s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:.3}
+  50%{opacity:1}
+}
+
+/* ===== PRO BADGE ===== */
+
+.badge{
+  font-size:11px;
+  background:#facc15;
+  color:black;
+  padding:4px 10px;
+  border-radius:999px;
+  margin-left:6px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  🕌 Tanya Ustadz AI
+  <span class="badge">PRO</span>
+</header>
+
+<div class="quick">
+  <button onclick="askQuick('Bagaimana niat shalat yang benar?')">Niat Shalat</button>
+  <button onclick="askQuick('Bagaimana hukum hutang dalam Islam?')">Hutang</button>
+  <button onclick="askQuick('Apa yang membatalkan puasa?')">Puasa</button>
+  <button onclick="askQuick('Bagaimana zakat fitrah?')">Zakat</button>
+  <button onclick="askQuick('Bagaimana adab bekerja menurut Islam?')">Kerja</button>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="input-box">
+  <textarea id="input" rows="2"
+    placeholder="Tanyakan masalah ibadah, muamalah, keluarga, dsb..."></textarea>
+  <button onclick="send()">Kirim</button>
+</div>
+
+<script>
+
+const uid =
+  localStorage.getItem("uid") ||
+  new URLSearchParams(location.search).get("uid");
+
+let sessionId = Date.now().toString();
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+
+/* ===== QUICK ===== */
+
+function askQuick(text){
+ input.value=text;
+ send();
+}
+
+/* ===== RENDER ===== */
+
+function add(role,text){
+ const div=document.createElement("div");
+ div.className="msg "+(role==="user"?"user":"ai");
+ div.innerHTML=text.replace(/\n/g,"<br>");
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+/* ===== SEND ===== */
+
+async function send(){
+
+ const prompt=input.value.trim();
+ if(!prompt) return;
+
+ add("user",prompt);
+ input.value="";
+
+ const typing=document.createElement("div");
+ typing.className="typing";
+ typing.textContent="Ustadz AI sedang mengetik...";
+ chat.appendChild(typing);
+
+ const res = await fetch("/assistant/ai",{
+  method:"POST",
+  headers:{ "content-type":"application/json" },
+  body:JSON.stringify({
+   uid,
+   prompt,
+   sessionId
+  })
+ });
+
+ typing.remove();
+
+ const data = await res.json();
+
+ if(data.answer)
+   add("ai",data.answer);
+ else
+   add("ai","⚠️ Tidak bisa menjawab saat ini.");
+
+}
+
+</script>
+
+</body>
+</html>
