@@ -1,175 +1,157 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Widget Shalat</title>
 
-<link rel="manifest" href="/manifest.json">
+<title>NoorRahma — Widget Shalat</title>
+
+<link rel="manifest" href="manifest.json">
 
 <style>
-html,body{
+body{
   margin:0;
-  height:100%;
-  background:#043b47;
   font-family:system-ui;
+  background:#08121f;
   color:white;
 }
 
-.wrap{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  height:100%;
-  text-align:center;
+.card{
+  margin:12px;
+  padding:16px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#0f9d77,#0b6);
 }
 
-h1{
-  font-size:22px;
-  margin:0;
-}
+.city{font-size:14px;opacity:.9}
+.time{font-size:40px;font-weight:700}
+.prayer{font-size:18px;margin-top:4px}
+.count{font-size:13px;opacity:.85}
 
-.time{
-  font-size:34px;
-  font-weight:bold;
-  margin:6px 0;
-}
-
-.city{
-  opacity:.8;
-  font-size:13px;
-}
-
-.countdown{
-  margin-top:10px;
-  font-size:14px;
-  opacity:.9;
-}
-
-.lock{
-  font-size:14px;
-  opacity:.8;
+button{
+  margin-top:14px;
+  padding:10px 16px;
+  border:none;
+  border-radius:12px;
+  background:#fff;
+  color:#111;
 }
 </style>
 </head>
 
 <body>
 
-<div class="wrap" id="app">
-  <div>⏳ memuat...</div>
+<div class="card">
+  <div class="city" id="city">Mendeteksi lokasi…</div>
+  <div class="time" id="time">--:--</div>
+  <div class="prayer" id="prayer">---</div>
+  <div class="count" id="count"></div>
+
+  <button onclick="reload()">Refresh</button>
 </div>
 
 <script>
-const API="https://noorrahma-app.pembang001.workers.dev";
+const API = "https://noorrahma-app.pembang001.workers.dev";
 
-const app=document.getElementById("app");
+let uid = localStorage.getItem("uid");
 
-let uid=localStorage.getItem("nr_uid");
+if(!uid){
+  uid = prompt("Masukkan UID aplikasi:");
+  if(uid) localStorage.setItem("uid",uid);
+}
 
-async function main(){
+async function reload(){
 
-  if(!uid){
-    app.innerHTML=
-      `<div class="lock">❌ UID tidak ditemukan</div>`;
-    return;
-  }
+  if(!uid) return;
 
-  const pro=await fetch(
+  const pro = await fetch(
     API+"/pro-status?uid="+uid
-  ).then(r=>r.json()).catch(()=>null);
+  ).then(r=>r.json());
 
-  if(!pro?.pro){
-    app.innerHTML=
-      `<div class="lock">🔒 Widget hanya untuk PRO</div>`;
+  if(!pro.pro){
+    document.body.innerHTML =
+      "<h2 style='padding:20px'>🚫 Widget hanya untuk akun PRO</h2>";
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(
-    pos=>loadPrayer(pos.coords),
-    ()=>app.innerHTML=`<div class="lock">📍 GPS dibutuhkan</div>`
-  );
+  navigator.geolocation.getCurrentPosition(async pos=>{
+
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    const res = await fetch(
+      `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=11`
+    );
+
+    const data = await res.json();
+
+    render(data.data);
+
+  });
+
 }
 
-async function loadPrayer(coords){
+function render(d){
 
-  const r=await fetch(
-    `https://api.aladhan.com/v1/timings?latitude=${coords.latitude}&longitude=${coords.longitude}&method=11`
-  );
+  const city =
+    d.meta.timezone.replace("_"," ");
 
-  const j=await r.json();
+  const t = d.timings;
 
-  const times=j.data.timings;
+  document.getElementById("city").innerText = city;
 
-  renderNext(times,j.data.meta.timezone);
-}
+  const now = new Date();
 
-function renderNext(times){
-
-  const now=new Date();
-
-  const order=[
-    ["Fajr","Subuh"],
-    ["Dhuhr","Dzuhur"],
-    ["Asr","Ashar"],
-    ["Maghrib","Maghrib"],
-    ["Isha","Isya"]
+  const list = [
+    ["Fajr",t.Fajr],
+    ["Dhuhr",t.Dhuhr],
+    ["Asr",t.Asr],
+    ["Maghrib",t.Maghrib],
+    ["Isha",t.Isha],
   ];
 
-  let next=null;
+  for(const [name,val] of list){
 
-  for(const [k,label] of order){
+    const [h,m]=val.split(":");
+    const dt = new Date();
+    dt.setHours(h,m,0);
 
-    const [h,m]=times[k].split(":");
-
-    const d=new Date();
-    d.setHours(h);
-    d.setMinutes(m);
-    d.setSeconds(0);
-
-    if(d>now){
-      next={label,time:times[k]};
-      break;
+    if(dt > now){
+      show(name,val,dt-now);
+      return;
     }
   }
 
-  if(!next){
-    app.innerHTML="<div>🌙 Shalat selesai hari ini</div>";
-    return;
-  }
-
-  app.innerHTML=`
-    <h1>${next.label}</h1>
-    <div class="time">${next.time}</div>
-    <div class="countdown" id="cd"></div>
-  `;
-
-  startCountdown(next.time);
 }
 
-function startCountdown(t){
+function show(name,time,ms){
 
-  const [h,m]=t.split(":");
+  document.getElementById("prayer").innerText =
+    "Shalat berikutnya: "+name;
 
-  const target=new Date();
-  target.setHours(h);
-  target.setMinutes(m);
-  target.setSeconds(0);
+  document.getElementById("time").innerText = time;
+
+  tick(ms);
+}
+
+function tick(ms){
+
+  const el = document.getElementById("count");
 
   setInterval(()=>{
-    const diff=target-new Date();
+    ms-=1000;
 
-    if(diff<=0) return;
+    const h=Math.floor(ms/3600000);
+    const m=Math.floor(ms/60000)%60;
+    const s=Math.floor(ms/1000)%60;
 
-    const min=Math.floor(diff/60000);
-    const sec=Math.floor((diff%60000)/1000);
+    el.innerText=`${h}j ${m}m ${s}d`;
 
-    document.getElementById("cd").textContent=
-      `⏳ ${min}m ${sec}s`;
   },1000);
+
 }
 
-main();
+reload();
 </script>
 
 </body>
