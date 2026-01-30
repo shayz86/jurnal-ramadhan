@@ -2,177 +2,475 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Doa Lengkap — NoorRahma</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Doa Premium - NoorRahma</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter&family=Amiri&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json" />
 
 <style>
-body { font-family: Inter }
-.font-arab { font-family: Amiri }
+body {
+  margin:0;
+  background:#020617;
+  color:white;
+  font-family:system-ui;
+}
+
+/* ===== FIXED TOP AREA ===== */
+
+.top-area {
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:10;
+  background:#020617;
+}
+
+header {
+  padding:18px;
+  font-weight:bold;
+  font-size:20px;
+  text-align:center;
+  background:linear-gradient(to right,#059669,#10b981);
+}
+
+/* ===== SEARCH ===== */
+
+.search-wrap{
+  padding:0 15px 6px;
+  display:flex;
+  justify-content:center;
+}
+
+.search-wrap input{
+  width:100%;
+  max-width:420px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid #334155;
+  background:#020617;
+  color:white;
+  outline:none;
+  font-size:13px;
+}
+
+/* ===== CATEGORIES ===== */
+
+.categories {
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:10px 15px 15px;
+}
+
+.categories button {
+  background:#0f172a;
+  border:1px solid #334155;
+  color:white;
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.categories button.active {
+  background:#10b981;
+  border:none;
+}
+
+/* ===== CONTENT ===== */
+
+.list {
+  padding:15px;
+  display:grid;
+  gap:16px;
+  margin-top:185px;
+}
+
+.card {
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:16px;
+  padding:16px;
+  position:relative;
+}
+
+.card h4 {
+  margin:0 0 8px;
+  font-size:14px;
+  color:#34d399;
+}
+
+.fav{
+  position:absolute;
+  right:12px;
+  top:12px;
+  font-size:18px;
+  cursor:pointer;
+  opacity:.5;
+}
+
+.fav.active{
+  opacity:1;
+  color:#f43f5e;
+}
+
+.arab {
+  text-align:right;
+  font-size:26px;
+  line-height:1.8;
+}
+
+.latin {
+  font-style:italic;
+  color:#a7f3d0;
+  margin-top:10px;
+}
+
+.arti {
+  font-size:13px;
+  opacity:.85;
+  margin-top:8px;
+}
 </style>
-
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
 
-<div id="app" class="max-w-md mx-auto p-4 space-y-4"></div>
+<body>
+
+<div class="top-area">
+  <header>📿 Kumpulan Doa</header>
+
+  <div class="search-wrap">
+    <input id="search" placeholder="Cari doa, arti, latin..." />
+  </div>
+
+  <div class="categories" id="cats"></div>
+</div>
+
+<div class="list" id="list"></div>
 
 <script>
 
-const categories = [
-  "semua","harian","ramadhan","stres","hutang","sakit",
-  "rezeki","keluarga","anak","kerja"
+const categories=[
+ "semua","harian","ramadhan","stres","hutang",
+ "sakit","rezeki","keluarga","anak","kerja"
 ];
 
-const doaData = [
+const data=[
 
 /* ================= HARIAN ================= */
-{
-cat:"harian",
-title:"Doa Bangun Tidur",
-arab:"الْحَمْدُ لِلّٰهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
-latin:"Alhamdulillāhilladzī aḥyā-nā ba‘da mā amātanā wa ilaihin-nusyūr.",
-arti:"Segala puji bagi Allah yang menghidupkan kami setelah mematikan kami, dan kepada-Nya kami kembali."
-},
-{
-cat:"harian",
-title:"Doa Masuk Rumah",
-arab:"اللّٰهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ",
-latin:"Allāhumma innī as’aluka khairal mauliji wa khairal makhraji.",
-arti:"Ya Allah, aku memohon kepada-Mu sebaik-baik tempat masuk dan keluar."
-},
-{
-cat:"harian",
-title:"Doa Keluar Rumah",
-arab:"بِسْمِ اللّٰهِ تَوَكَّلْتُ عَلَى اللّٰهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ",
-latin:"Bismillāhi tawakkaltu ‘alallāh, lā ḥaula wa lā quwwata illā billāh.",
-arti:"Dengan nama Allah aku bertawakal kepada-Nya, tidak ada daya dan kekuatan kecuali dengan-Nya."
-},
-{
-cat:"harian",
-title:"Doa Sebelum Tidur",
-arab:"بِاسْمِكَ اللّٰهُمَّ أَحْيَا وَأَمُوتُ",
-latin:"Bismikallāhumma aḥyā wa amūt.",
-arti:"Dengan nama-Mu ya Allah aku hidup dan mati."
-},
-{
-cat:"harian",
-title:"Doa Mohon Perlindungan",
-arab:"أَعُوذُ بِكَلِمَاتِ اللّٰهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
-latin:"A‘ūdzu bikalimātillāhit-tāmmāti min syarri mā khalaq.",
-arti:"Aku berlindung dengan kalimat Allah yang sempurna dari kejahatan makhluk-Nya."
-},
+
+{cat:"harian", title:"Doa Pagi",
+arab:"اَللّٰهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+latin:"Allahumma bika ashbahnaa wa bika amsaynaa wa bika nahyaa wa bika namuutu wa ilaikan-nusyuur.",
+arti:"Ya Allah, dengan-Mu kami memasuki pagi dan dengan-Mu kami memasuki petang, dengan-Mu kami hidup dan dengan-Mu kami mati dan kepada-Mu kami dibangkitkan."},
+
+{cat:"harian",title:"Doa Keluar Rumah",
+arab:"بِسْمِ اللّٰهِ تَوَكَّلْتُ عَلَى اللّٰهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ",
+latin:"Bismillaahi tawakkaltu ‘alallaah laa hawla wa laa quwwata illaa billaah.",
+arti:"Dengan nama Allah aku bertawakal kepada Allah, tidak ada daya dan kekuatan kecuali dengan pertolongan Allah."},
+
+{cat:"harian",title:"Doa Masuk Rumah",
+arab:"اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ",
+latin:"Allahumma innii as-aluka khairal-mauliji wa khairal-makhraji.",
+arti:"Ya Allah aku memohon kepada-Mu sebaik-baik tempat masuk dan sebaik-baik tempat keluar."},
+
+{cat:"harian",title:"Doa Sebelum Tidur",
+arab:"بِاسْمِكَ اللّٰهُمَّ أَحْيَا وَبِاسْمِكَ أَمُوتُ",
+latin:"Bismikallaahumma ahyaa wa amuut.",
+arti:"Dengan nama-Mu ya Allah aku hidup dan aku mati."},
+
+{cat:"harian",title:"Doa Bangun Tidur",
+arab:"الْحَمْدُ لِلّٰهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا",
+latin:"Alhamdulillaahil-ladzii ahyaanaa ba’da maa amaatanaa.",
+arti:"Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami."},
 
 /* ================= RAMADHAN ================= */
-{
-cat:"ramadhan",
-title:"Niat Puasa",
-arab:"نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ لِلّٰهِ تَعَالَى",
-latin:"Nawaitu shauma ghadin ‘an adā’i farḍi syahri Ramaḍāna lillāhi ta‘ālā.",
-arti:"Aku niat puasa esok hari untuk menunaikan kewajiban Ramadhan karena Allah."
-},
-{
-cat:"ramadhan",
-title:"Doa Berbuka",
-arab:"اَللّٰهُمَّ لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ",
-latin:"Allāhumma laka shumtu wa bika āmantu wa ‘alā rizqika afṭartu.",
-arti:"Ya Allah, kepada-Mu aku berpuasa, kepada-Mu aku beriman, dan dengan rezeki-Mu aku berbuka."
-},
-{
-cat:"ramadhan",
-title:"Lailatul Qadar",
-arab:"اللّٰهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي",
-latin:"Allāhumma innaka ‘afuwwun tuḥibbul ‘afwa fa‘fu ‘annī.",
-arti:"Ya Allah, Engkau Maha Pemaaf dan menyukai maaf, maka maafkanlah aku."
-},
-{
-cat:"ramadhan",
-title:"Doa Qunut Witir",
-arab:"اللّٰهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ وَعَافِنِي فِيمَنْ عَافَيْتَ...",
-latin:"Allāhummahdinī fīman hadait wa ‘āfinī fīman ‘āfait...",
-arti:"Ya Allah, berilah aku petunjuk dan kesehatan sebagaimana orang yang Engkau beri."
-},
-{
-cat:"ramadhan",
-title:"Doa Khatam Quran",
-arab:"اللّٰهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا",
-latin:"Allāhummarḥamnī bil-Qur’ān waj‘alhu lī imāman wa nūran.",
-arti:"Ya Allah, rahmatilah aku dengan Al-Qur’an dan jadikan ia pemimpin dan cahaya."
-},
+
+{cat:"ramadhan",title:"Doa Puasa",
+arab:"نَوَيْتُ صَوْمَ غَدٍ عَنْ أَدَاءِ فَرْضِ شَهْرِ رَمَضَانَ",
+latin:"Nawaitu shauma ghadin ‘an adaa-i fardhi syahri ramadhaan.",
+arti:"Aku berniat puasa esok hari untuk menunaikan kewajiban bulan Ramadhan."},
+
+{cat:"ramadhan",title:"Doa Berbuka",
+arab:"ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللّٰهُ",
+latin:"Dzahabazh-zhama’u wabtallatil ‘uruuq wa tsabatal ajru in syaa Allah.",
+arti:"Telah hilang dahaga, telah basah urat-urat, dan insyaAllah telah tetap pahala."},
+
+{cat:"ramadhan",title:"Doa Lailatul Qadar",
+arab:"اَللّٰهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي",
+latin:"Allahumma innaka ‘afuwwun tuhibbul ‘afwa fa’fu ‘annii.",
+arti:"Ya Allah Engkau Maha Pemaaf dan menyukai pemaafan, maka maafkanlah aku."},
+
+{cat:"ramadhan",title:"Doa Sahur",
+arab:"اَللّٰهُمَّ بَارِكْ لَنَا فِي رِزْقِنَا",
+latin:"Allahumma baarik lanaa fii rizqinaa.",
+arti:"Ya Allah berkahilah rezeki yang Engkau berikan kepada kami."},
+
+{cat:"ramadhan",title:"Doa Iktikaf",
+arab:"اللَّهُمَّ إِنِّي أَسْأَلُكَ رَحْمَتَكَ",
+latin:"Allahumma inni as-aluka rahmataka.",
+arti:"Ya Allah aku memohon rahmat-Mu."},
 
 /* ================= STRES ================= */
-{
-cat:"stres",
-title:"Mohon Ketenangan",
-arab:"اللّٰهُمَّ إِنِّي عَبْدُكَ ابْنُ عَبْدِكَ ابْنُ أَمَتِكَ نَاصِيَتِي بِيَدِكَ",
-latin:"Allāhumma innī ‘abduka ibnu ‘abdika ibnu amatika...",
-arti:"Ya Allah, aku adalah hamba-Mu, anak hamba-Mu..."
-},
-{
-cat:"stres",
-title:"Hilangkan Kesedihan",
-arab:"اللّٰهُمَّ أَذْهِبْ عَنِّي الْهَمَّ وَالْحَزَنَ",
-latin:"Allāhumma adzhhib ‘annil-hamma wal-ḥazan.",
-arti:"Ya Allah, hilangkan dariku kesedihan dan kegundahan."
-},
-{
-cat:"stres",
-title:"Doa Lapang Dada",
-arab:"رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي",
-latin:"Rabbishraḥ lī ṣadrī wa yassir lī amrī.",
-arti:"Wahai Tuhanku, lapangkan dadaku dan mudahkan urusanku."
-},
-{
-cat:"stres",
-title:"Mohon Perlindungan Jiwa",
-arab:"اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ",
-latin:"Allāhumma innī a‘ūdzu bika minal-hamm.",
-arti:"Ya Allah aku berlindung dari kesedihan."
-},
-{
-cat:"stres",
-title:"Pasrah Kepada Allah",
+
+{cat:"stres",title:"Doa Ketenangan",
+arab:"اَللّٰهُمَّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي",
+latin:"Allahummasyrakh lii shadrii wa yassir lii amrii.",
+arti:"Ya Allah lapangkanlah dadaku dan mudahkanlah urusanku."},
+
+{cat:"stres",title:"Doa Hilang Cemas",
 arab:"حَسْبِيَ اللّٰهُ لَا إِلٰهَ إِلَّا هُوَ",
-latin:"Ḥasbiyallāhu lā ilāha illā huwa.",
-arti:"Cukuplah Allah bagiku, tiada Tuhan selain Dia."
-},
+latin:"Hasbiyallaahu laa ilaaha illaa huwa.",
+arti:"Cukuplah Allah bagiku, tiada Tuhan selain Dia."},
+
+{cat:"stres",title:"Doa Kesabaran",
+arab:"رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا",
+latin:"Rabbanaa afrigh ‘alainaa shabran.",
+arti:"Wahai Tuhan kami limpahkanlah kesabaran kepada kami."},
+
+{cat:"stres",title:"Doa Pasrah",
+arab:"تَوَكَّلْتُ عَلَى اللّٰهِ",
+latin:"Tawakkaltu ‘alallaah.",
+arti:"Aku bertawakal kepada Allah."},
+
+{cat:"stres",title:"Doa Dada Lapang",
+arab:"رَبِّ اشْرَحْ لِي صَدْرِي",
+latin:"Rabbi isyrah lii shadrii.",
+arti:"Ya Tuhanku lapangkanlah dadaku."},
+
+/* ================= HUTANG ================= */
+
+{cat:"hutang",title:"Doa Lunasi Hutang",
+arab:"اَللّٰهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ",
+latin:"Allahummakfinii bihalaalika ‘an haraamika wa aghninii bifadhlika ‘amman siwaaka.",
+arti:"Ya Allah, cukupkanlah aku dengan rezeki halal-Mu dari yang haram dan kayakanlah aku dengan karunia-Mu dari selain-Mu."},
+
+{cat:"hutang",title:"Doa Lepas Kesempitan",
+arab:"رَبِّ إِنِّي لِمَا أَنْزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",
+latin:"Rabbi inni limaa anzalta ilayya min khairin faqiir.",
+arti:"Ya Tuhanku, sungguh aku sangat membutuhkan kebaikan yang Engkau turunkan kepadaku."},
+
+{cat:"hutang",title:"Doa Perlindungan dari Beban",
+arab:"اَللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ وَأَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ وَأَعُوذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ وَأَعُوذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَالِ",
+latin:"Allahumma inni a‘uudzu bika minal hammi wal hazani wa a‘uudzu bika minal ‘ajzi wal kasali wa a‘uudzu bika minal jubni wal bukhli wa a‘uudzu bika min ghalabatid daini wa qahrir rijaal.",
+arti:"Ya Allah, aku berlindung kepada-Mu dari kesedihan dan kegelisahan, dari kelemahan dan kemalasan, dari sifat pengecut dan kikir, serta dari lilitan hutang dan penindasan manusia."},
+
+{cat:"hutang",title:"Doa Jalan Keluar",
+arab:"وَمَنْ يَتَّقِ اللّٰهَ يَجْعَلْ لَهُ مَخْرَجًا وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ",
+latin:"Wa may yattaqillaha yaj‘al lahu makhrajaa wa yarzuqhu min haitsu laa yahtasib.",
+arti:"Barangsiapa bertakwa kepada Allah niscaya Dia akan memberinya jalan keluar dan rezeki dari arah yang tidak disangka-sangka."},
+
+{cat:"hutang",title:"Doa Kecukupan",
+arab:"اَللّٰهُمَّ اغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ",
+latin:"Allahummaghninii bifadhlika ‘amman siwaaka.",
+arti:"Ya Allah, cukupkanlah aku dengan karunia-Mu dari bergantung kepada selain-Mu."},
+
+/* ================= SAKIT ================= */
+
+{cat:"sakit",title:"Doa Kesembuhan",
+arab:"اَللّٰهُمَّ اشْفِنِي شِفَاءً لَا يُغَادِرُ سَقَمًا",
+latin:"Allahummas yfinii shifaa’an laa yughaadiru saqamaa.",
+arti:"Ya Allah sembuhkanlah aku dengan kesembuhan yang tidak meninggalkan penyakit."},
+
+{cat:"sakit",title:"Doa Rasul untuk Orang Sakit",
+arab:"أَسْأَلُ اللّٰهَ الْعَظِيمَ رَبَّ الْعَرْشِ الْعَظِيمِ أَنْ يَشْفِيَكَ",
+latin:"As-alullaahal ‘azhiim rabbal ‘arsyil ‘azhiimi an yasyfiyaka.",
+arti:"Aku memohon kepada Allah Yang Maha Agung, Tuhan pemilik Arsy yang agung, agar menyembuhkanmu."},
+
+{cat:"sakit",title:"Doa Angkat Penyakit",
+arab:"اَللّٰهُمَّ رَبَّ النَّاسِ أَذْهِبِ الْبَأْسَ اشْفِ أَنْتَ الشَّافِي",
+latin:"Allahumma rabban naasi adzhibil ba’sa isyfi antas syaafii.",
+arti:"Ya Allah Tuhan manusia, hilangkanlah penyakit ini, sembuhkanlah, Engkaulah Maha Penyembuh."},
+
+{cat:"sakit",title:"Doa Perlindungan",
+arab:"بِسْمِ اللّٰهِ أَعُوذُ بِعِزَّةِ اللّٰهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ",
+latin:"Bismillaahi a‘uudzu bi‘izzatillaahi wa qudratihii min syarri maa ajidu wa uhaadzir.",
+arti:"Dengan nama Allah aku berlindung dengan keagungan dan kekuasaan-Nya dari keburukan yang aku rasakan."},
+
+{cat:"sakit",title:"Doa Saat Lemah",
+arab:"رَبِّ لَا تَذَرْنِي فَرْدًا وَأَنْتَ خَيْرُ الْوَارِثِينَ",
+latin:"Rabbi laa tadzarnii fardan wa anta khairul waaritsiin.",
+arti:"Ya Tuhanku, janganlah Engkau biarkan aku sendirian dan Engkaulah sebaik-baik pewaris."},
+
+/* ================= REZEKI ================= */
+
+{cat:"rezeki",title:"Doa Rezeki Halal",
+arab:"اَللّٰهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ",
+latin:"Allahummakfinii bihalaalika ‘an haraamika.",
+arti:"Ya Allah, cukupkan aku dengan rezeki halal-Mu dari yang haram."},
+
+{cat:"rezeki",title:"Doa Dilapangkan Rezeki",
+arab:"رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَارْزُقْنِي",
+latin:"Rabbighfirlii warhamnii warzuqnii.",
+arti:"Ya Tuhanku, ampunilah aku, rahmatilah aku dan berilah aku rezeki."},
+
+{cat:"rezeki",title:"Doa Kecukupan Hidup",
+arab:"اَللّٰهُمَّ اغْنِنَا بِفَضْلِكَ",
+latin:"Allahummagh ninaa bifadhlika.",
+arti:"Ya Allah, kayakanlah kami dengan karunia-Mu."},
+
+{cat:"rezeki",title:"Doa Rezeki Berkah",
+arab:"اَللّٰهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا",
+latin:"Allahumma baarik lanaa fiimaa razaqtanaa.",
+arti:"Ya Allah berkahilah rezeki yang Engkau berikan kepada kami."},
+
+{cat:"rezeki",title:"Doa Ketenangan Hidup",
+arab:"رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ",
+latin:"Rabbanaa hab lanaa min azwaajinaa wa dzurriyyaatinaa qurrata a‘yun.",
+arti:"Ya Tuhan kami, anugerahkanlah kepada kami pasangan dan keturunan sebagai penyejuk mata."},
+
+/* ================= KELUARGA ================= */
+
+{cat:"keluarga",title:"Doa Keluarga Sakinah",
+arab:"رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+latin:"Rabbanaa hab lanaa min azwaajinaa wa dzurriyyaatinaa qurrata a‘yun waj‘alnaa lil muttaqiina imaamaa.",
+arti:"Ya Tuhan kami, anugerahkan kepada kami pasangan dan keturunan sebagai penyejuk mata dan jadikanlah kami pemimpin bagi orang-orang bertakwa."},
+
+{cat:"keluarga",title:"Doa Keberkahan Rumah",
+arab:"اَللّٰهُمَّ بَارِكْ لَنَا فِي أَهْلِنَا وَمَالِنَا",
+latin:"Allahumma baarik lanaa fii ahlinaa wa maalinaa.",
+arti:"Ya Allah berkahilah keluarga dan harta kami."},
+
+{cat:"keluarga",title:"Doa Anak Shalih",
+arab:"رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِنْ ذُرِّيَّتِي",
+latin:"Rabbij‘alnii muqiimas shalaati wa min dzurriyyatii.",
+arti:"Ya Tuhanku, jadikanlah aku dan keturunanku orang-orang yang tetap mendirikan shalat."},
+
+{cat:"keluarga",title:"Doa Lindungi Keluarga",
+arab:"رَبِّ احْفَظْنِي وَأَهْلِي مِنَ السُّوءِ",
+latin:"Rabbi ihfaznii wa ahlii minas suu’.",
+arti:"Ya Tuhanku lindungilah aku dan keluargaku dari segala keburukan."},
+
+{cat:"keluarga",title:"Doa Rumah Tangga Damai",
+arab:"اَللّٰهُمَّ أَلِّفْ بَيْنَ قُلُوبِنَا وَاصْرِفْ عَنَّا الشَّيْطَانَ",
+latin:"Allahumma allif baina quluubinaa washrif ‘annaa asy syaithaan.",
+arti:"Ya Allah satukanlah hati kami dan jauhkanlah kami dari gangguan setan."},
+
+/* ================= ANAK ================= */
+
+{cat:"anak",title:"Doa Anak Saleh",
+arab:"رَبِّ هَبْ لِي مِنْ لَدُنْكَ ذُرِّيَّةً طَيِّبَةً إِنَّكَ سَمِيعُ الدُّعَاءِ",
+latin:"Rabbi hab lii min ladunka dzurriyyatan thayyibah innaka samii‘ud du‘aa.",
+arti:"Ya Tuhanku, anugerahkanlah kepadaku keturunan yang baik. Sesungguhnya Engkau Maha Mendengar doa."},
+
+{cat:"anak",title:"Doa Perlindungan Anak",
+arab:"أُعِيذُكُمَا بِكَلِمَاتِ اللّٰهِ التَّامَّةِ مِنْ كُلِّ شَيْطَانٍ وَهَامَّةٍ وَمِنْ كُلِّ عَيْنٍ لَامَّةٍ",
+latin:"U‘iidzukumaa bikalimaatillaahit taammati min kulli syaithaanin wa haammah wa min kulli ‘ainin laammah.",
+arti:"Aku melindungi kalian dengan kalimat-kalimat Allah yang sempurna dari setiap setan, gangguan, dan pandangan mata jahat."},
+
+{cat:"anak",title:"Doa Kecerdasan Anak",
+arab:"رَبِّ زِدْنِي عِلْمًا",
+latin:"Rabbi zidnii ‘ilmaa.",
+arti:"Ya Tuhanku, tambahkanlah aku ilmu."},
+
+{cat:"anak",title:"Doa Akhlak Baik",
+arab:"اَللّٰهُمَّ اهْدِهِ وَأَصْلِحْ شَأْنَهُ",
+latin:"Allahummah dihi wa aslih sya’nah.",
+arti:"Ya Allah, berilah ia petunjuk dan perbaikilah keadaannya."},
+
+{cat:"anak",title:"Doa Masa Depan Anak",
+arab:"اَللّٰهُمَّ اجْعَلْهُ مِنَ الصَّالِحِينَ وَفَتِّحْ لَهُ أَبْوَابَ الْخَيْرِ",
+latin:"Allahummaj‘alhu minas shaalihiin wa fattah lahu abwaabal khair.",
+arti:"Ya Allah, jadikanlah ia termasuk orang-orang saleh dan bukakanlah baginya pintu-pintu kebaikan."},
+
+/* ================= KERJA ================= */
+
+{cat:"kerja",title:"Doa Kemudahan Urusan",
+arab:"اَللّٰهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا",
+latin:"Allahumma laa sahla illaa maa ja‘altahu sahlaa wa anta taj‘alul hazna idzaa syi’ta sahlaa.",
+arti:"Ya Allah, tidak ada yang mudah kecuali apa yang Engkau jadikan mudah. Engkau dapat menjadikan kesulitan itu mudah bila Engkau kehendaki."},
+
+{cat:"kerja",title:"Doa Pekerjaan Berkah",
+arab:"اَللّٰهُمَّ بَارِكْ لِي فِي عَمَلِي",
+latin:"Allahumma baarik lii fii ‘amalii.",
+arti:"Ya Allah berkahilah pekerjaanku."},
+
+{cat:"kerja",title:"Doa Fokus dan Amanah",
+arab:"اَللّٰهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",
+latin:"Allahumma a‘innii ‘alaa dzikrika wa syukrika wa husni ‘ibaadatika.",
+arti:"Ya Allah bantulah aku untuk selalu mengingat-Mu, bersyukur kepada-Mu, dan beribadah dengan baik."},
+
+{cat:"kerja",title:"Doa Naik Jabatan",
+arab:"رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي",
+latin:"Rabbisyrah lii shadrii wa yassir lii amrii.",
+arti:"Ya Tuhanku lapangkanlah dadaku dan mudahkanlah urusanku."},
+
+{cat:"kerja",title:"Doa Rezeki Lewat Usaha",
+arab:"اَللّٰهُمَّ إِنِّي أَسْأَلُكَ رِزْقًا طَيِّبًا وَعَمَلًا مُتَقَبَّلًا",
+latin:"Allahumma innii as-aluka rizqan thayyiban wa ‘amalan mutaqabbalan.",
+arti:"Ya Allah, aku memohon kepada-Mu rezeki yang baik dan pekerjaan yang Engkau terima."},
 
 ];
 
-let activeCat="semua";
+/* ===== UI ===== */
 
-const app=document.getElementById("app");
+const catsDiv=document.getElementById("cats");
+const list=document.getElementById("list");
+const search=document.getElementById("search");
 
-function render(){
+let active="semua";
+let favs=JSON.parse(localStorage.getItem("doaFav")||"[]");
 
-const cats = `
-<div class="flex gap-2 overflow-x-auto pb-2">
-${categories.map(c=>`
-<button onclick="setCat('${c}')"
-class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap
-${activeCat===c?'bg-emerald-600 text-white':'bg-white border'}">
-${c.toUpperCase()}
-</button>
-`).join("")}
-</div>`;
+categories.forEach(c=>{
+ const b=document.createElement("button");
+ b.textContent=c.toUpperCase();
+ b.onclick=()=>select(c);
+ if(c==="semua")b.classList.add("active");
+ catsDiv.appendChild(b);
+});
 
-const list = doaData.filter(d=>activeCat==="semua"||d.cat===activeCat);
-
-const cards = list.map(d=>`
-<div class="bg-white dark:bg-slate-900 rounded-xl p-4 shadow border space-y-3">
-<h3 class="font-bold">${d.title}</h3>
-<p class="font-arab text-right text-2xl">${d.arab}</p>
-<p class="italic text-emerald-700">${d.latin}</p>
-<p class="text-sm text-slate-600">${d.arti}</p>
-</div>
-`).join("");
-
-app.innerHTML = cats + `<div class="space-y-4">${cards}</div>`;
+function select(cat){
+ active=cat;
+ [...catsDiv.children].forEach(x=>{
+  x.classList.toggle("active",x.textContent.toLowerCase()===cat);
+ });
+ render();
 }
 
-function setCat(c){activeCat=c;render()}
+search.oninput=render;
+
+function toggleFav(i){
+ if(favs.includes(i))
+   favs=favs.filter(x=>x!==i);
+ else favs.push(i);
+
+ localStorage.setItem("doaFav",JSON.stringify(favs));
+ render();
+}
+
+function render(){
+ list.innerHTML="";
+ const q=search.value.toLowerCase();
+
+ data
+ .filter(d=>
+  (active==="semua"||d.cat===active)&&
+  (
+   d.title.toLowerCase().includes(q)||
+   d.latin.toLowerCase().includes(q)||
+   d.arti.toLowerCase().includes(q)
+  )
+ )
+ .forEach(d=>{
+  const i=data.indexOf(d);
+  const div=document.createElement("div");
+  div.className="card";
+
+  const favActive=favs.includes(i);
+
+  div.innerHTML=`
+   <div class="fav ${favActive?"active":""}" onclick="toggleFav(${i})">❤</div>
+   <h4>${d.title}</h4>
+   <div class="arab">${d.arab}</div>
+   <div class="latin">${d.latin}</div>
+   <div class="arti">${d.arti}</div>
+  `;
+
+  list.appendChild(div);
+ });
+}
 
 render();
 
