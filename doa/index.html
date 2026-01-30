@@ -1,199 +1,180 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Doa Premium • NoorRahma</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Doa Premium — NoorRahma</title>
 
-  <link rel="icon" href="/icon-192.png" />
+<style>
+body {
+  margin:0;
+  font-family: system-ui, sans-serif;
+  background:#050b18;
+  color:white;
+}
 
-  <script src="https://cdn.tailwindcss.com"></script>
+header {
+  padding:18px;
+  font-size:20px;
+  font-weight:700;
+  background:linear-gradient(135deg,#059669,#10b981);
+}
 
-  <style>
-    body {
-      background: radial-gradient(circle at top, #0f172a, #020617);
-      color: white;
-    }
-  </style>
+.container {
+  padding:14px;
+}
+
+select {
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-bottom:14px;
+}
+
+.card {
+  background:#0f172a;
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.cat {
+  font-size:10px;
+  letter-spacing:.08em;
+  opacity:.7;
+  margin-bottom:6px;
+}
+
+.arab {
+  font-size:26px;
+  line-height:1.8;
+  text-align:right;
+}
+
+.latin {
+  margin-top:10px;
+  color:#34d399;
+  font-style:italic;
+}
+
+.arti {
+  opacity:.9;
+  margin-top:6px;
+  font-size:14px;
+}
+
+footer {
+  text-align:center;
+  opacity:.5;
+  font-size:11px;
+  margin:20px 0;
+}
+</style>
 </head>
 
-<body class="min-h-screen px-4 py-6">
+<body>
 
-<!-- HEADER -->
-<div class="flex items-center gap-3 mb-6">
+<header>🤲 Doa Premium</header>
 
-  <button onclick="history.back()"
-    class="bg-white/10 rounded-full px-3 py-2 active:scale-95">
-    ←
-  </button>
+<div class="container">
 
-  <div>
-    <h1 class="font-bold text-lg">Doa Premium</h1>
-    <p class="text-xs opacity-70">Khusus akun PRO</p>
-  </div>
+<select id="filter">
+<option value="semua">Semua</option>
+<option value="harian">Harian</option>
+<option value="ramadhan">Ramadhan</option>
+<option value="stres">Stres</option>
+<option value="hutang">Hutang</option>
+<option value="sakit">Sakit</option>
+<option value="rezeki">Rezeki</option>
+<option value="keluarga">Keluarga</option>
+<option value="anak">Anak</option>
+<option value="kerja">Kerja</option>
+</select>
 
-  <span
-    class="ml-auto bg-emerald-500/20 text-emerald-400
-    px-3 py-1 rounded-full text-xs font-bold">
-    PRO
-  </span>
+<div id="list"></div>
 
-</div>
-
-<!-- CATEGORY -->
-<div class="flex gap-2 overflow-x-auto mb-6 pb-2">
-
-  <button class="cat-btn bg-emerald-600 px-4 py-2 rounded-full text-xs font-bold">
-    Semua
-  </button>
-
-  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
-    Harian
-  </button>
-
-  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
-    Rezeki
-  </button>
-
-  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
-    Perlindungan
-  </button>
-
-  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
-    Ramadhan
-  </button>
+<footer>© NoorRahma PRO</footer>
 
 </div>
-
-<!-- DOA LIST -->
-<div id="doaList" class="space-y-4"></div>
 
 <script>
-const doaData = [
-  {
-    id:1,
-    kategori:"Harian",
-    judul:"Doa Bangun Tidur",
-    arab:"الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا...",
-    latin:"Alhamdulillahilladzi ahyana...",
-    arti:"Segala puji bagi Allah yang menghidupkan kami setelah mematikan kami."
-  },
-  {
-    id:2,
-    kategori:"Rezeki",
-    judul:"Doa Dilancarkan Rezeki",
-    arab:"اللَّهُمَّ اكْفِنِي بِحَلَالِكَ...",
-    latin:"Allahummakfini bihalalika...",
-    arti:"Ya Allah cukupkan aku dengan rezeki halal-Mu."
-  },
-  {
-    id:3,
-    kategori:"Perlindungan",
-    judul:"Doa Mohon Perlindungan",
-    arab:"اللَّهُمَّ إِنِّي أَعُوذُ بِكَ...",
-    latin:"Allahumma inni a'udzu bika...",
-    arti:"Aku berlindung kepada-Mu dari keburukan."
-  },
-  {
-    id:4,
-    kategori:"Ramadhan",
-    judul:"Doa Berbuka",
-    arab:"ذَهَبَ الظَّمَأُ...",
-    latin:"Dzahabazh zhama’u...",
-    arti:"Telah hilang dahaga..."
-  }
+const doa = [
+
+{cat:"harian",arab:"اللَّهُمَّ بِاسْمِكَ أَمُوتُ وَأَحْيَا",latin:"Allahumma bismika amuutu wa ahyaa.",arti:"Ya Allah, dengan nama-Mu aku mati dan hidup."},
+
+{cat:"harian",arab:"رَبِّ زِدْنِي عِلْمًا",latin:"Rabbi zidnii 'ilmaa.",arti:"Ya Rabb, tambahkanlah kepadaku ilmu."},
+
+{cat:"rezeki",arab:"اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ",latin:"Allahummakfinii bihalaalika 'an haraamika.",arti:"Ya Allah, cukupkan aku dengan yang halal dari yang haram."},
+
+{cat:"hutang",arab:"اللَّهُمَّ اقْضِ عَنِّي الدَّيْنَ",latin:"Allahummaqdhi 'annid dain.",arti:"Ya Allah, lunasilah hutangku."},
+
+{cat:"sakit",arab:"اللَّهُمَّ اشْفِنِي شِفَاءً لَا يُغَادِرُ سَقَمًا",latin:"Allahummashfinii shifaa'an laa yughaadiru saqamaa.",arti:"Ya Allah, sembuhkan aku dengan kesembuhan sempurna."},
+
+{cat:"stres",arab:"اللَّهُمَّ اشْرَحْ لِي صَدْرِي",latin:"Allahummashrah lii shadrii.",arti:"Ya Allah, lapangkanlah dadaku."},
+
+{cat:"keluarga",arab:"رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ",latin:"Rabbanaa hab lanaa min azwaajinaa wa dzurriyyaatinaa qurrata a'yun.",arti:"Ya Rabb, anugerahkan keluarga penyejuk hati."},
+
+{cat:"anak",arab:"رَبِّ هَبْ لِي مِنَ الصَّالِحِينَ",latin:"Rabbi hab lii minas shaalihiin.",arti:"Ya Rabb, karuniakan anak yang saleh."},
+
+{cat:"kerja",arab:"اللَّهُمَّ بَارِكْ لِي فِي عَمَلِي",latin:"Allahumma baarik lii fii 'amalii.",arti:"Ya Allah, berkahilah pekerjaanku."},
+
+{cat:"ramadhan",arab:"اللَّهُمَّ بَلِّغْنَا رَمَضَانَ",latin:"Allahumma ballighnaa Ramadhaan.",arti:"Ya Allah, sampaikan kami ke Ramadhan."},
+
+{cat:"ramadhan",arab:"اللَّهُمَّ تَقَبَّلْ صِيَامَنَا",latin:"Allahumma taqabbal shiyaamanaa.",arti:"Ya Allah, terimalah puasa kami."},
+
+{cat:"stres",arab:"حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ",latin:"Hasbiyallaahu laa ilaaha illaa Huwa.",arti:"Cukuplah Allah bagiku."},
+
+{cat:"rezeki",arab:"رَبِّ إِنِّي لِمَا أَنْزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",latin:"Rabbi innii limaa anzalta ilayya min khairin faqiir.",arti:"Ya Rabb, aku butuh kebaikan dari-Mu."},
+
+{cat:"sakit",arab:"أَذْهِبِ الْبَأْسَ رَبَّ النَّاسِ",latin:"Adhhib il-ba'sa Rabbann-naas.",arti:"Hilangkan penyakit wahai Rabb manusia."},
+
+{cat:"keluarga",arab:"رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ",latin:"Rabbighfir lii waliwaalidayya.",arti:"Ya Rabb, ampunilah aku dan orang tuaku."},
+
+{cat:"anak",arab:"اللَّهُمَّ اجْعَلْهُمْ مِنَ الصَّالِحِينَ",latin:"Allahummaj'alhum minas shaalihiin.",arti:"Ya Allah, jadikan mereka anak saleh."},
+
+{cat:"kerja",arab:"اللَّهُمَّ يَسِّرْ وَلَا تُعَسِّرْ",latin:"Allahumma yassir walaa tu'assir.",arti:"Ya Allah mudahkanlah, jangan persulit."},
+
+{cat:"harian",arab:"أَسْتَغْفِرُ اللَّهَ",latin:"Astaghfirullaah.",arti:"Aku memohon ampun kepada Allah."},
+
+{cat:"harian",arab:"سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",latin:"Subhaanallaahi wa bihamdih.",arti:"Maha Suci Allah dan segala puji bagi-Nya."},
+
+{cat:"hutang",arab:"اللَّهُمَّ اكْفِنِي فَقْرِي",latin:"Allahummakfinii faqrii.",arti:"Ya Allah, cukupkan aku dari kefakiran."},
+
+{cat:"rezeki",arab:"اللَّهُمَّ ارْزُقْنِي رِزْقًا طَيِّبًا",latin:"Allahummarzuqnii rizqan thayyibaa.",arti:"Ya Allah, berilah rezeki yang baik."},
+
+{cat:"stres",arab:"رَبِّ لَا تَذَرْنِي فَرْدًا",latin:"Rabbi laa tazarnii fardaa.",arti:"Ya Rabb jangan biarkan aku sendiri."},
+
+{cat:"sakit",arab:"اللَّهُمَّ عَافِنِي",latin:"Allahumma 'aafinii.",arti:"Ya Allah, sehatkanlah aku."},
+
+{cat:"keluarga",arab:"اللَّهُمَّ أَصْلِحْ لِي أَهْلِي",latin:"Allahumma ashlih lii ahlii.",arti:"Ya Allah, perbaikilah keluargaku."},
+
+{cat:"anak",arab:"رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِنْ ذُرِّيَّتِي",latin:"Rabbij'alnii muqiimash-shalaah wa min dzurriyyatii.",arti:"Ya Rabb, jadikan aku dan anakku ahli shalat."},
+
+{cat:"kerja",arab:"اللَّهُمَّ وَفِّقْنِي",latin:"Allahumma waffiqnii.",arti:"Ya Allah, berilah aku taufik."}
+
 ];
 
-const listEl = document.getElementById("doaList");
+const list=document.getElementById("list");
+const filter=document.getElementById("filter");
 
-function renderDoa(filter="Semua") {
-  listEl.innerHTML = "";
-
-  doaData
-    .filter(d => filter==="Semua" || d.kategori===filter)
-    .forEach(d => {
-
-      const card = document.createElement("div");
-      card.className =
-        "bg-white/5 border border-white/10 rounded-xl overflow-hidden";
-
-      card.innerHTML = `
-        <button
-          class="w-full p-4 flex justify-between items-center"
-          onclick="toggleDoa(${d.id})">
-
-          <div>
-            <span class="text-[10px] uppercase opacity-60">${d.kategori}</span>
-            <h3 class="font-bold">${d.judul}</h3>
-          </div>
-
-          <span id="icon-${d.id}">+</span>
-        </button>
-
-        <div
-          id="body-${d.id}"
-          class="hidden px-5 pb-5">
-
-          <p dir="rtl"
-            class="text-2xl text-right leading-loose mb-3">
-            ${d.arab}
-          </p>
-
-          <p class="italic text-emerald-400 mb-2">
-            "${d.latin}"
-          </p>
-
-          <p class="text-sm opacity-80">
-            ${d.arti}
-          </p>
-        </div>
-      `;
-
-      listEl.appendChild(card);
-    });
-}
-
-function toggleDoa(id) {
-
-  const body = document.getElementById("body-"+id);
-  const icon = document.getElementById("icon-"+id);
-
-  const isOpen = !body.classList.contains("hidden");
-
-  document
-    .querySelectorAll("[id^='body-']")
-    .forEach(e => e.classList.add("hidden"));
-
-  document
-    .querySelectorAll("[id^='icon-']")
-    .forEach(e => e.innerText = "+");
-
-  if (!isOpen) {
-    body.classList.remove("hidden");
-    icon.innerText = "−";
-  }
-}
-
-renderDoa();
-
-document.querySelectorAll(".cat-btn")
-  .forEach(btn=>{
-    btn.onclick = () => {
-
-      document
-        .querySelectorAll(".cat-btn")
-        .forEach(b=>{
-          b.className =
-            "cat-btn bg-white/10 px-4 py-2 rounded-full text-xs";
-        });
-
-      btn.className =
-        "cat-btn bg-emerald-600 px-4 py-2 rounded-full text-xs font-bold";
-
-      renderDoa(btn.innerText);
-    }
+function render(){
+  list.innerHTML="";
+  doa.filter(d=>filter.value==="semua"||d.cat===filter.value)
+  .forEach(d=>{
+    list.innerHTML+=`
+    <div class="card">
+      <div class="cat">${d.cat.toUpperCase()}</div>
+      <div class="arab">${d.arab}</div>
+      <div class="latin">"${d.latin}"</div>
+      <div class="arti">${d.arti}</div>
+    </div>`;
   });
+}
 
+filter.onchange=render;
+render();
 </script>
 
 </body>
