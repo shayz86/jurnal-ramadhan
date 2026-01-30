@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doa Premium • NoorRahma</title>
+
+  <link rel="icon" href="/icon-192.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen px-4 py-6">
+
+<!-- HEADER -->
+<div class="flex items-center gap-3 mb-6">
+
+  <button onclick="history.back()"
+    class="bg-white/10 rounded-full px-3 py-2 active:scale-95">
+    ←
+  </button>
+
+  <div>
+    <h1 class="font-bold text-lg">Doa Premium</h1>
+    <p class="text-xs opacity-70">Khusus akun PRO</p>
+  </div>
+
+  <span
+    class="ml-auto bg-emerald-500/20 text-emerald-400
+    px-3 py-1 rounded-full text-xs font-bold">
+    PRO
+  </span>
+
+</div>
+
+<!-- CATEGORY -->
+<div class="flex gap-2 overflow-x-auto mb-6 pb-2">
+
+  <button class="cat-btn bg-emerald-600 px-4 py-2 rounded-full text-xs font-bold">
+    Semua
+  </button>
+
+  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
+    Harian
+  </button>
+
+  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
+    Rezeki
+  </button>
+
+  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
+    Perlindungan
+  </button>
+
+  <button class="cat-btn bg-white/10 px-4 py-2 rounded-full text-xs">
+    Ramadhan
+  </button>
+
+</div>
+
+<!-- DOA LIST -->
+<div id="doaList" class="space-y-4"></div>
+
+<script>
+const doaData = [
+  {
+    id:1,
+    kategori:"Harian",
+    judul:"Doa Bangun Tidur",
+    arab:"الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا...",
+    latin:"Alhamdulillahilladzi ahyana...",
+    arti:"Segala puji bagi Allah yang menghidupkan kami setelah mematikan kami."
+  },
+  {
+    id:2,
+    kategori:"Rezeki",
+    judul:"Doa Dilancarkan Rezeki",
+    arab:"اللَّهُمَّ اكْفِنِي بِحَلَالِكَ...",
+    latin:"Allahummakfini bihalalika...",
+    arti:"Ya Allah cukupkan aku dengan rezeki halal-Mu."
+  },
+  {
+    id:3,
+    kategori:"Perlindungan",
+    judul:"Doa Mohon Perlindungan",
+    arab:"اللَّهُمَّ إِنِّي أَعُوذُ بِكَ...",
+    latin:"Allahumma inni a'udzu bika...",
+    arti:"Aku berlindung kepada-Mu dari keburukan."
+  },
+  {
+    id:4,
+    kategori:"Ramadhan",
+    judul:"Doa Berbuka",
+    arab:"ذَهَبَ الظَّمَأُ...",
+    latin:"Dzahabazh zhama’u...",
+    arti:"Telah hilang dahaga..."
+  }
+];
+
+const listEl = document.getElementById("doaList");
+
+function renderDoa(filter="Semua") {
+  listEl.innerHTML = "";
+
+  doaData
+    .filter(d => filter==="Semua" || d.kategori===filter)
+    .forEach(d => {
+
+      const card = document.createElement("div");
+      card.className =
+        "bg-white/5 border border-white/10 rounded-xl overflow-hidden";
+
+      card.innerHTML = `
+        <button
+          class="w-full p-4 flex justify-between items-center"
+          onclick="toggleDoa(${d.id})">
+
+          <div>
+            <span class="text-[10px] uppercase opacity-60">${d.kategori}</span>
+            <h3 class="font-bold">${d.judul}</h3>
+          </div>
+
+          <span id="icon-${d.id}">+</span>
+        </button>
+
+        <div
+          id="body-${d.id}"
+          class="hidden px-5 pb-5">
+
+          <p dir="rtl"
+            class="text-2xl text-right leading-loose mb-3">
+            ${d.arab}
+          </p>
+
+          <p class="italic text-emerald-400 mb-2">
+            "${d.latin}"
+          </p>
+
+          <p class="text-sm opacity-80">
+            ${d.arti}
+          </p>
+        </div>
+      `;
+
+      listEl.appendChild(card);
+    });
+}
+
+function toggleDoa(id) {
+
+  const body = document.getElementById("body-"+id);
+  const icon = document.getElementById("icon-"+id);
+
+  const isOpen = !body.classList.contains("hidden");
+
+  document
+    .querySelectorAll("[id^='body-']")
+    .forEach(e => e.classList.add("hidden"));
+
+  document
+    .querySelectorAll("[id^='icon-']")
+    .forEach(e => e.innerText = "+");
+
+  if (!isOpen) {
+    body.classList.remove("hidden");
+    icon.innerText = "−";
+  }
+}
+
+renderDoa();
+
+document.querySelectorAll(".cat-btn")
+  .forEach(btn=>{
+    btn.onclick = () => {
+
+      document
+        .querySelectorAll(".cat-btn")
+        .forEach(b=>{
+          b.className =
+            "cat-btn bg-white/10 px-4 py-2 rounded-full text-xs";
+        });
+
+      btn.className =
+        "cat-btn bg-emerald-600 px-4 py-2 rounded-full text-xs font-bold";
+
+      renderDoa(btn.innerText);
+    }
+  });
+
+</script>
+
+</body>
+</html>
