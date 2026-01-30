@@ -2,179 +2,248 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Doa Premium — NoorRahma</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<title>Doa Premium – NoorRahma</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Amiri:wght@400;700&display=swap"
+  rel="stylesheet"
+/>
 
 <style>
-body {
-  margin:0;
-  font-family: system-ui, sans-serif;
-  background:#050b18;
-  color:white;
-}
-
-header {
-  padding:18px;
-  font-size:20px;
-  font-weight:700;
-  background:linear-gradient(135deg,#059669,#10b981);
-}
-
-.container {
-  padding:14px;
-}
-
-select {
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:14px;
-}
-
-.card {
-  background:#0f172a;
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:12px;
-  border:1px solid rgba(255,255,255,.06);
-}
-
-.cat {
-  font-size:10px;
-  letter-spacing:.08em;
-  opacity:.7;
-  margin-bottom:6px;
-}
-
-.arab {
-  font-size:26px;
-  line-height:1.8;
-  text-align:right;
-}
-
-.latin {
-  margin-top:10px;
-  color:#34d399;
-  font-style:italic;
-}
-
-.arti {
-  opacity:.9;
-  margin-top:6px;
-  font-size:14px;
-}
-
-footer {
-  text-align:center;
-  opacity:.5;
-  font-size:11px;
-  margin:20px 0;
-}
+body { font-family: Inter,sans-serif; }
+.font-arab { font-family: Amiri,serif; }
 </style>
+
 </head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800">
 
-<body>
-
-<header>🤲 Doa Premium</header>
-
-<div class="container">
-
-<select id="filter">
-<option value="semua">Semua</option>
-<option value="harian">Harian</option>
-<option value="ramadhan">Ramadhan</option>
-<option value="stres">Stres</option>
-<option value="hutang">Hutang</option>
-<option value="sakit">Sakit</option>
-<option value="rezeki">Rezeki</option>
-<option value="keluarga">Keluarga</option>
-<option value="anak">Anak</option>
-<option value="kerja">Kerja</option>
-</select>
-
-<div id="list"></div>
-
-<footer>© NoorRahma PRO</footer>
-
-</div>
+<div id="app" class="max-w-md mx-auto p-4 space-y-5"></div>
 
 <script>
-const doa = [
 
-{cat:"harian",arab:"اللَّهُمَّ بِاسْمِكَ أَمُوتُ وَأَحْيَا",latin:"Allahumma bismika amuutu wa ahyaa.",arti:"Ya Allah, dengan nama-Mu aku mati dan hidup."},
+const categories = [
+  "semua","harian","ramadhan","stres","hutang",
+  "sakit","rezeki","keluarga","anak","kerja"
+];
 
-{cat:"harian",arab:"رَبِّ زِدْنِي عِلْمًا",latin:"Rabbi zidnii 'ilmaa.",arti:"Ya Rabb, tambahkanlah kepadaku ilmu."},
+const doaData = [
 
-{cat:"rezeki",arab:"اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ",latin:"Allahummakfinii bihalaalika 'an haraamika.",arti:"Ya Allah, cukupkan aku dengan yang halal dari yang haram."},
+/* ================= HARIAN ================= */
 
-{cat:"hutang",arab:"اللَّهُمَّ اقْضِ عَنِّي الدَّيْنَ",latin:"Allahummaqdhi 'annid dain.",arti:"Ya Allah, lunasilah hutangku."},
+{
+cat:"harian",
+title:"Doa Pagi",
+arab:"اللّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا...",
+latin:"Allahumma bika ashbahnaa...",
+arti:"Ya Allah, dengan-Mu kami memasuki pagi..."
+},
+{
+cat:"harian",
+title:"Doa Petang",
+arab:"اللّهُمَّ بِكَ أَمْسَيْنَا...",
+latin:"Allahumma bika amsainaa...",
+arti:"Ya Allah, dengan-Mu kami memasuki petang..."
+},
+{
+cat:"harian",
+title:"Sebelum Tidur",
+arab:"بِاسْمِكَ اللّهُمَّ أَحْيَا وَأَمُوتُ",
+latin:"Bismikallahumma ahyaa wa amuut",
+arti:"Dengan nama-Mu ya Allah aku hidup dan mati."
+},
+{
+cat:"harian",
+title:"Keluar Rumah",
+arab:"بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ",
+latin:"Bismillah tawakkaltu ‘alallah",
+arti:"Dengan nama Allah aku bertawakal..."
+},
+{
+cat:"harian",
+title:"Masuk Rumah",
+arab:"اللّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ...",
+latin:"Allahumma inni as'aluka khayral maulij...",
+arti:"Ya Allah aku memohon sebaik-baik tempat masuk..."
+},
 
-{cat:"sakit",arab:"اللَّهُمَّ اشْفِنِي شِفَاءً لَا يُغَادِرُ سَقَمًا",latin:"Allahummashfinii shifaa'an laa yughaadiru saqamaa.",arti:"Ya Allah, sembuhkan aku dengan kesembuhan sempurna."},
+/* ================= RAMADHAN ================= */
 
-{cat:"stres",arab:"اللَّهُمَّ اشْرَحْ لِي صَدْرِي",latin:"Allahummashrah lii shadrii.",arti:"Ya Allah, lapangkanlah dadaku."},
+{
+cat:"ramadhan",
+title:"Niat Puasa",
+arab:"نَوَيْتُ صَوْمَ غَدٍ...",
+latin:"Nawaitu shauma ghadin...",
+arti:"Aku berniat puasa esok hari..."
+},
+{
+cat:"ramadhan",
+title:"Berbuka",
+arab:"اللّهُمَّ لَكَ صُمْتُ...",
+latin:"Allahumma laka shumtu...",
+arti:"Ya Allah untuk-Mu aku berpuasa..."
+},
+{
+cat:"ramadhan",
+title:"Lailatul Qadar",
+arab:"اللَّهُمَّ إِنَّكَ عَفُوٌّ...",
+latin:"Allahumma innaka ‘afuwwun...",
+arti:"Ya Allah Engkau Maha Pemaaf..."
+},
+{
+cat:"ramadhan",
+title:"Qunut Witir",
+arab:"اللّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ...",
+latin:"Allahummahdinii fiiman hadait...",
+arti:"Ya Allah berilah aku petunjuk..."
+},
+{
+cat:"ramadhan",
+title:"Khatam Qur’an",
+arab:"اللّهُمَّ ارْحَمْنِي بِالْقُرْآنِ",
+latin:"Allahummarhamnii bil qur'an",
+arti:"Ya Allah rahmatilah aku dengan Al-Qur’an..."
+},
 
-{cat:"keluarga",arab:"رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ",latin:"Rabbanaa hab lanaa min azwaajinaa wa dzurriyyaatinaa qurrata a'yun.",arti:"Ya Rabb, anugerahkan keluarga penyejuk hati."},
+/* ================= STRES ================= */
 
-{cat:"anak",arab:"رَبِّ هَبْ لِي مِنَ الصَّالِحِينَ",latin:"Rabbi hab lii minas shaalihiin.",arti:"Ya Rabb, karuniakan anak yang saleh."},
+{
+cat:"stres",
+title:"Penentram Hati",
+arab:"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
+latin:"Alaa bidzikrillaahi tathmainnul quluub",
+arti:"Hanya dengan mengingat Allah hati menjadi tenang."
+},
+{
+cat:"stres",
+title:"Hilang Cemas",
+arab:"حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ",
+latin:"Hasbiyallahu laa ilaaha illaa huwa",
+arti:"Cukuplah Allah bagiku."
+},
+{
+cat:"stres",
+title:"Mohon Kuat",
+arab:"رَبِّ اشْرَحْ لِي صَدْرِي",
+latin:"Rabbi ishrah li shadrii",
+arti:"Ya Rabb lapangkan dadaku."
+},
+{
+cat:"stres",
+title:"Saat Sedih",
+arab:"اللّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ",
+latin:"Allahumma inni a'udzubika minal hammi",
+arti:"Ya Allah aku berlindung dari kesedihan."
+},
+{
+cat:"stres",
+title:"Pasrah",
+arab:"تَوَكَّلْتُ عَلَى اللَّهِ",
+latin:"Tawakkaltu ‘alallah",
+arti:"Aku bertawakal kepada Allah."
+},
 
-{cat:"kerja",arab:"اللَّهُمَّ بَارِكْ لِي فِي عَمَلِي",latin:"Allahumma baarik lii fii 'amalii.",arti:"Ya Allah, berkahilah pekerjaanku."},
+/* ================= REZEKI ================= */
 
-{cat:"ramadhan",arab:"اللَّهُمَّ بَلِّغْنَا رَمَضَانَ",latin:"Allahumma ballighnaa Ramadhaan.",arti:"Ya Allah, sampaikan kami ke Ramadhan."},
-
-{cat:"ramadhan",arab:"اللَّهُمَّ تَقَبَّلْ صِيَامَنَا",latin:"Allahumma taqabbal shiyaamanaa.",arti:"Ya Allah, terimalah puasa kami."},
-
-{cat:"stres",arab:"حَسْبِيَ اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ",latin:"Hasbiyallaahu laa ilaaha illaa Huwa.",arti:"Cukuplah Allah bagiku."},
-
-{cat:"rezeki",arab:"رَبِّ إِنِّي لِمَا أَنْزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",latin:"Rabbi innii limaa anzalta ilayya min khairin faqiir.",arti:"Ya Rabb, aku butuh kebaikan dari-Mu."},
-
-{cat:"sakit",arab:"أَذْهِبِ الْبَأْسَ رَبَّ النَّاسِ",latin:"Adhhib il-ba'sa Rabbann-naas.",arti:"Hilangkan penyakit wahai Rabb manusia."},
-
-{cat:"keluarga",arab:"رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ",latin:"Rabbighfir lii waliwaalidayya.",arti:"Ya Rabb, ampunilah aku dan orang tuaku."},
-
-{cat:"anak",arab:"اللَّهُمَّ اجْعَلْهُمْ مِنَ الصَّالِحِينَ",latin:"Allahummaj'alhum minas shaalihiin.",arti:"Ya Allah, jadikan mereka anak saleh."},
-
-{cat:"kerja",arab:"اللَّهُمَّ يَسِّرْ وَلَا تُعَسِّرْ",latin:"Allahumma yassir walaa tu'assir.",arti:"Ya Allah mudahkanlah, jangan persulit."},
-
-{cat:"harian",arab:"أَسْتَغْفِرُ اللَّهَ",latin:"Astaghfirullaah.",arti:"Aku memohon ampun kepada Allah."},
-
-{cat:"harian",arab:"سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",latin:"Subhaanallaahi wa bihamdih.",arti:"Maha Suci Allah dan segala puji bagi-Nya."},
-
-{cat:"hutang",arab:"اللَّهُمَّ اكْفِنِي فَقْرِي",latin:"Allahummakfinii faqrii.",arti:"Ya Allah, cukupkan aku dari kefakiran."},
-
-{cat:"rezeki",arab:"اللَّهُمَّ ارْزُقْنِي رِزْقًا طَيِّبًا",latin:"Allahummarzuqnii rizqan thayyibaa.",arti:"Ya Allah, berilah rezeki yang baik."},
-
-{cat:"stres",arab:"رَبِّ لَا تَذَرْنِي فَرْدًا",latin:"Rabbi laa tazarnii fardaa.",arti:"Ya Rabb jangan biarkan aku sendiri."},
-
-{cat:"sakit",arab:"اللَّهُمَّ عَافِنِي",latin:"Allahumma 'aafinii.",arti:"Ya Allah, sehatkanlah aku."},
-
-{cat:"keluarga",arab:"اللَّهُمَّ أَصْلِحْ لِي أَهْلِي",latin:"Allahumma ashlih lii ahlii.",arti:"Ya Allah, perbaikilah keluargaku."},
-
-{cat:"anak",arab:"رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِنْ ذُرِّيَّتِي",latin:"Rabbij'alnii muqiimash-shalaah wa min dzurriyyatii.",arti:"Ya Rabb, jadikan aku dan anakku ahli shalat."},
-
-{cat:"kerja",arab:"اللَّهُمَّ وَفِّقْنِي",latin:"Allahumma waffiqnii.",arti:"Ya Allah, berilah aku taufik."}
+{
+cat:"rezeki",
+title:"Pembuka Rezeki",
+arab:"اللّهُمَّ اكْفِنِي بِحَلَالِكَ...",
+latin:"Allahummakfinii bihalaalik...",
+arti:"Ya Allah cukupkan aku dengan yang halal..."
+},
+{
+cat:"rezeki",
+title:"Kelancaran Usaha",
+arab:"رَبِّ زِدْنِي عِلْمًا",
+latin:"Rabbi zidnii ‘ilmaa",
+arti:"Ya Rabb tambahkan ilmuku."
+},
+{
+cat:"rezeki",
+title:"Barokah",
+arab:"اللّهُمَّ بَارِكْ لَنَا...",
+latin:"Allahumma baarik lanaa",
+arti:"Ya Allah berkahilah kami..."
+},
+{
+cat:"rezeki",
+title:"Harta Halal",
+arab:"اللّهُمَّ اجْعَلْ رِزْقِي حَلَالًا",
+latin:"Allahummaj'al rizqii halaalan",
+arti:"Ya Allah jadikan rezekiku halal."
+},
+{
+cat:"rezeki",
+title:"Cukup",
+arab:"رَبِّ إِنِّي لِمَا أَنْزَلْتَ...",
+latin:"Rabbi inni limaa anzalta...",
+arti:"Ya Rabb aku membutuhkan..."
+},
 
 ];
 
-const list=document.getElementById("list");
-const filter=document.getElementById("filter");
+let activeCat="semua";
 
 function render(){
-  list.innerHTML="";
-  doa.filter(d=>filter.value==="semua"||d.cat===filter.value)
-  .forEach(d=>{
-    list.innerHTML+=`
-    <div class="card">
-      <div class="cat">${d.cat.toUpperCase()}</div>
-      <div class="arab">${d.arab}</div>
-      <div class="latin">"${d.latin}"</div>
-      <div class="arti">${d.arti}</div>
-    </div>`;
-  });
+
+const list = activeCat==="semua"
+? doaData
+: doaData.filter(d=>d.cat===activeCat);
+
+document.getElementById("app").innerHTML=`
+
+<h1 class="text-xl font-bold text-center mb-2">🤲 Doa Premium</h1>
+
+<div class="flex gap-2 overflow-x-auto pb-3">
+
+${categories.map(c=>`
+
+<button onclick="setCat('${c}')"
+class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap
+${activeCat===c
+? "bg-emerald-600 text-white"
+: "bg-slate-200 dark:bg-slate-800"}">
+
+${c.toUpperCase()}
+
+</button>
+
+`).join("")}
+
+</div>
+
+<div class="space-y-4">
+
+${list.map(d=>`
+
+<div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow border">
+
+<h3 class="font-bold mb-2">${d.title}</h3>
+
+<p class="font-arab text-right text-2xl mb-3" dir="rtl">${d.arab}</p>
+
+<p class="italic text-emerald-700 text-sm mb-1">${d.latin}</p>
+
+<p class="text-slate-600 text-sm">${d.arti}</p>
+
+</div>
+
+`).join("")}
+
+</div>
+
+`;
+
 }
 
-filter.onchange=render;
+function setCat(c){ activeCat=c; render(); }
+
 render();
+
 </script>
 
 </body>
