@@ -279,7 +279,7 @@ Gunakan bahasa sopan dan lembut.`;
  typing.textContent="Ustadz AI sedang mengetik...";
  chat.appendChild(typing);
 
- const res = await fetch("/assistant/ai",{
+ const res = await fetch("https://noorrahma-app.pembang001.workers.dev/assistant/ai",{
   method:"POST",
   headers:{ "content-type":"application/json" },
   body:JSON.stringify({
