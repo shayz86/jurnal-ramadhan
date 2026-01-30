@@ -1740,6 +1740,21 @@ const sendAssistant = () => {
                         <p className="text-[10px] text-slate-500">Hafalan 99 Nama Allah</p>
                       </div>
 
+{/* DOA PREMIUM */}
+
+<div
+  onClick={() => (location.href = "/doa/")}
+  className="bg-gradient-to-br from-amber-500 to-orange-600
+border border-amber-200
+rounded-2xl p-4 shadow-lg
+text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
+>
+
+  🤲
+  <h4 className="font-bold text-sm mt-2">Kumpulan Doa</h4>
+  <p className="text-[10px] opacity-90">Koleksi doa pilihan</p>
+</div>
+
                       {/* KIBLAT COMPASS */}
 
                       {isPro && (
@@ -2268,142 +2283,162 @@ const sendAssistant = () => {
                 </div>
               )}
 
-              {/* TAB LAINNYA */}
+             
+{/* TAB LAINNYA */}
 
-              {activeTab === "doa" && (
-                <div className="space-y-6">
-                  <div className="w-full">
-                    {!isPro ? (
-                      /* ================= NON PRO ================= */
+{activeTab === "doa" && (
+  <div className="space-y-6">
+    {/* ===== PRO / NON PRO BADGE ===== */}
 
-                      <button
-                        onClick={() => setShowDonation(true)}
-                        className="w-full flex items-center justify-center gap-2 text-xs font-bold
+    <div className="w-full">
+      {!isPro ? (
+        /* ================= NON PRO ================= */
 
-      bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+        <button
+          onClick={() => setShowDonation(true)}
+          className="w-full flex items-center justify-center gap-2 text-xs font-bold
+bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400
+px-4 py-3 rounded-xl hover:bg-amber-200 dark:hover:bg-amber-900/50
+transition-colors border border-amber-200 dark:border-amber-800 shadow-sm"
+        >
+          <Icon name="Coffee" size={16} /> TRAKTIR KOPI (SUPPORT)
+        </button>
+      ) : (
+        /* ================= PRO ================= */
 
-      px-4 py-3 rounded-xl hover:bg-amber-200 dark:hover:bg-amber-900/50
+        <div
+          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600
+text-white text-xs font-bold py-3 rounded-xl shadow-lg
+flex items-center justify-center gap-2"
+        >
+          <Icon name="Star" size={16} />
+          AKUN PRO AKTIF
+        </div>
+      )}
+    </div>
 
-      transition-colors border border-amber-200 dark:border-amber-800 shadow-sm"
-                      >
-                        <Icon name="Coffee" size={16} /> TRAKTIR KOPI (SUPPORT)
-                      </button>
-                    ) : (
-                      /* ================= PRO ================= */
+    {/* ===== TASBIH ===== */}
 
-                      <div
-                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600
+    <div
+      onClick={() => setIsTasbihFullScreen(true)}
+      className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white text-center shadow-lg relative cursor-pointer active:scale-[0.98] transition-transform"
+    >
+      <div className="absolute top-0 right-0 p-4 opacity-10">
+        <Icon name="Fingerprint" size={100} />
+      </div>
 
-      text-white text-xs font-bold py-3 rounded-xl shadow-lg
+      <div className="absolute top-3 right-3 opacity-50 flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest">
+        <Icon name="Maximize2" size={14} /> Full Screen
+      </div>
 
-      flex items-center justify-center gap-2"
-                      >
-                        <Icon name="Star" size={16} />
-                        AKUN PRO AKTIF
-                      </div>
-                    )}
-                  </div>
+      <h2 className="text-sm font-bold opacity-70 mb-4 uppercase tracking-widest">
+        Tasbih Digital
+      </h2>
 
-                  <div
-                    onClick={() => setIsTasbihFullScreen(true)}
-                    className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white text-center shadow-lg relative cursor-pointer active:scale-[0.98] transition-transform"
+      <div className="text-6xl font-mono font-bold mb-6 tracking-widest">
+        {tasbihCount}
+      </div>
+
+      <div className="flex justify-center gap-6 items-center">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setTasbihCount(0);
+          }}
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+        >
+          <Icon name="RotateCcw" size={16} />
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleTasbihTap();
+          }}
+          className="w-20 h-20 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <Icon name="Plus" size={32} />
+        </button>
+      </div>
+    </div>
+
+    {/* ===== PILIHAN DOA (FREE ONLY) ===== */}
+
+    {!isPro && (
+      <div className="space-y-3">
+        <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2">
+          <Icon
+            name="BookOpen"
+            size={20}
+            className="text-emerald-600 dark:text-emerald-400"
+          />{" "}
+          Pilihan Doa
+        </h3>
+
+        {doaList.map((item) => {
+          const isOpen = openDoaId === item.id;
+
+          return (
+            <div
+              key={item.id}
+              className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
+            >
+              <button
+                onClick={() => setOpenDoaId(isOpen ? null : item.id)}
+                className={`w-full flex justify-between items-center p-4 text-left transition-colors ${
+                  isOpen
+                    ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800"
+                    : "bg-white dark:bg-slate-900"
+                }`}
+              >
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">
+                    {item.category}
+                  </span>
+                  <span className="font-bold text-sm">{item.title}</span>
+                </div>
+
+                {isOpen ? (
+                  <Icon
+                    name="ChevronUp"
+                    size={20}
+                    className="text-emerald-600"
+                  />
+                ) : (
+                  <Icon
+                    name="ChevronDown"
+                    size={20}
+                    className="text-slate-400"
+                  />
+                )}
+              </button>
+
+              {isOpen && (
+                <div className="p-5 border-t dark:border-emerald-900 animate-in slide-in-from-top-2 fade-in">
+                  <p
+                    className="text-right text-2xl font-serif leading-loose mb-4"
+                    dir="rtl"
                   >
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <Icon name="Fingerprint" size={100} />
-                    </div>
-                    <div className="absolute top-3 right-3 opacity-50 flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest">
-                      <Icon name="Maximize2" size={14} /> Full Screen
-                    </div>
+                    {item.arabic}
+                  </p>
 
-                    <h2 className="text-sm font-bold opacity-70 mb-4 uppercase tracking-widest">
-                      Tasbih Digital
-                    </h2>
-                    <div className="text-6xl font-mono font-bold mb-6 tracking-widest">
-                      {tasbihCount}
-                    </div>
-
-                    <div className="flex justify-center gap-6 items-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTasbihCount(0);
-                        }}
-                        className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
-                      >
-                        <Icon name="RotateCcw" size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTasbihTap();
-                        }}
-                        className="w-20 h-20 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center justify-center active:scale-95 transition-transform"
-                      >
-                        <Icon name="Plus" size={32} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-2">
-                      <Icon
-                        name="BookOpen"
-                        size={20}
-                        className="text-emerald-600 dark:text-emerald-400"
-                      />{" "}
-                      Pilihan Doa
-                    </h3>
-
-                    {doaList.map((item) => {
-                      const isOpen = openDoaId === item.id;
-
-                      return (
-                        <div
-                          key={item.id}
-                          className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden"
-                        >
-                          <button
-                            onClick={() => setOpenDoaId(isOpen ? null : item.id)}
-                            className={`w-full flex justify-between items-center p-4 text-left transition-colors ${isOpen ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800" : "bg-white dark:bg-slate-900"}`}
-                          >
-                            <div className="flex flex-col">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">
-                                {item.category}
-                              </span>
-                              <span className="font-bold text-sm">{item.title}</span>
-                            </div>
-
-                            {isOpen ? (
-                              <Icon name="ChevronUp" size={20} className="text-emerald-600" />
-                            ) : (
-                              <Icon name="ChevronDown" size={20} className="text-slate-400" />
-                            )}
-                          </button>
-
-                          {isOpen && (
-                            <div className="p-5 border-t dark:border-emerald-900 animate-in slide-in-from-top-2 fade-in">
-                              <p
-                                className="text-right text-2xl font-serif leading-loose mb-4"
-                                dir="rtl"
-                              >
-                                {item.arabic}
-                              </p>
-                              <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border-l-4 border-emerald-400">
-                                <p className="text-sm text-emerald-700 font-medium italic mb-2">
-                                  "{item.latin}"
-                                </p>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">
-                                  {item.artinya}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                  <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border-l-4 border-emerald-400">
+                    <p className="text-sm text-emerald-700 font-medium italic mb-2">
+                      "{item.latin}"
+                    </p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {item.artinya}
+                    </p>
                   </div>
                 </div>
               )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
             </main>
 
             {/* NAVBAR FOOTER */}
