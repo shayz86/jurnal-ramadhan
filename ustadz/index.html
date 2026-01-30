@@ -26,6 +26,31 @@ header{
   background:linear-gradient(to right,#059669,#0ea5e9);
 }
 
+/* ===== SETTINGS ===== */
+
+.settings{
+  display:flex;
+  gap:10px;
+  padding:10px 14px;
+  overflow-x:auto;
+}
+
+.settings select,
+.settings label{
+  background:#0f172a;
+  border:1px solid #334155;
+  color:white;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.settings input{
+  accent-color:#10b981;
+}
+
 /* ===== CHAT ===== */
 
 .chat{
@@ -33,7 +58,7 @@ header{
   display:flex;
   flex-direction:column;
   gap:14px;
-  padding-bottom:90px;
+  padding-bottom:130px;
 }
 
 .msg{
@@ -54,7 +79,7 @@ header{
   background:#064e3b;
 }
 
-/* ===== QUICK TOPIC ===== */
+/* ===== QUICK ===== */
 
 .quick{
   display:flex;
@@ -140,12 +165,40 @@ header{
   <span class="badge">PRO</span>
 </header>
 
+<!-- ===== SETTINGS BAR ===== -->
+
+<div class="settings">
+
+  <select id="mazhab">
+    <option value="netral">Mazhab: Netral</option>
+    <option value="syafii">Syafi’i</option>
+    <option value="hanafi">Hanafi</option>
+    <option value="maliki">Maliki</option>
+    <option value="hanbali">Hanbali</option>
+  </select>
+
+  <select id="persona">
+    <option value="ilmiah">Ustadz Ilmiah</option>
+    <option value="santai">Santai</option>
+    <option value="remaja">Remaja Friendly</option>
+    <option value="tradisional">Tradisional</option>
+  </select>
+
+  <label><input type="checkbox" id="dalil" checked> Dalil</label>
+  <label><input type="checkbox" id="ringkas"> Ringkas</label>
+  <label><input type="checkbox" id="detail"> Detail</label>
+
+</div>
+
+<!-- ===== QUICK TOPIC ===== -->
+
 <div class="quick">
   <button onclick="askQuick('Bagaimana niat shalat yang benar?')">Niat Shalat</button>
   <button onclick="askQuick('Bagaimana hukum hutang dalam Islam?')">Hutang</button>
   <button onclick="askQuick('Apa yang membatalkan puasa?')">Puasa</button>
   <button onclick="askQuick('Bagaimana zakat fitrah?')">Zakat</button>
   <button onclick="askQuick('Bagaimana adab bekerja menurut Islam?')">Kerja</button>
+  <button onclick="askQuick('Bagaimana mendidik anak dalam Islam?')">Anak</button>
 </div>
 
 <div class="chat" id="chat"></div>
@@ -166,6 +219,18 @@ let sessionId = Date.now().toString();
 
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
+
+/* ===== DAILY QUESTION ===== */
+
+const daily=[
+ "Apakah shalatmu hari ini sudah khusyuk?",
+ "Sudahkah bersedekah hari ini?",
+ "Apa amalan terbaik yang kamu lakukan hari ini?",
+ "Apa yang ingin kamu perbaiki dalam ibadahmu?",
+ "Bagaimana hubunganmu dengan keluarga hari ini?"
+];
+
+add("ai","🌙 Refleksi hari ini:\n"+daily[Math.floor(Math.random()*daily.length)]);
 
 /* ===== QUICK ===== */
 
@@ -191,6 +256,21 @@ async function send(){
  const prompt=input.value.trim();
  if(!prompt) return;
 
+ const mazhab=document.getElementById("mazhab").value;
+ const persona=document.getElementById("persona").value;
+
+ const dalil=document.getElementById("dalil").checked;
+ const ringkas=document.getElementById("ringkas").checked;
+ const detail=document.getElementById("detail").checked;
+
+ const sysPrompt=
+`Jawab sebagai ustadz muslim ${persona}.
+Mazhab: ${mazhab}.
+${dalil?"Sertakan ayat dan hadits.":""}
+${ringkas?"Jawaban singkat.":""}
+${detail?"Jawaban panjang dan terperinci.":""}
+Gunakan bahasa sopan dan lembut.`;
+
  add("user",prompt);
  input.value="";
 
@@ -204,7 +284,7 @@ async function send(){
   headers:{ "content-type":"application/json" },
   body:JSON.stringify({
    uid,
-   prompt,
+   prompt: sysPrompt+"\n\nPERTANYAAN USER:\n"+prompt,
    sessionId
   })
  });
