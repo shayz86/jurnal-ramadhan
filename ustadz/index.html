@@ -58,7 +58,7 @@ header{
   display:flex;
   flex-direction:column;
   gap:14px;
-  padding-bottom:130px;
+  padding-bottom:150px;
 }
 
 .msg{
@@ -67,6 +67,7 @@ header{
   border-radius:18px;
   font-size:14px;
   line-height:1.6;
+  position:relative;
 }
 
 .user{
@@ -77,6 +78,21 @@ header{
 .ai{
   align-self:flex-start;
   background:#064e3b;
+}
+
+/* ===== BOOKMARK BTN ===== */
+
+.bookmark{
+  position:absolute;
+  right:10px;
+  bottom:6px;
+  font-size:13px;
+  opacity:.7;
+  cursor:pointer;
+}
+
+.bookmark.active{
+  color:#facc15;
 }
 
 /* ===== QUICK ===== */
@@ -194,12 +210,11 @@ header{
 </div>
 
 <div class="quick">
-  <button onclick="askQuick('Bagaimana niat shalat yang benar?')">Niat Shalat</button>
-  <button onclick="askQuick('Bagaimana hukum hutang dalam Islam?')">Hutang</button>
-  <button onclick="askQuick('Apa yang membatalkan puasa?')">Puasa</button>
-  <button onclick="askQuick('Bagaimana zakat fitrah?')">Zakat</button>
-  <button onclick="askQuick('Bagaimana adab bekerja menurut Islam?')">Kerja</button>
-  <button onclick="askQuick('Bagaimana mendidik anak dalam Islam?')">Anak</button>
+<button onclick="askQuick('Apakah riba itu haram?')">Riba</button>
+<button onclick="askQuick('Apa syarat sah shalat?')">Sah Shalat</button>
+<button onclick="askQuick('Apakah wudhu batal jika tidur?')">Wudhu</button>
+<button onclick="askQuick('Bagaimana zakat fitrah?')">Zakat</button>
+<button onclick="askQuick('Hukum hutang dalam Islam')">Hutang</button>
 </div>
 
 <div class="chat" id="chat"></div>
@@ -212,36 +227,98 @@ header{
 
 <script>
 
-let uid = localStorage.getItem("nr_uid");
+/* ================= UID ================= */
+
+let uid=localStorage.getItem("nr_uid");
 if(!uid){
  uid="uid-"+Date.now();
  localStorage.setItem("nr_uid",uid);
 }
 
-let sessionId = Date.now().toString();
+/* ================= HISTORY ================= */
+
+let history=
+ JSON.parse(localStorage.getItem("nr_ustadz_history")||"[]");
+
+const bookmarks=
+ JSON.parse(localStorage.getItem("nr_ustadz_bookmarks")||"[]");
 
 const chat=document.getElementById("chat");
 const input=document.getElementById("input");
+
+/* render history */
+history.forEach(m=>add(m.role,m.text,m.bookmark));
+
+/* ================= AUTO SWITCH ================= */
+
+const fiqhWords=[
+ "halal","haram","batal","sah","riba","najis",
+ "wudhu","puasa","zakat","hutang","nikah","mahram"
+];
+
+function detectFiqh(t){
+ return fiqhWords.some(w=>t.toLowerCase().includes(w));
+}
+
+/* ================= UI ================= */
 
 function askQuick(t){
  input.value=t;
  send();
 }
 
-function add(role,text){
+function add(role,text,bookmarked=false){
+
  const d=document.createElement("div");
  d.className="msg "+(role==="user"?"user":"ai");
  d.innerHTML=text.replace(/\n/g,"<br>");
+
+ if(role==="ai"){
+
+  const bm=document.createElement("div");
+  bm.className="bookmark"+(bookmarked?" active":"");
+  bm.textContent="❤️";
+
+  bm.onclick=()=>toggleBookmark(text,bm);
+
+  d.appendChild(bm);
+ }
+
  chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
 }
 
-/* ================= SEND FIX ================= */
+/* ================= BOOKMARK ================= */
+
+function toggleBookmark(text,el){
+
+ let i=bookmarks.indexOf(text);
+
+ if(i>-1){
+  bookmarks.splice(i,1);
+  el.classList.remove("active");
+ }else{
+  bookmarks.push(text);
+  el.classList.add("active");
+ }
+
+ localStorage.setItem(
+  "nr_ustadz_bookmarks",
+  JSON.stringify(bookmarks)
+ );
+}
+
+/* ================= SEND ================= */
 
 async function send(){
 
  const q=input.value.trim();
  if(!q) return;
+
+ const autoFiqh=detectFiqh(q);
+
+ if(autoFiqh)
+  document.getElementById("mode").value="fiqh";
 
  const mazhab=document.getElementById("mazhab").value;
  const persona=document.getElementById("persona").value;
@@ -260,7 +337,7 @@ ${detail?"Jawaban panjang dan terperinci.":""}`;
  let endpoint="/assistant/ai";
  let payload={
   uid,
-  sessionId,
+  sessionId:Date.now().toString(),
   prompt: sysPrompt+"\n\nPERTANYAAN:\n"+q
  };
 
@@ -275,6 +352,9 @@ ${detail?"Jawaban panjang dan terperinci.":""}`;
  }
 
  add("user",q);
+ history.push({role:"user",text:q});
+ saveHistory();
+
  input.value="";
 
  const typing=document.createElement("div");
@@ -295,9 +375,21 @@ ${detail?"Jawaban panjang dan terperinci.":""}`;
 
  const data=await res.json();
 
- if(data.answer) add("ai",data.answer);
- else add("ai","⚠️ Tidak bisa menjawab saat ini.");
+ const answer=data.answer||"⚠️ Tidak bisa menjawab.";
 
+ add("ai",answer,bookmarks.includes(answer));
+
+ history.push({role:"ai",text:answer});
+ saveHistory();
+}
+
+/* ================= SAVE ================= */
+
+function saveHistory(){
+ localStorage.setItem(
+  "nr_ustadz_history",
+  JSON.stringify(history)
+ );
 }
 
 </script>
