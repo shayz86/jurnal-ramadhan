@@ -169,6 +169,11 @@ header{
 
 <div class="settings">
 
+<select id="mode">
+  <option value="ai">Mode Konsultan</option>
+  <option value="fiqh">Mode Fiqh</option>
+</select>
+
   <select id="mazhab">
     <option value="netral">Mazhab: Netral</option>
     <option value="syafii">Syafi’i</option>
@@ -266,6 +271,8 @@ async function send(){
  const ringkas=document.getElementById("ringkas").checked;
  const detail=document.getElementById("detail").checked;
 
+ const mode=document.getElementById("mode").value;
+
  const sysPrompt=
 `Jawab sebagai ustadz muslim ${persona}.
 Mazhab: ${mazhab}.
@@ -273,6 +280,16 @@ ${dalil?"Sertakan ayat dan hadits.":""}
 ${ringkas?"Jawaban singkat.":""}
 ${detail?"Jawaban panjang dan terperinci.":""}
 Gunakan bahasa sopan dan lembut.`;
+
+ const finalPrompt =
+  mode==="fiqh"
+   ? `PERTANYAAN FIQH:\n${prompt}`
+   : sysPrompt+"\n\nPERTANYAAN USER:\n"+prompt;
+
+ const endpoint =
+  mode==="fiqh"
+   ? "/assistant/fiqh"
+   : "/assistant/ai";
 
  add("user",prompt);
  input.value="";
@@ -282,28 +299,28 @@ Gunakan bahasa sopan dan lembut.`;
  typing.textContent="Ustadz AI sedang mengetik...";
  chat.appendChild(typing);
 
- const res = await fetch("https://noorrahma-app.pembang001.workers.dev/assistant/ai",{
-  method:"POST",
-  headers:{ "content-type":"application/json" },
-  body:JSON.stringify({
-   uid,
-   prompt: sysPrompt+"\n\nPERTANYAAN USER:\n"+prompt,
-   sessionId
-  })
- });
+ const res = await fetch(
+  "https://noorrahma-app.pembang001.workers.dev"+endpoint,
+  {
+   method:"POST",
+   headers:{ "content-type":"application/json" },
+   body:JSON.stringify({
+    uid,
+    prompt: finalPrompt,
+    sessionId,
+    madhhab:mazhab
+   })
+  }
+ );
 
  typing.remove();
 
  const data = await res.json();
 
-console.log("USTADZ RESPONSE:", data);
-
-if(data.answer)
-  add("ai",data.answer);
-else if(data.error)
-  add("ai","⚠️ Error: "+data.error);
-else
-  add("ai","⚠️ Tidak ada jawaban.");
+ if(data.answer)
+   add("ai",data.answer);
+ else
+   add("ai","⚠️ Tidak bisa menjawab saat ini.");
 
 }
 
