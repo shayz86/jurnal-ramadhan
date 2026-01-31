@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Kisah Nabi — NoorRahma</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { font-family: Inter, sans-serif; }
+</style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+
+<div id="app" class="max-w-md mx-auto p-4 space-y-4"></div>
+
+<script>
+const slug = location.pathname.split("/").filter(Boolean).pop();
+
+const uid = localStorage.getItem("nr_uid");
+const isPro = localStorage.getItem("nr_is_pro") === "1";
+
+if (!isPro) {
+  document.getElementById("app").innerHTML = `
+    <div class="bg-amber-100 text-amber-800 p-6 rounded-xl text-center">
+      🔒 Fitur PRO<br>
+      Kisah Nabi lengkap hanya tersedia untuk akun PRO.
+    </div>`;
+  throw "";
+}
+
+fetch("/noorrahma/nabi/data.json")
+.then(r=>r.json())
+.then(data=>{
+
+const nabi = data.find(n=>n.slug===slug);
+
+if(!nabi){
+document.getElementById("app").innerHTML="Data nabi tidak ditemukan";
+return;
+}
+
+render(nabi);
+});
+
+let mode="adult";
+
+function render(n){
+
+const el=document.getElementById("app");
+
+el.innerHTML=`
+
+<!-- HEADER -->
+<div class="flex items-center gap-3">
+<button onclick="history.back()" class="text-emerald-600 font-bold">←</button>
+<h1 class="font-bold text-lg">${n.name}</h1>
+</div>
+
+<!-- ILLUSTRATION -->
+<img src="/noorrahma/nabi/assets/${n.illustration}"
+class="rounded-2xl shadow mb-3"/>
+
+<!-- BASIC INFO -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl">
+<p><b>Nama Lengkap:</b> ${n.full_name}</p>
+<p><b>Gelar:</b> ${n.title}</p>
+<p><b>Kaum:</b> ${n.people}</p>
+<p><b>Wilayah:</b> ${n.location}</p>
+<p><b>Masa:</b> ${n.era}</p>
+</div>
+
+<!-- MODE -->
+<div class="flex gap-2">
+<button onclick="setMode('child')" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl">Mode Anak</button>
+<button onclick="setMode('adult')" class="flex-1 bg-slate-200 py-2 rounded-xl">Tadabbur</button>
+</div>
+
+<!-- STORY -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl">
+<h3 class="font-bold mb-2">📖 Kisah</h3>
+<p id="story">${n.story_long}</p>
+</div>
+
+<!-- MIRACLE -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl">
+<h3 class="font-bold mb-2">✨ Mukjizat</h3>
+<ul>${n.miracles.map(m=>`<li>• ${m}</li>`).join("")}</ul>
+</div>
+
+<!-- TRIAL -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl">
+<h3 class="font-bold mb-2">⚔️ Ujian Hidup</h3>
+<ul>${n.trials.map(t=>`<li>• ${t}</li>`).join("")}</ul>
+</div>
+
+<!-- HIKMAH -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl">
+<h3 class="font-bold mb-2">🌿 Hikmah</h3>
+<ul>${n.lessons.map(l=>`<li>• ${l}</li>`).join("")}</ul>
+</div>
+
+<!-- AYAT -->
+<div class="bg-emerald-50 p-4 rounded-xl">
+<h3 class="font-bold mb-2">📜 Ayat Qur’an</h3>
+${n.quran_refs.map(a=>`<div>${a}</div>`).join("")}
+</div>
+
+<!-- TIMELINE -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl">
+<h3 class="font-bold mb-2">🕰 Timeline</h3>
+${n.timeline.map(t=>`
+<div class="border-l-4 pl-3 mb-2">
+<b>${t.year}</b> — ${t.event}
+</div>`).join("")}
+</div>
+
+<!-- TTS -->
+<button onclick="speak()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">
+🔊 Dengarkan Kisah
+</button>
+
+<!-- BOOKMARK -->
+<button onclick="bookmark('${n.slug}')"
+class="w-full border py-2 rounded-xl mt-2">
+⭐ Bookmark
+</button>
+
+`;
+
+}
+
+function setMode(m){
+mode=m;
+
+fetch("/noorrahma/nabi/data.json")
+.then(r=>r.json())
+.then(data=>{
+const nabi=data.find(n=>n.slug===slug);
+document.getElementById("story").innerText=
+mode==="child" ? nabi.story_child : nabi.story_long;
+});
+}
+
+function speak(){
+const txt=document.getElementById("story").innerText;
+speechSynthesis.cancel();
+speechSynthesis.speak(new SpeechSynthesisUtterance(txt));
+}
+
+function bookmark(slug){
+let list=JSON.parse(localStorage.getItem("nr_nabi_bookmark")||"[]");
+if(!list.includes(slug)) list.push(slug);
+localStorage.setItem("nr_nabi_bookmark",JSON.stringify(list));
+alert("⭐ Disimpan");
+}
+</script>
+
+</body>
+</html>
