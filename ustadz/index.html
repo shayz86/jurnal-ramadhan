@@ -293,10 +293,14 @@ Gunakan bahasa sopan dan lembut.`;
 
  const data = await res.json();
 
- if(data.answer)
-   add("ai",data.answer);
- else
-   add("ai","⚠️ Tidak bisa menjawab saat ini.");
+console.log("USTADZ RESPONSE:", data);
+
+if(data.answer)
+  add("ai",data.answer);
+else if(data.error)
+  add("ai","⚠️ Error: "+data.error);
+else
+  add("ai","⚠️ Tidak ada jawaban.");
 
 }
 
