@@ -165,8 +165,6 @@ header{
   <span class="badge">PRO</span>
 </header>
 
-<!-- ===== SETTINGS BAR ===== -->
-
 <div class="settings">
 
 <select id="mode">
@@ -174,28 +172,26 @@ header{
   <option value="fiqh">Mode Fiqh</option>
 </select>
 
-  <select id="mazhab">
-    <option value="netral">Mazhab: Netral</option>
-    <option value="syafii">Syafi’i</option>
-    <option value="hanafi">Hanafi</option>
-    <option value="maliki">Maliki</option>
-    <option value="hanbali">Hanbali</option>
-  </select>
+<select id="mazhab">
+  <option value="netral">Mazhab: Netral</option>
+  <option value="syafii">Syafi’i</option>
+  <option value="hanafi">Hanafi</option>
+  <option value="maliki">Maliki</option>
+  <option value="hanbali">Hanbali</option>
+</select>
 
-  <select id="persona">
-    <option value="ilmiah">Ustadz Ilmiah</option>
-    <option value="santai">Santai</option>
-    <option value="remaja">Remaja Friendly</option>
-    <option value="tradisional">Tradisional</option>
-  </select>
+<select id="persona">
+  <option value="ilmiah">Ustadz Ilmiah</option>
+  <option value="santai">Santai</option>
+  <option value="remaja">Remaja Friendly</option>
+  <option value="tradisional">Tradisional</option>
+</select>
 
-  <label><input type="checkbox" id="dalil" checked> Dalil</label>
-  <label><input type="checkbox" id="ringkas"> Ringkas</label>
-  <label><input type="checkbox" id="detail"> Detail</label>
+<label><input type="checkbox" id="dalil" checked> Dalil</label>
+<label><input type="checkbox" id="ringkas"> Ringkas</label>
+<label><input type="checkbox" id="detail"> Detail</label>
 
 </div>
-
-<!-- ===== QUICK TOPIC ===== -->
 
 <div class="quick">
   <button onclick="askQuick('Bagaimana niat shalat yang benar?')">Niat Shalat</button>
@@ -209,15 +205,14 @@ header{
 <div class="chat" id="chat"></div>
 
 <div class="input-box">
-  <textarea id="input" rows="2"
-    placeholder="Tanyakan masalah ibadah, muamalah, keluarga, dsb..."></textarea>
-  <button onclick="send()">Kirim</button>
+<textarea id="input" rows="2"
+ placeholder="Tanyakan masalah ibadah, muamalah, keluarga, dsb..."></textarea>
+<button onclick="send()">Kirim</button>
 </div>
 
 <script>
 
 let uid = localStorage.getItem("nr_uid");
-
 if(!uid){
  uid="uid-"+Date.now();
  localStorage.setItem("nr_uid",uid);
@@ -225,52 +220,34 @@ if(!uid){
 
 let sessionId = Date.now().toString();
 
-const chat = document.getElementById("chat");
-const input = document.getElementById("input");
+const chat=document.getElementById("chat");
+const input=document.getElementById("input");
 
-/* ===== DAILY QUESTION ===== */
-
-const daily=[
- "Apakah shalatmu hari ini sudah khusyuk?",
- "Sudahkah bersedekah hari ini?",
- "Apa amalan terbaik yang kamu lakukan hari ini?",
- "Apa yang ingin kamu perbaiki dalam ibadahmu?",
- "Bagaimana hubunganmu dengan keluarga hari ini?"
-];
-
-add("ai","🌙 Refleksi hari ini:\n"+daily[Math.floor(Math.random()*daily.length)]);
-
-/* ===== QUICK ===== */
-
-function askQuick(text){
- input.value=text;
+function askQuick(t){
+ input.value=t;
  send();
 }
 
-/* ===== RENDER ===== */
-
 function add(role,text){
- const div=document.createElement("div");
- div.className="msg "+(role==="user"?"user":"ai");
- div.innerHTML=text.replace(/\n/g,"<br>");
- chat.appendChild(div);
+ const d=document.createElement("div");
+ d.className="msg "+(role==="user"?"user":"ai");
+ d.innerHTML=text.replace(/\n/g,"<br>");
+ chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
 }
 
-/* ===== SEND ===== */
+/* ================= SEND FIX ================= */
 
 async function send(){
 
- const prompt=input.value.trim();
- if(!prompt) return;
+ const q=input.value.trim();
+ if(!q) return;
 
  const mazhab=document.getElementById("mazhab").value;
  const persona=document.getElementById("persona").value;
-
  const dalil=document.getElementById("dalil").checked;
  const ringkas=document.getElementById("ringkas").checked;
  const detail=document.getElementById("detail").checked;
-
  const mode=document.getElementById("mode").value;
 
  const sysPrompt=
@@ -278,20 +255,26 @@ async function send(){
 Mazhab: ${mazhab}.
 ${dalil?"Sertakan ayat dan hadits.":""}
 ${ringkas?"Jawaban singkat.":""}
-${detail?"Jawaban panjang dan terperinci.":""}
-Gunakan bahasa sopan dan lembut.`;
+${detail?"Jawaban panjang dan terperinci.":""}`;
 
- const finalPrompt =
-  mode==="fiqh"
-   ? `PERTANYAAN FIQH:\n${prompt}`
-   : sysPrompt+"\n\nPERTANYAAN USER:\n"+prompt;
+ let endpoint="/assistant/ai";
+ let payload={
+  uid,
+  sessionId,
+  prompt: sysPrompt+"\n\nPERTANYAAN:\n"+q
+ };
 
- const endpoint =
-  mode==="fiqh"
-   ? "/assistant/fiqh"
-   : "/assistant/ai";
+ if(mode==="fiqh"){
+  endpoint="/assistant/fiqh";
+  payload={
+   uid,
+   topic:"Fiqh",
+   madhhab:mazhab,
+   question:q
+  };
+ }
 
- add("user",prompt);
+ add("user",q);
  input.value="";
 
  const typing=document.createElement("div");
@@ -299,28 +282,21 @@ Gunakan bahasa sopan dan lembut.`;
  typing.textContent="Ustadz AI sedang mengetik...";
  chat.appendChild(typing);
 
- const res = await fetch(
+ const res=await fetch(
   "https://noorrahma-app.pembang001.workers.dev"+endpoint,
   {
    method:"POST",
    headers:{ "content-type":"application/json" },
-   body:JSON.stringify({
-    uid,
-    prompt: finalPrompt,
-    sessionId,
-    madhhab:mazhab
-   })
+   body:JSON.stringify(payload)
   }
  );
 
  typing.remove();
 
- const data = await res.json();
+ const data=await res.json();
 
- if(data.answer)
-   add("ai",data.answer);
- else
-   add("ai","⚠️ Tidak bisa menjawab saat ini.");
+ if(data.answer) add("ai",data.answer);
+ else add("ai","⚠️ Tidak bisa menjawab saat ini.");
 
 }
 
