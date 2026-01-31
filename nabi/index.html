@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Kisah 25 Nabi</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-slate-50">
+
+<div id="root"></div>
+
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+const App=()=>{
+
+  const isPro = localStorage.getItem("nr_is_pro")==="1";
+
+  if(!isPro){
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="bg-white p-8 rounded-3xl shadow text-center">
+          <h1 className="font-bold text-xl">🔒 Fitur PRO</h1>
+          <p className="text-sm mt-2">
+            Kisah Nabi hanya tersedia untuk akun PRO.
+          </p>
+          <button
+            onClick={()=>location.href="/"}
+            className="mt-6 bg-emerald-600 text-white px-6 py-3 rounded-xl"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const [list,setList]=useState([]);
+  const [search,setSearch]=useState("");
+  const [filter,setFilter]=useState("all");
+  const [bookmark,setBookmark]=useState(
+    ()=>JSON.parse(localStorage.getItem("nr_nabi_bookmark")||"[]")
+  );
+
+  useEffect(()=>{
+    fetch("/nabi/data.json").then(r=>r.json()).then(setList);
+  },[]);
+
+  const toggleBookmark=slug=>{
+    const next=bookmark.includes(slug)
+      ? bookmark.filter(x=>x!==slug)
+      : [...bookmark,slug];
+
+    localStorage.setItem("nr_nabi_bookmark",JSON.stringify(next));
+    setBookmark(next);
+  };
+
+  const filtered=list.filter(n=>{
+    return (
+      n.nama.toLowerCase().includes(search.toLowerCase()) &&
+      (filter==="all"||n.generasi===filter)
+    );
+  });
+
+  return(
+    <div className="max-w-md mx-auto p-4 space-y-4">
+
+      <h1 className="font-bold text-xl">📜 Kisah 25 Nabi & Rasul</h1>
+
+      <input
+        placeholder="Cari nabi..."
+        className="w-full p-3 rounded-xl bg-slate-100"
+        onChange={e=>setSearch(e.target.value)}
+      />
+
+      <select
+        className="w-full p-3 rounded-xl bg-slate-100"
+        onChange={e=>setFilter(e.target.value)}
+      >
+        <option value="all">Semua Generasi</option>
+        <option value="awal-manusia">Awal Manusia</option>
+        <option value="pra-ibrahim">Pra Ibrahim</option>
+        <option value="bani-israil">Bani Israil</option>
+        <option value="akhir">Menjelang Rasulullah</option>
+      </select>
+
+      <div className="grid grid-cols-2 gap-3">
+
+        {filtered.map(n=>(
+          <div
+            key={n.slug}
+            onClick={()=>location.href="/nabi/"+n.slug+"/"}
+            className="bg-white p-4 rounded-2xl shadow cursor-pointer active:scale-95"
+          >
+            <div className="text-3xl">{n.icon}</div>
+            <h4 className="font-bold text-sm">{n.nama}</h4>
+            <p className="text-[10px] text-slate-500">{n.ringkas}</p>
+
+            <button
+              onClick={e=>{
+                e.stopPropagation();
+                toggleBookmark(n.slug);
+              }}
+              className={
+                "mt-2 text-lg "+
+                (bookmark.includes(n.slug)
+                  ?"text-yellow-400"
+                  :"text-slate-300")
+              }
+            >
+              ⭐
+            </button>
+          </div>
+        ))}
+
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(root).render(<App/>);
+</script>
+</body>
+</html>
