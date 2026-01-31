@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Nabi Adam AS</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-slate-50">
+
+<div id="root"></div>
+
+<script type="text/babel">
+const {useState}=React;
+
+const App=()=>{
+
+  const isPro = localStorage.getItem("nr_is_pro")==="1";
+
+  if(!isPro){
+    location.href="/nabi/";
+    return null;
+  }
+
+  const [mode,setMode]=useState("anak");
+
+  const anakText=`
+Nabi Adam adalah manusia pertama yang Allah ciptakan.
+Beliau tinggal di surga bersama Siti Hawa.
+Lalu mereka turun ke bumi untuk memulai kehidupan manusia.
+`;
+
+  const tadabburText=`
+Nabi Adam AS mengajarkan tentang taubat,
+kerendahan hati, dan bahwa manusia bisa salah
+namun Allah Maha Pengampun bagi yang kembali.
+`;
+
+  const speak=text=>{
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="id-ID";
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  };
+
+  const content=mode==="anak"?anakText:tadabburText;
+
+  return(
+    <div className="max-w-md mx-auto p-5 space-y-4">
+
+      <button
+        onClick={()=>history.back()}
+        className="text-sm text-emerald-600"
+      >
+        ← Kembali
+      </button>
+
+      <h1 className="font-bold text-xl">Nabi Adam AS</h1>
+
+      <div className="flex gap-2">
+        <button
+          onClick={()=>setMode("anak")}
+          className={
+            "flex-1 p-2 rounded-xl "+
+            (mode==="anak"
+              ?"bg-emerald-600 text-white"
+              :"bg-slate-200")
+          }
+        >
+          👶 Mode Anak
+        </button>
+
+        <button
+          onClick={()=>setMode("tadabbur")}
+          className={
+            "flex-1 p-2 rounded-xl "+
+            (mode==="tadabbur"
+              ?"bg-indigo-600 text-white"
+              :"bg-slate-200")
+          }
+        >
+          📖 Tadabbur
+        </button>
+      </div>
+
+      <div className="bg-white p-4 rounded-2xl shadow leading-relaxed whitespace-pre-line">
+        {content}
+      </div>
+
+      <button
+        onClick={()=>speak(content)}
+        className="w-full bg-emerald-600 text-white py-3 rounded-xl"
+      >
+        🔊 Dengarkan Audio
+      </button>
+
+    </div>
+  );
+};
+
+ReactDOM.createRoot(root).render(<App/>);
+</script>
+</body>
+</html>
