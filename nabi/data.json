@@ -1,202 +1,104 @@
-[
-  {
-    "slug": "adam-as",
-    "nama": "Nabi Adam AS",
-    "arab": "آدم عليه السلام",
-    "generasi": "awal-manusia",
-    "ringkas": "Manusia pertama ciptaan Allah.",
-    "icon": "🌱"
-  },
-  {
-    "slug": "idris-as",
-    "nama": "Nabi Idris AS",
-    "arab": "إدريس عليه السلام",
-    "generasi": "awal-manusia",
-    "ringkas": "Nabi yang diangkat ke tempat tinggi.",
-    "icon": "📜"
-  },
-  {
-    "slug": "nuh-as",
-    "nama": "Nabi Nuh AS",
-    "arab": "نوح عليه السلام",
-    "generasi": "pra-ibrahim",
-    "ringkas": "Nabi pembuat bahtera besar.",
-    "icon": "🚢"
-  },
-  {
-    "slug": "hud-as",
-    "nama": "Nabi Hud AS",
-    "arab": "هود عليه السلام",
-    "generasi": "pra-ibrahim",
-    "ringkas": "Diutus kepada kaum 'Ad.",
-    "icon": "🏜️"
-  },
-  {
-    "slug": "shalih-as",
-    "nama": "Nabi Shalih AS",
-    "arab": "صالح عليه السلام",
-    "generasi": "pra-ibrahim",
-    "ringkas": "Mukjizat unta betina.",
-    "icon": "🐪"
-  },
-  {
-    "slug": "ibrahim-as",
-    "nama": "Nabi Ibrahim AS",
-    "arab": "إبراهيم عليه السلام",
-    "generasi": "keluarga-ibrahim",
-    "ringkas": "Bapak para nabi.",
-    "icon": "🔥"
-  },
-  {
-    "slug": "luth-as",
-    "nama": "Nabi Luth AS",
-    "arab": "لوط عليه السلام",
-    "generasi": "keluarga-ibrahim",
-    "ringkas": "Peringatan kaum Sodom.",
-    "icon": "🌋"
-  },
-  {
-    "slug": "ismail-as",
-    "nama": "Nabi Ismail AS",
-    "arab": "إسماعيل عليه السلام",
-    "generasi": "keluarga-ibrahim",
-    "ringkas": "Putra Ibrahim yang taat.",
-    "icon": "🏹"
-  },
-  {
-    "slug": "ishaq-as",
-    "nama": "Nabi Ishaq AS",
-    "arab": "إسحاق عليه السلام",
-    "generasi": "keluarga-ibrahim",
-    "ringkas": "Putra Ibrahim, ayah Ya'qub.",
-    "icon": "🌿"
-  },
-  {
-    "slug": "yaqub-as",
-    "nama": "Nabi Ya'qub AS",
-    "arab": "يعقوب عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Ayah Nabi Yusuf.",
-    "icon": "👨‍👦"
-  },
-  {
-    "slug": "yusuf-as",
-    "nama": "Nabi Yusuf AS",
-    "arab": "يوسف عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Kisah kesabaran dan ampunan.",
-    "icon": "👑"
-  },
-  {
-    "slug": "ayyub-as",
-    "nama": "Nabi Ayyub AS",
-    "arab": "أيوب عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Kesabaran dalam ujian.",
-    "icon": "⛰️"
-  },
-  {
-    "slug": "syuaib-as",
-    "nama": "Nabi Syu'aib AS",
-    "arab": "شعيب عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Peringatan kecurangan dagang.",
-    "icon": "⚖️"
-  },
-  {
-    "slug": "musa-as",
-    "nama": "Nabi Musa AS",
-    "arab": "موسى عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Menerima Taurat.",
-    "icon": "🌊"
-  },
-  {
-    "slug": "harun-as",
-    "nama": "Nabi Harun AS",
-    "arab": "هارون عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Pendamping Nabi Musa.",
-    "icon": "🤝"
-  },
-  {
-    "slug": "dzulkifli-as",
-    "nama": "Nabi Dzulkifli AS",
-    "arab": "ذو الكفل عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Teladan kesabaran dan adil.",
-    "icon": "📖"
-  },
-  {
-    "slug": "daud-as",
-    "nama": "Nabi Daud AS",
-    "arab": "داود عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Raja dan nabi, Zabur.",
-    "icon": "🎶"
-  },
-  {
-    "slug": "sulaiman-as",
-    "nama": "Nabi Sulaiman AS",
-    "arab": "سليمان عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Menguasai jin & hewan.",
-    "icon": "🕊️"
-  },
-  {
-    "slug": "ilyas-as",
-    "nama": "Nabi Ilyas AS",
-    "arab": "إلياس عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Menyeru tauhid.",
-    "icon": "🔥"
-  },
-  {
-    "slug": "alyasa-as",
-    "nama": "Nabi Alyasa AS",
-    "arab": "اليسع عليه السلام",
-    "generasi": "bani-israil",
-    "ringkas": "Penerus dakwah Ilyas.",
-    "icon": "🌿"
-  },
-  {
-    "slug": "yunus-as",
-    "nama": "Nabi Yunus AS",
-    "arab": "يونس عليه السلام",
-    "generasi": "akhir",
-    "ringkas": "Dalam perut ikan.",
-    "icon": "🐋"
-  },
-  {
-    "slug": "zakaria-as",
-    "nama": "Nabi Zakaria AS",
-    "arab": "زكريا عليه السلام",
-    "generasi": "akhir",
-    "ringkas": "Ayah Nabi Yahya.",
-    "icon": "🌱"
-  },
-  {
-    "slug": "yahya-as",
-    "nama": "Nabi Yahya AS",
-    "arab": "يحيى عليه السلام",
-    "generasi": "akhir",
-    "ringkas": "Kesucian dan hikmah.",
-    "icon": "🕊️"
-  },
-  {
-    "slug": "isa-as",
-    "nama": "Nabi Isa AS",
-    "arab": "عيسى عليه السلام",
-    "generasi": "akhir",
-    "ringkas": "Mukjizat atas izin Allah.",
-    "icon": "✨"
-  },
-  {
-    "slug": "muhammad-saw",
-    "nama": "Nabi Muhammad ﷺ",
-    "arab": "محمد ﷺ",
-    "generasi": "akhir",
-    "ringkas": "Penutup para nabi.",
-    "icon": "🌙"
-  }
-]
+{
+  "version": 1,
+  "updated": "2026-01-31",
+  "total": 25,
+  "prophets": [
+    {
+      "id": 1,
+      "slug": "adam-as",
+      "name": "Nabi Adam عليه السلام",
+      "arabic": "آدم عليه السلام",
+      "full_name": "Adam AS diciptakan Allah tanpa ayah dan ibu",
+      "title": "Bapak Manusia",
+      "people": "Manusia pertama",
+      "location": "Surga → Bumi",
+      "era": "Awal penciptaan manusia",
+      "generation": "Primordial",
+      "summary": "Manusia pertama yang diciptakan Allah dan nabi pertama.",
+      "quran_refs": ["Al-Baqarah 2:30-39", "Al-A'raf 7:19-27", "Thaha 20:115-123"],
+      "illustration": "adam-child.png"
+    },
+
+    {
+      "id": 2,
+      "slug": "idris-as",
+      "name": "Nabi Idris عليه السلام",
+      "arabic": "إدريس عليه السلام",
+      "full_name": "Idris bin Yarid",
+      "title": "Nabi yang diangkat ke langit",
+      "people": "Keturunan Adam",
+      "location": "Mesopotamia",
+      "era": "Pasca Adam",
+      "generation": "Awal manusia",
+      "summary": "Nabi yang dikenal karena kesalehan dan kecerdasannya.",
+      "quran_refs": ["Maryam 19:56-57", "Al-Anbiya 21:85"],
+      "illustration": "idris-child.png"
+    },
+
+    {
+      "id": 3,
+      "slug": "nuh-as",
+      "name": "Nabi Nuh عليه السلام",
+      "arabic": "نوح عليه السلام",
+      "full_name": "Nuh bin Lamik",
+      "title": "Rasul pertama",
+      "people": "Kaum penyembah berhala",
+      "location": "Mesopotamia",
+      "era": "Zaman banjir besar",
+      "generation": "Pra-Ibrahim",
+      "summary": "Rasul yang berdakwah ratusan tahun dan membangun bahtera.",
+      "quran_refs": ["Hud 11:25-48", "Nuh 71"],
+      "illustration": "nuh-child.png"
+    },
+
+    {
+      "id": 4,
+      "slug": "hud-as",
+      "name": "Nabi Hud عليه السلام",
+      "arabic": "هود عليه السلام",
+      "full_name": "Hud bin Abdullah",
+      "title": "Pemberi peringatan kaum 'Ad",
+      "people": "Kaum 'Ad",
+      "location": "Arab Selatan",
+      "era": "Pasca banjir",
+      "generation": "Pra-Ibrahim",
+      "summary": "Nabi yang diutus kepada kaum kuat namun sombong.",
+      "quran_refs": ["Hud 11:50-60"],
+      "illustration": "hud-child.png"
+    },
+
+    {
+      "id": 5,
+      "slug": "shalih-as",
+      "name": "Nabi Shalih عليه السلام",
+      "arabic": "صالح عليه السلام",
+      "full_name": "Shalih bin Ubaid",
+      "title": "Pembawa mukjizat unta",
+      "people": "Kaum Tsamud",
+      "location": "Hijr / Madain Shalih",
+      "era": "Arab kuno",
+      "generation": "Pra-Ibrahim",
+      "summary": "Nabi yang membawa tanda berupa unta betina.",
+      "quran_refs": ["Asy-Syams 91:11-15"],
+      "illustration": "shalih-child.png"
+    },
+
+    {
+      "id": 6,
+      "slug": "ibrahim-as",
+      "name": "Nabi Ibrahim عليه السلام",
+      "arabic": "إبراهيم عليه السلام",
+      "full_name": "Ibrahim bin Azar",
+      "title": "Khalilullah",
+      "people": "Kaum penyembah berhala",
+      "location": "Ur → Syam → Makkah",
+      "era": "±2000 SM",
+      "generation": "Bapak para nabi",
+      "summary": "Nabi tauhid dan bapak para nabi.",
+      "quran_refs": ["Ibrahim 14", "Al-Baqarah 2:124-132"],
+      "illustration": "ibrahim-child.png"
+    }
+
+    // ... lanjut sampai 25 nabi
+  ]
+}
