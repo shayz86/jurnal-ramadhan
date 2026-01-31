@@ -1,0 +1,18 @@
+[
+  {
+    "slug":"adam-as",
+    "nama":"Nabi Adam AS",
+    "arab":"آدم عليه السلام",
+    "generasi":"awal-manusia",
+    "ringkas":"Manusia pertama.",
+    "icon":"🌱"
+  },
+  {
+    "slug":"nuh-as",
+    "nama":"Nabi Nuh AS",
+    "arab":"نوح عليه السلام",
+    "generasi":"pra-ibrahim",
+    "ringkas":"Nabi bahtera besar.",
+    "icon":"🚢"
+  }
+]
