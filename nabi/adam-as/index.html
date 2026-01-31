@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kisah Nabi Adam AS — NoorRahma</title>
+
+<link rel="manifest" href="/manifest.json" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{background:#020617}
+</style>
+</head>
+
+<body class="text-slate-100">
+
+<header class="p-4 bg-emerald-700 text-center font-bold">
+📜 Kisah Nabi
+</header>
+
+<main class="max-w-md mx-auto p-4 space-y-5" id="app">
+
+<div class="text-center">
+<img id="illus" class="mx-auto rounded-xl w-48 mb-3"/>
+<h1 id="name" class="text-xl font-bold"></h1>
+<p id="title" class="text-sm opacity-80"></p>
+</div>
+
+<!-- TOGGLE MODE -->
+
+<div class="flex gap-2 justify-center">
+<button onclick="setMode('child')" class="modeBtn">👦 Anak</button>
+<button onclick="setMode('long')" class="modeBtn">📖 Tadabbur</button>
+</div>
+
+<!-- AUDIO -->
+
+<div class="flex justify-center gap-3">
+<button onclick="playAudio()">🔊 Dengarkan</button>
+<button onclick="shareWA()">📤 Kirim WA</button>
+<button onclick="toggleBookmark()">❤️</button>
+</div>
+
+<!-- INFO -->
+
+<div class="bg-slate-800 rounded-xl p-4 text-sm space-y-1">
+<p><b>Nama:</b> <span id="full"></span></p>
+<p><b>Gelar:</b> <span id="gelar"></span></p>
+<p><b>Kaum:</b> <span id="people"></span></p>
+<p><b>Masa:</b> <span id="era"></span></p>
+</div>
+
+<!-- STORY -->
+
+<section class="bg-slate-900 rounded-xl p-4">
+<h3 class="font-bold mb-2">📜 Kisah</h3>
+<p id="story"></p>
+</section>
+
+<!-- MUKJIZAT -->
+
+<section class="bg-slate-900 rounded-xl p-4">
+<h3 class="font-bold mb-2">✨ Mukjizat</h3>
+<ul id="miracles" class="list-disc pl-5"></ul>
+</section>
+
+<!-- UJIAN -->
+
+<section class="bg-slate-900 rounded-xl p-4">
+<h3 class="font-bold mb-2">⚔️ Ujian</h3>
+<ul id="trials" class="list-disc pl-5"></ul>
+</section>
+
+<!-- HIKMAH -->
+
+<section class="bg-slate-900 rounded-xl p-4">
+<h3 class="font-bold mb-2">🌙 Hikmah</h3>
+<ul id="lessons" class="list-disc pl-5"></ul>
+</section>
+
+<!-- AYAT -->
+
+<section class="bg-slate-900 rounded-xl p-4">
+<h3 class="font-bold mb-2">📖 Ayat Qur'an</h3>
+<ul id="ayat" class="list-disc pl-5"></ul>
+</section>
+
+<!-- TIMELINE -->
+
+<section class="bg-slate-900 rounded-xl p-4">
+<h3 class="font-bold mb-2">⏳ Timeline</h3>
+<div id="timeline" class="space-y-2"></div>
+</section>
+
+</main>
+
+<script>
+
+let DATA=null;
+let mode="child";
+
+fetch("./data.json")
+ .then(r=>r.json())
+ .then(d=>{
+  DATA=d;
+  render();
+ });
+
+function setMode(m){
+ mode=m;
+ render();
+}
+
+function render(){
+
+ document.getElementById("name").textContent=DATA.name;
+ document.getElementById("title").textContent=DATA.title;
+ document.getElementById("full").textContent=DATA.full_name;
+ document.getElementById("gelar").textContent=DATA.title;
+ document.getElementById("people").textContent=DATA.people;
+ document.getElementById("era").textContent=DATA.era;
+
+ document.getElementById("story").textContent=
+  mode==="child"?DATA.story_child:DATA.story_long;
+
+ renderList("miracles",DATA.miracles);
+ renderList("trials",DATA.trials);
+ renderList("lessons",DATA.lessons);
+ renderList("ayat",DATA.quran_refs);
+
+ const tl=document.getElementById("timeline");
+ tl.innerHTML="";
+ DATA.timeline.forEach(t=>{
+  tl.innerHTML+=`
+   <div class="bg-slate-800 p-2 rounded">
+    <b>${t.year}</b> — ${t.event}
+   </div>`;
+ });
+
+ document.getElementById("illus").src=
+   "../img/"+DATA.illustration;
+}
+
+function renderList(id,arr){
+ const el=document.getElementById(id);
+ el.innerHTML="";
+ arr.forEach(a=>{
+  el.innerHTML+=`<li>${a}</li>`;
+ });
+}
+
+/* ===== TTS ===== */
+
+function playAudio(){
+ const txt=document.getElementById("story").textContent;
+ speechSynthesis.speak(new SpeechSynthesisUtterance(txt));
+}
+
+/* ===== SHARE ===== */
+
+function shareWA(){
+ const t=encodeURIComponent(DATA.name+" — "+DATA.title);
+ location.href="https://wa.me/?text="+t;
+}
+
+/* ===== BOOKMARK ===== */
+
+function toggleBookmark(){
+
+ let b=JSON.parse(
+  localStorage.getItem("nr_nabi_bookmark")||"[]"
+ );
+
+ if(!b.includes(DATA.slug)) b.push(DATA.slug);
+ else b=b.filter(x=>x!==DATA.slug);
+
+ localStorage.setItem("nr_nabi_bookmark",JSON.stringify(b));
+
+ alert("Bookmark diperbarui ❤️");
+}
+
+</script>
+
+</body>
+</html>
