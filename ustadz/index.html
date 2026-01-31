@@ -211,13 +211,11 @@ header{
 
 <script>
 
-let uid =
-  localStorage.getItem("uid") ||
-  new URLSearchParams(location.search).get("uid");
+let uid = localStorage.getItem("nr_uid");
 
 if(!uid){
-  uid = crypto.randomUUID();
-  localStorage.setItem("uid", uid);
+ uid="uid-"+Date.now();
+ localStorage.setItem("nr_uid",uid);
 }
 
 let sessionId = Date.now().toString();
