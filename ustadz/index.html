@@ -58,7 +58,7 @@ header{
   display:flex;
   flex-direction:column;
   gap:14px;
-  padding-bottom:150px;
+  padding-bottom:210px;
 }
 
 .msg{
@@ -80,20 +80,21 @@ header{
   background:#064e3b;
 }
 
-/* ===== BOOKMARK BTN ===== */
+/* ===== ACTION BTN ===== */
 
-.bookmark{
-  position:absolute;
-  right:10px;
-  bottom:6px;
-  font-size:13px;
-  opacity:.7;
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+  font-size:12px;
+  opacity:.85;
+}
+
+.actions span{
   cursor:pointer;
 }
 
-.bookmark.active{
-  color:#facc15;
-}
+.bookmark.active{color:#facc15}
 
 /* ===== QUICK ===== */
 
@@ -148,17 +149,25 @@ header{
   font-weight:bold;
 }
 
-/* ===== LOADING ===== */
+/* ===== FAVORITE PANEL ===== */
 
-.typing{
-  font-size:13px;
-  opacity:.7;
-  animation:pulse 1.4s infinite;
+#favPanel{
+ position:fixed;
+ inset:0;
+ background:#020617;
+ z-index:99;
+ padding:20px;
+ display:none;
+ overflow:auto;
 }
 
-@keyframes pulse{
-  0%,100%{opacity:.3}
-  50%{opacity:1}
+#favPanel h3{text-align:center}
+
+.fav-item{
+ background:#064e3b;
+ padding:14px;
+ border-radius:14px;
+ margin-bottom:10px;
 }
 
 /* ===== PRO BADGE ===== */
@@ -177,30 +186,37 @@ header{
 <body>
 
 <header>
-  🕌 Tanya Ustadz AI
-  <span class="badge">PRO</span>
+ 🕌 Tanya Ustadz AI
+ <span class="badge">PRO</span>
+ ⭐ <span onclick="openFav()">Fatwa Favorit</span>
 </header>
+
+<div id="favPanel">
+<h3>⭐ Fatwa Favorit</h3>
+<div id="favList"></div>
+<button onclick="closeFav()">Tutup</button>
+</div>
 
 <div class="settings">
 
 <select id="mode">
-  <option value="ai">Mode Konsultan</option>
-  <option value="fiqh">Mode Fiqh</option>
+<option value="ai">Mode Konsultan</option>
+<option value="fiqh">Mode Fiqh</option>
 </select>
 
 <select id="mazhab">
-  <option value="netral">Mazhab: Netral</option>
-  <option value="syafii">Syafi’i</option>
-  <option value="hanafi">Hanafi</option>
-  <option value="maliki">Maliki</option>
-  <option value="hanbali">Hanbali</option>
+<option value="netral">Mazhab: Netral</option>
+<option value="syafii">Syafi’i</option>
+<option value="hanafi">Hanafi</option>
+<option value="maliki">Maliki</option>
+<option value="hanbali">Hanbali</option>
 </select>
 
 <select id="persona">
-  <option value="ilmiah">Ustadz Ilmiah</option>
-  <option value="santai">Santai</option>
-  <option value="remaja">Remaja Friendly</option>
-  <option value="tradisional">Tradisional</option>
+<option value="ilmiah">Ustadz Ilmiah</option>
+<option value="santai">Santai</option>
+<option value="remaja">Remaja Friendly</option>
+<option value="tradisional">Tradisional</option>
 </select>
 
 <label><input type="checkbox" id="dalil" checked> Dalil</label>
@@ -211,10 +227,9 @@ header{
 
 <div class="quick">
 <button onclick="askQuick('Apakah riba itu haram?')">Riba</button>
-<button onclick="askQuick('Apa syarat sah shalat?')">Sah Shalat</button>
-<button onclick="askQuick('Apakah wudhu batal jika tidur?')">Wudhu</button>
-<button onclick="askQuick('Bagaimana zakat fitrah?')">Zakat</button>
-<button onclick="askQuick('Hukum hutang dalam Islam')">Hutang</button>
+<button onclick="askQuick('Apa syarat sah shalat?')">Shalat</button>
+<button onclick="askQuick('Apakah wudhu batal?')">Wudhu</button>
+<button onclick="askQuick('Bagaimana zakat?')">Zakat</button>
 </div>
 
 <div class="chat" id="chat"></div>
@@ -229,45 +244,24 @@ header{
 
 /* ================= UID ================= */
 
-let uid=localStorage.getItem("nr_uid");
-if(!uid){
- uid="uid-"+Date.now();
- localStorage.setItem("nr_uid",uid);
-}
+let uid=localStorage.getItem("nr_uid")||
+ "uid-"+Date.now();
 
-/* ================= HISTORY ================= */
+/* ================= DATA ================= */
 
-let history=
- JSON.parse(localStorage.getItem("nr_ustadz_history")||"[]");
-
-const bookmarks=
- JSON.parse(localStorage.getItem("nr_ustadz_bookmarks")||"[]");
+let history=JSON.parse(localStorage.getItem("nr_ustadz_history")||"[]");
+let bookmarks=JSON.parse(localStorage.getItem("nr_ustadz_bookmarks")||"[]");
 
 const chat=document.getElementById("chat");
 const input=document.getElementById("input");
 
-/* render history */
-history.forEach(m=>add(m.role,m.text,m.bookmark));
-
-/* ================= AUTO SWITCH ================= */
-
-const fiqhWords=[
- "halal","haram","batal","sah","riba","najis",
- "wudhu","puasa","zakat","hutang","nikah","mahram"
-];
-
-function detectFiqh(t){
- return fiqhWords.some(w=>t.toLowerCase().includes(w));
-}
+history.forEach(m=>add(m.role,m.text));
 
 /* ================= UI ================= */
 
-function askQuick(t){
- input.value=t;
- send();
-}
+function askQuick(t){input.value=t;send();}
 
-function add(role,text,bookmarked=false){
+function add(role,text){
 
  const d=document.createElement("div");
  d.className="msg "+(role==="user"?"user":"ai");
@@ -275,37 +269,24 @@ function add(role,text,bookmarked=false){
 
  if(role==="ai"){
 
-  const bm=document.createElement("div");
-  bm.className="bookmark"+(bookmarked?" active":"");
-  bm.textContent="❤️";
+ const actions=document.createElement("div");
+ actions.className="actions";
 
-  bm.onclick=()=>toggleBookmark(text,bm);
+ const bm=document.createElement("span");
+ bm.textContent="⭐";
+ bm.onclick=()=>toggleBookmark(text);
 
-  d.appendChild(bm);
+ const wa=document.createElement("span");
+ wa.textContent="📤 WA";
+ wa.onclick=()=>shareWA(text);
+
+ actions.append(bm,wa);
+
+ d.append(actions);
  }
 
  chat.appendChild(d);
  chat.scrollTop=chat.scrollHeight;
-}
-
-/* ================= BOOKMARK ================= */
-
-function toggleBookmark(text,el){
-
- let i=bookmarks.indexOf(text);
-
- if(i>-1){
-  bookmarks.splice(i,1);
-  el.classList.remove("active");
- }else{
-  bookmarks.push(text);
-  el.classList.add("active");
- }
-
- localStorage.setItem(
-  "nr_ustadz_bookmarks",
-  JSON.stringify(bookmarks)
- );
 }
 
 /* ================= SEND ================= */
@@ -313,43 +294,7 @@ function toggleBookmark(text,el){
 async function send(){
 
  const q=input.value.trim();
- if(!q) return;
-
- const autoFiqh=detectFiqh(q);
-
- if(autoFiqh)
-  document.getElementById("mode").value="fiqh";
-
- const mazhab=document.getElementById("mazhab").value;
- const persona=document.getElementById("persona").value;
- const dalil=document.getElementById("dalil").checked;
- const ringkas=document.getElementById("ringkas").checked;
- const detail=document.getElementById("detail").checked;
- const mode=document.getElementById("mode").value;
-
- const sysPrompt=
-`Jawab sebagai ustadz muslim ${persona}.
-Mazhab: ${mazhab}.
-${dalil?"Sertakan ayat dan hadits.":""}
-${ringkas?"Jawaban singkat.":""}
-${detail?"Jawaban panjang dan terperinci.":""}`;
-
- let endpoint="/assistant/ai";
- let payload={
-  uid,
-  sessionId:Date.now().toString(),
-  prompt: sysPrompt+"\n\nPERTANYAAN:\n"+q
- };
-
- if(mode==="fiqh"){
-  endpoint="/assistant/fiqh";
-  payload={
-   uid,
-   topic:"Fiqh",
-   madhhab:mazhab,
-   question:q
-  };
- }
+ if(!q)return;
 
  add("user",q);
  history.push({role:"user",text:q});
@@ -357,38 +302,73 @@ ${detail?"Jawaban panjang dan terperinci.":""}`;
 
  input.value="";
 
- const typing=document.createElement("div");
- typing.className="typing";
- typing.textContent="Ustadz AI sedang mengetik...";
- chat.appendChild(typing);
-
  const res=await fetch(
-  "https://noorrahma-app.pembang001.workers.dev"+endpoint,
-  {
-   method:"POST",
-   headers:{ "content-type":"application/json" },
-   body:JSON.stringify(payload)
-  }
- );
+ "https://noorrahma-app.pembang001.workers.dev/assistant/ai",
+ {
+ method:"POST",
+ headers:{"content-type":"application/json"},
+ body:JSON.stringify({uid,prompt:q})
+ });
 
- typing.remove();
+ const d=await res.json();
 
- const data=await res.json();
+ const ans=d.answer||"⚠️ Tidak bisa menjawab.";
 
- const answer=data.answer||"⚠️ Tidak bisa menjawab.";
+ const withAyat=ans+"\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa";
 
- add("ai",answer,bookmarks.includes(answer));
+ add("ai",withAyat);
 
- history.push({role:"ai",text:answer});
+ history.push({role:"ai",text:withAyat});
  saveHistory();
+}
+
+/* ================= FAVORITE ================= */
+
+function toggleBookmark(t){
+
+ if(bookmarks.includes(t))
+ bookmarks=bookmarks.filter(x=>x!==t);
+ else bookmarks.push(t);
+
+ localStorage.setItem(
+ "nr_ustadz_bookmarks",
+ JSON.stringify(bookmarks)
+ );
+}
+
+function openFav(){
+
+ const list=document.getElementById("favList");
+ list.innerHTML="";
+
+ bookmarks.forEach(b=>{
+ const d=document.createElement("div");
+ d.className="fav-item";
+ d.innerText=b;
+ list.appendChild(d);
+ });
+
+ document.getElementById("favPanel").style.display="block";
+}
+
+function closeFav(){
+ document.getElementById("favPanel").style.display="none";
+}
+
+/* ================= SHARE ================= */
+
+function shareWA(t){
+ window.open(
+ "https://wa.me/?text="+encodeURIComponent(t)
+ );
 }
 
 /* ================= SAVE ================= */
 
 function saveHistory(){
  localStorage.setItem(
-  "nr_ustadz_history",
-  JSON.stringify(history)
+ "nr_ustadz_history",
+ JSON.stringify(history)
  );
 }
 
