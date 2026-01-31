@@ -211,9 +211,14 @@ header{
 
 <script>
 
-const uid =
+let uid =
   localStorage.getItem("uid") ||
   new URLSearchParams(location.search).get("uid");
+
+if(!uid){
+  uid = crypto.randomUUID();
+  localStorage.setItem("uid", uid);
+}
 
 let sessionId = Date.now().toString();
 
