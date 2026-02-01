@@ -2,199 +2,129 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Kisah 25 Nabi & Rasul — NoorRahma</title>
-
-<meta name="theme-color" content="#047857" />
-<link rel="manifest" href="/manifest.json" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Kisah 25 Nabi</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
-<script>
-tailwind.config={
-  darkMode:"class",
-  theme:{
-    extend:{
-      colors:{ slate:{950:"#020617"} }
-    }
-  }
-}
-</script>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
 
-<header class="bg-emerald-700 text-white p-4 sticky top-0 z-20">
-  <div class="max-w-md mx-auto flex items-center justify-between">
-    <button onclick="history.back()">←</button>
-    <h1 class="font-bold text-sm">📜 Kisah 25 Nabi & Rasul</h1>
-    <span class="text-[10px] bg-yellow-400 text-black px-2 py-1 rounded-full font-bold">
-      PRO
-    </span>
-  </div>
-</header>
+<body class="bg-slate-50">
 
-<main class="max-w-md mx-auto p-4 space-y-4">
+<div id="root"></div>
 
-<!-- ===== PRO LOCK ===== -->
+<script type="text/babel">
+const {useState,useEffect}=React;
 
-<div id="proLock" class="hidden bg-amber-100 border border-amber-300 p-4 rounded-xl text-center">
-  <h3 class="font-bold">Fitur PRO</h3>
-  <p class="text-xs mt-1">
-    Kisah lengkap para nabi hanya tersedia untuk akun PRO.
-  </p>
-</div>
+const App=()=>{
 
-<!-- ===== SEARCH ===== -->
+  const isPro = localStorage.getItem("nr_is_pro")==="1";
 
-<input id="searchInput"
- type="text"
- placeholder="Cari nama nabi..."
- class="w-full px-4 py-2 rounded-xl border bg-white dark:bg-slate-900"/>
+  if(!isPro){
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="bg-white p-8 rounded-3xl shadow text-center">
+          <h1 className="font-bold text-xl">🔒 Fitur PRO</h1>
+          <p className="text-sm mt-2">
+            Kisah Nabi hanya tersedia untuk akun PRO.
+          </p>
+          <button
+            onClick={()=>location.href="/"}
+            className="mt-6 bg-emerald-600 text-white px-6 py-3 rounded-xl"
+          >
+            Kembali
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-<!-- ===== FILTER ===== -->
-
-<select id="filterGen"
- class="w-full px-4 py-2 rounded-xl border bg-white dark:bg-slate-900">
-
- <option value="">Semua Generasi</option>
- <option value="awal-manusia">Awal Manusia</option>
- <option value="pra-banjir">Pra Banjir</option>
- <option value="bani-israil">Bani Israil</option>
- <option value="arab">Arab</option>
-
-</select>
-
-<!-- ===== GRID ===== -->
-
-<div id="grid"
- class="grid grid-cols-2 gap-3"></div>
-
-</main>
-
-<script>
-
-/* =====================
-   PRO CHECK
-===================== */
-
-const isPro = localStorage.getItem("nr_is_pro")==="1";
-
-if(!isPro){
- document.getElementById("proLock").classList.remove("hidden");
-}
-
-/* =====================
-   DATA INDEX
-===================== */
-
-const prophets=[
- {slug:"adam-as",name:"Nabi Adam AS",generation:"awal-manusia"},
- {slug:"idris-as",name:"Nabi Idris AS",generation:"pra-banjir"},
- {slug:"nuh-as",name:"Nabi Nuh AS",generation:"pra-banjir"},
- {slug:"hud-as",name:"Nabi Hud AS",generation:"pra-banjir"},
- {slug:"shalih-as",name:"Nabi Shalih AS",generation:"pra-banjir"},
- {slug:"ibrahim-as",name:"Nabi Ibrahim AS",generation:"bani-israil"},
- {slug:"luth-as",name:"Nabi Luth AS",generation:"bani-israil"},
- {slug:"ismail-as",name:"Nabi Ismail AS",generation:"arab"},
- {slug:"ishaq-as",name:"Nabi Ishaq AS",generation:"bani-israil"},
- {slug:"yaqub-as",name:"Nabi Ya'qub AS",generation:"bani-israil"},
- {slug:"yusuf-as",name:"Nabi Yusuf AS",generation:"bani-israil"},
- {slug:"ayyub-as",name:"Nabi Ayyub AS",generation:"bani-israil"},
- {slug:"syuaib-as",name:"Nabi Syuaib AS",generation:"bani-israil"},
- {slug:"musa-as",name:"Nabi Musa AS",generation:"bani-israil"},
- {slug:"harun-as",name:"Nabi Harun AS",generation:"bani-israil"},
- {slug:"dzulkifli-as",name:"Nabi Dzulkifli AS",generation:"bani-israil"},
- {slug:"daud-as",name:"Nabi Daud AS",generation:"bani-israil"},
- {slug:"sulaiman-as",name:"Nabi Sulaiman AS",generation:"bani-israil"},
- {slug:"ilyas-as",name:"Nabi Ilyas AS",generation:"bani-israil"},
- {slug:"alyasa-as",name:"Nabi Alyasa AS",generation:"bani-israil"},
- {slug:"yunus-as",name:"Nabi Yunus AS",generation:"bani-israil"},
- {slug:"zakaria-as",name:"Nabi Zakaria AS",generation:"bani-israil"},
- {slug:"yahya-as",name:"Nabi Yahya AS",generation:"bani-israil"},
- {slug:"isa-as",name:"Nabi Isa AS",generation:"bani-israil"},
- {slug:"muhammad-saw",name:"Nabi Muhammad ﷺ",generation:"arab"}
-];
-
-/* =====================
-   BOOKMARK
-===================== */
-
-let bookmarks=JSON.parse(localStorage.getItem("nr_nabi_bookmarks")||"[]");
-
-const toggleBookmark=(slug)=>{
- if(bookmarks.includes(slug))
-  bookmarks=bookmarks.filter(s=>s!==slug);
- else bookmarks.push(slug);
-
- localStorage.setItem("nr_nabi_bookmarks",JSON.stringify(bookmarks));
- render();
-}
-
-/* =====================
-   RENDER
-===================== */
-
-const grid=document.getElementById("grid");
-const searchInput=document.getElementById("searchInput");
-const filterGen=document.getElementById("filterGen");
-
-function render(){
-
- grid.innerHTML="";
-
- let list=[...prophets];
-
- if(searchInput.value)
-  list=list.filter(p=>
-   p.name.toLowerCase().includes(searchInput.value.toLowerCase())
+  const [list,setList]=useState([]);
+  const [search,setSearch]=useState("");
+  const [filter,setFilter]=useState("all");
+  const [bookmark,setBookmark]=useState(
+    ()=>JSON.parse(localStorage.getItem("nr_nabi_bookmark")||"[]")
   );
 
- if(filterGen.value)
-  list=list.filter(p=>p.generation===filterGen.value);
+  useEffect(()=>{
+    fetch("/nabi/data.json").then(r=>r.json()).then(setList);
+  },[]);
 
- list.forEach(p=>{
+  const toggleBookmark=slug=>{
+    const next=bookmark.includes(slug)
+      ? bookmark.filter(x=>x!==slug)
+      : [...bookmark,slug];
 
-  const isSaved=bookmarks.includes(p.slug);
+    localStorage.setItem("nr_nabi_bookmark",JSON.stringify(next));
+    setBookmark(next);
+  };
 
-  const card=document.createElement("div");
-  card.className="bg-white dark:bg-slate-900 p-3 rounded-xl border shadow-sm relative";
+  const filtered=list.filter(n=>{
+    return (
+      n.nama.toLowerCase().includes(search.toLowerCase()) &&
+      (filter==="all"||n.generasi===filter)
+    );
+  });
 
-  card.innerHTML=`
-   <button onclick="toggleBookmark('${p.slug}')"
-    class="absolute top-2 right-2 text-lg">
-     ${isSaved?"⭐":"☆"}
-   </button>
+  return(
+    <div className="max-w-md mx-auto p-4 space-y-4">
 
-   <div onclick="openNabi('${p.slug}')"
-    class="cursor-pointer">
-    <div class="text-3xl">📖</div>
-    <h4 class="font-bold text-sm mt-2">${p.name}</h4>
-    <p class="text-[10px] text-slate-500">${p.generation}</p>
-   </div>
-  `;
+      <h1 className="font-bold text-xl">📜 Kisah 25 Nabi & Rasul</h1>
 
-  grid.appendChild(card);
- });
+      <input
+        placeholder="Cari nabi..."
+        className="w-full p-3 rounded-xl bg-slate-100"
+        onChange={e=>setSearch(e.target.value)}
+      />
 
-}
+      <select
+        className="w-full p-3 rounded-xl bg-slate-100"
+        onChange={e=>setFilter(e.target.value)}
+      >
+        <option value="all">Semua Generasi</option>
+        <option value="awal-manusia">Awal Manusia</option>
+        <option value="pra-ibrahim">Pra Ibrahim</option>
+        <option value="bani-israil">Bani Israil</option>
+        <option value="akhir">Menjelang Rasulullah</option>
+      </select>
 
-const openNabi=(slug)=>{
- if(!isPro){
-  alert("Fitur PRO. Upgrade untuk membuka kisah lengkap nabi.");
-  return;
- }
- location.href=`/noorrahma/nabi/${slug}/`;
+      <div className="grid grid-cols-2 gap-3">
+
+        {filtered.map(n=>(
+          <div
+            key={n.slug}
+            onClick={()=>location.href="/nabi/"+n.slug+"/"}
+            className="bg-white p-4 rounded-2xl shadow cursor-pointer active:scale-95"
+          >
+            <div className="text-3xl">{n.icon}</div>
+            <h4 className="font-bold text-sm">{n.nama}</h4>
+            <p className="text-[10px] text-slate-500">{n.ringkas}</p>
+
+            <button
+              onClick={e=>{
+                e.stopPropagation();
+                toggleBookmark(n.slug);
+              }}
+              className={
+                "mt-2 text-lg "+
+                (bookmark.includes(n.slug)
+                  ?"text-yellow-400"
+                  :"text-slate-300")
+              }
+            >
+              ⭐
+            </button>
+          </div>
+        ))}
+
+      </div>
+    </div>
+  );
 };
 
-searchInput.oninput=render;
-filterGen.onchange=render;
-
-render();
-
+ReactDOM.createRoot(root).render(<App/>);
 </script>
-
 </body>
 </html>
