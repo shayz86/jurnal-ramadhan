@@ -187,14 +187,14 @@ modeTadabbur.onclick=()=>loadStory(slug,"tadabbur");
 bookmarkBtn.onclick=()=>{
 
  let bm=
-  JSON.parse(localStorage.getItem("nr_nabi_bookmarks")||"[]");
+  JSON.parse(localStorage.getItem("nr_nabi_bookmark")||"[]");
 
  if(!bm.includes(slug)){
   bm.push(slug);
   bookmarkBtn.textContent="⭐ Tersimpan";
  }
 
- localStorage.setItem("nr_nabi_bookmarks",JSON.stringify(bm));
+ localStorage.setItem("nr_nabi_bookmark",JSON.stringify(bm));
 };
 
 /* ========= TTS ========= */
