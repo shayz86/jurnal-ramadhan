@@ -104,9 +104,7 @@ fetch("/nabi/data.json")
 
 });
 
-/* ========= STORY ENGINE ========= */
-
-let currentText="";
+/* ========= STORY ========= */
 
 function loadStory(slug,mode){
 
@@ -116,7 +114,7 @@ function loadStory(slug,mode){
 
    let html="";
 
-   /* ===== MODE ANAK ===== */
+   /* MODE ANAK */
    if(d.cerita){
 
      html+=`<h2 class="font-bold mb-3">${d.judul}</h2>`;
@@ -126,20 +124,21 @@ function loadStory(slug,mode){
      });
 
      if(d.hikmah){
-       html+="<hr class='my-4'>";
-       html+="<b>Hikmah:</b><ul class='list-disc pl-5'>";
+       html+=`<hr class="my-4">`;
+       html+=`<b>Hikmah:</b><ul class="list-disc pl-5">`;
        d.hikmah.forEach(h=>{
          html+=`<li>${h}</li>`;
        });
-       html+="</ul>";
+       html+=`</ul>`;
      }
 
      if(d.penutup){
        html+=`<p class="mt-4 italic">${d.penutup}</p>`;
      }
+
    }
 
-   /* ===== MODE TADABBUR ===== */
+   /* MODE TADABBUR */
    if(d.narasi){
 
      html+=`<h2 class="font-bold mb-3">${d.judul}</h2>`;
@@ -152,12 +151,12 @@ function loadStory(slug,mode){
      });
 
      if(d.hikmah){
-       html+="<hr class='my-4'>";
-       html+="<b>Hikmah:</b><ul class='list-disc pl-5'>";
+       html+=`<hr class="my-4">`;
+       html+=`<b>Hikmah:</b><ul class="list-disc pl-5">`;
        d.hikmah.forEach(h=>{
          html+=`<li>${h}</li>`;
        });
-       html+="</ul>";
+       html+=`</ul>`;
      }
 
      if(d.doa){
@@ -167,14 +166,16 @@ function loadStory(slug,mode){
      if(d.penutup){
        html+=`<p class="mt-4 italic">${d.penutup}</p>`;
      }
+
    }
 
    story.innerHTML=html;
    currentText=story.innerText;
 
  });
-
 }
+
+let currentText="";
 
 /* ========= MODE ========= */
 
