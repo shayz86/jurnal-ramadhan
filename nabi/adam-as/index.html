@@ -104,77 +104,19 @@ fetch("/nabi/data.json")
 
 });
 
-/* ========= STORY ENGINE ========= */
-
-let currentText="";
+/* ========= STORY ========= */
 
 function loadStory(slug,mode){
 
  fetch(`/nabi/${slug}/${mode}.json`)
  .then(r=>r.json())
  .then(d=>{
-
-   let html="";
-
-   /* ===== MODE ANAK ===== */
-   if(d.cerita){
-
-     html+=`<h2 class="font-bold mb-3">${d.judul}</h2>`;
-
-     d.cerita.forEach(p=>{
-       html+=`<p class="mb-3">${p}</p>`;
-     });
-
-     if(d.hikmah){
-       html+="<hr class='my-4'>";
-       html+="<b>Hikmah:</b><ul class='list-disc pl-5'>";
-       d.hikmah.forEach(h=>{
-         html+=`<li>${h}</li>`;
-       });
-       html+="</ul>";
-     }
-
-     if(d.penutup){
-       html+=`<p class="mt-4 italic">${d.penutup}</p>`;
-     }
-   }
-
-   /* ===== MODE TADABBUR ===== */
-   if(d.narasi){
-
-     html+=`<h2 class="font-bold mb-3">${d.judul}</h2>`;
-
-     d.narasi.forEach(n=>{
-       html+=`
-         <h3 class="mt-4 font-semibold">${n.judul}</h3>
-         <p>${n.isi}</p>
-       `;
-     });
-
-     if(d.hikmah){
-       html+="<hr class='my-4'>";
-       html+="<b>Hikmah:</b><ul class='list-disc pl-5'>";
-       d.hikmah.forEach(h=>{
-         html+=`<li>${h}</li>`;
-       });
-       html+="</ul>";
-     }
-
-     if(d.doa){
-       html+=`<p class="mt-4 text-center text-xl">${d.doa}</p>`;
-     }
-
-     if(d.penutup){
-       html+=`<p class="mt-4 italic">${d.penutup}</p>`;
-     }
-   }
-
-   story.innerHTML=html;
-   currentText=story.innerText;
-
+   story.innerHTML=d.text.replace(/\n/g,"<br>");
+   currentText=d.text;
  });
-
 }
+
+let currentText="";
 
 /* ========= MODE ========= */
 
@@ -186,14 +128,14 @@ modeTadabbur.onclick=()=>loadStory(slug,"tadabbur");
 bookmarkBtn.onclick=()=>{
 
  let bm=
-  JSON.parse(localStorage.getItem("nr_nabi_bookmark")||"[]");
+  JSON.parse(localStorage.getItem("nr_nabi_bookmarks")||"[]");
 
  if(!bm.includes(slug)){
   bm.push(slug);
   bookmarkBtn.textContent="⭐ Tersimpan";
  }
 
- localStorage.setItem("nr_nabi_bookmark",JSON.stringify(bm));
+ localStorage.setItem("nr_nabi_bookmarks",JSON.stringify(bm));
 };
 
 /* ========= TTS ========= */
