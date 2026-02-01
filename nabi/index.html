@@ -2,220 +2,197 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kisah 25 Nabi & Rasul — NoorRahma</title>
 
-<title>Kisah 25 Nabi — NoorRahma</title>
+<meta name="theme-color" content="#047857" />
+<link rel="manifest" href="/manifest.json" />
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script>
+tailwind.config={
+  darkMode:"class",
+  theme:{
+    extend:{
+      colors:{ slate:{950:"#020617"} }
+    }
+  }
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+
 </head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
 
-<body class="bg-slate-50 dark:bg-slate-950">
-
-<div id="root"></div>
-
-<script type="text/babel">
-
-const { useState, useEffect } = React;
-
-const PROGRESS_KEY = "nr_nabi_progress";
-const LAST_KEY = "nr_nabi_last";
-
-const loadProgress = () =>
-  JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}");
-
-const saveProgress = (p) =>
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
-
-const App = () => {
-
-  const isPro = localStorage.getItem("nr_is_pro") === "1";
-
-  const [nabi, setNabi] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [mode, setMode] = useState("child");
-  const [progress, setProgress] = useState(loadProgress());
-
-  const synth = window.speechSynthesis;
-  const [utterance, setUtterance] = useState(null);
-
-  useEffect(()=>{
-    if(!isPro) location.href="/";
-  },[]);
-
-  useEffect(()=>{
-    fetch("/nabi/data.json")
-      .then(r=>r.json())
-      .then(setNabi);
-  },[]);
-
-  const percent =
-    nabi.length
-      ? Math.round(
-          (Object.keys(progress).length / nabi.length) * 100
-        )
-      : 0;
-
-  const markDone = (id) => {
-    const p = { ...progress, [id]: true };
-    setProgress(p);
-    saveProgress(p);
-  };
-
-  const playTTS = (text) => {
-    synth.cancel();
-
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "id-ID";
-    synth.speak(u);
-
-    setUtterance(u);
-  };
-
-  const stopTTS = () => {
-    synth.cancel();
-    setUtterance(null);
-  };
-
-  if(!isPro)
-    return <div className="min-h-screen flex items-center justify-center">PRO ONLY</div>;
-
-  return (
-
-<div className="max-w-md mx-auto p-4 space-y-4">
-
-{/* HEADER */}
-<h1 className="text-lg font-bold">
-📜 Kisah 25 Nabi & Rasul
-</h1>
-
-{/* PROGRESS BAR */}
-<div className="bg-white dark:bg-slate-900 p-3 rounded-xl shadow border">
-
-  <div className="flex justify-between text-xs font-bold mb-2">
-    <span>Progress</span>
-    <span>{percent}%</span>
+<header class="bg-emerald-700 text-white p-4 sticky top-0 z-20">
+  <div class="max-w-md mx-auto flex items-center justify-between">
+    <button onclick="history.back()">←</button>
+    <h1 class="font-bold text-sm">📜 Kisah 25 Nabi & Rasul</h1>
+    <span class="text-[10px] bg-yellow-400 text-black px-2 py-1 rounded-full font-bold">
+      PRO
+    </span>
   </div>
+</header>
 
-  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-    <div
-      style={{ width: percent + "%" }}
-      className="h-full bg-emerald-500 transition-all"
-    />
-  </div>
+<main class="max-w-md mx-auto p-4 space-y-4">
 
+<!-- ===== PRO LOCK ===== -->
+
+<div id="proLock" class="hidden bg-amber-100 border border-amber-300 p-4 rounded-xl text-center">
+  <h3 class="font-bold">Fitur PRO</h3>
+  <p class="text-xs mt-1">
+    Kisah lengkap para nabi hanya tersedia untuk akun PRO.
+  </p>
 </div>
 
-{/* MODE */}
-<div className="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
+<!-- ===== SEARCH ===== -->
 
-  {["child","adult"].map(m=>(
-    <button
-      key={m}
-      onClick={()=>setMode(m)}
-      className={`flex-1 py-2 text-xs font-bold rounded-lg
-        ${mode===m
-          ? "bg-white dark:bg-slate-900 text-emerald-600"
-          : "text-slate-500"}
-      `}
-    >
-      {m==="child" ? "Mode Anak 👶" : "Mode Dewasa 📖"}
-    </button>
-  ))}
+<input id="searchInput"
+ type="text"
+ placeholder="Cari nama nabi..."
+ class="w-full px-4 py-2 rounded-xl border bg-white dark:bg-slate-900"/>
 
-</div>
+<!-- ===== FILTER ===== -->
 
-{/* LIST */}
-{!selected && (
+<select id="filterGen"
+ class="w-full px-4 py-2 rounded-xl border bg-white dark:bg-slate-900">
 
-<div className="grid grid-cols-2 gap-3">
+ <option value="">Semua Generasi</option>
+ <option value="awal-manusia">Awal Manusia</option>
+ <option value="pra-banjir">Pra Banjir</option>
+ <option value="bani-israil">Bani Israil</option>
+ <option value="arab">Arab</option>
 
-{nabi.map(n=>(
-<button
-  key={n.id}
-  onClick={()=>setSelected(n)}
-  className="bg-white dark:bg-slate-900 rounded-2xl p-4 border shadow text-left relative"
->
+</select>
 
-{progress[n.id] && (
-<div className="absolute top-2 right-2 text-green-500 text-xs">
-✔
-</div>
-)}
+<!-- ===== GRID ===== -->
 
-<h3 className="font-bold text-sm">
-Nabi {n.name}
-</h3>
+<div id="grid"
+ class="grid grid-cols-2 gap-3"></div>
 
-<p className="text-[10px] text-slate-500">
-{n.short}
-</p>
+</main>
 
-</button>
-))}
+<script>
 
-</div>
-)}
+/* =====================
+   PRO CHECK
+===================== */
 
-{/* DETAIL */}
-{selected && (
+const isPro = localStorage.getItem("nr_is_pro")==="1";
 
-<div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow border space-y-4">
+if(!isPro){
+ document.getElementById("proLock").classList.remove("hidden");
+}
 
-<button
-  onClick={()=>setSelected(null)}
-  className="text-xs font-bold text-emerald-600"
->
-← Kembali
-</button>
+/* =====================
+   DATA INDEX
+===================== */
 
-<h2 className="text-xl font-bold">
-Nabi {selected.name}
-</h2>
+const prophets=[
+ {slug:"adam-as",name:"Nabi Adam AS",generation:"awal-manusia"},
+ {slug:"idris-as",name:"Nabi Idris AS",generation:"pra-banjir"},
+ {slug:"nuh-as",name:"Nabi Nuh AS",generation:"pra-banjir"},
+ {slug:"hud-as",name:"Nabi Hud AS",generation:"pra-banjir"},
+ {slug:"shalih-as",name:"Nabi Shalih AS",generation:"pra-banjir"},
+ {slug:"ibrahim-as",name:"Nabi Ibrahim AS",generation:"bani-israil"},
+ {slug:"luth-as",name:"Nabi Luth AS",generation:"bani-israil"},
+ {slug:"ismail-as",name:"Nabi Ismail AS",generation:"arab"},
+ {slug:"ishaq-as",name:"Nabi Ishaq AS",generation:"bani-israil"},
+ {slug:"yaqub-as",name:"Nabi Ya'qub AS",generation:"bani-israil"},
+ {slug:"yusuf-as",name:"Nabi Yusuf AS",generation:"bani-israil"},
+ {slug:"ayyub-as",name:"Nabi Ayyub AS",generation:"bani-israil"},
+ {slug:"syuaib-as",name:"Nabi Syuaib AS",generation:"bani-israil"},
+ {slug:"musa-as",name:"Nabi Musa AS",generation:"bani-israil"},
+ {slug:"harun-as",name:"Nabi Harun AS",generation:"bani-israil"},
+ {slug:"dzulkifli-as",name:"Nabi Dzulkifli AS",generation:"bani-israil"},
+ {slug:"daud-as",name:"Nabi Daud AS",generation:"bani-israil"},
+ {slug:"sulaiman-as",name:"Nabi Sulaiman AS",generation:"bani-israil"},
+ {slug:"ilyas-as",name:"Nabi Ilyas AS",generation:"bani-israil"},
+ {slug:"alyasa-as",name:"Nabi Alyasa AS",generation:"bani-israil"},
+ {slug:"yunus-as",name:"Nabi Yunus AS",generation:"bani-israil"},
+ {slug:"zakaria-as",name:"Nabi Zakaria AS",generation:"bani-israil"},
+ {slug:"yahya-as",name:"Nabi Yahya AS",generation:"bani-israil"},
+ {slug:"isa-as",name:"Nabi Isa AS",generation:"bani-israil"},
+ {slug:"muhammad-saw",name:"Nabi Muhammad ﷺ",generation:"arab"}
+];
 
-<p className="text-sm leading-relaxed text-justify">
-{mode==="child" ? selected.child : selected.adult}
-</p>
+/* =====================
+   BOOKMARK
+===================== */
 
-{/* AUDIO */}
-<div className="flex gap-3">
+let bookmarks=JSON.parse(localStorage.getItem("nr_nabi_bookmarks")||"[]");
 
-<button
-  onClick={()=>playTTS(mode==="child" ? selected.child : selected.adult)}
-  className="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-xs font-bold"
->
-▶ Dengarkan
-</button>
+const toggleBookmark=(slug)=>{
+ if(bookmarks.includes(slug))
+  bookmarks=bookmarks.filter(s=>s!==slug);
+ else bookmarks.push(slug);
 
-<button
-  onClick={stopTTS}
-  className="bg-slate-200 px-4 rounded-xl text-xs font-bold"
->
-■ Stop
-</button>
+ localStorage.setItem("nr_nabi_bookmarks",JSON.stringify(bookmarks));
+ render();
+}
 
-</div>
+/* =====================
+   RENDER
+===================== */
 
-{/* MARK DONE */}
-<button
-  onClick={()=>markDone(selected.id)}
-  className="w-full bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold"
->
-✔ Tandai Selesai
-</button>
+const grid=document.getElementById("grid");
+const searchInput=document.getElementById("searchInput");
+const filterGen=document.getElementById("filterGen");
 
-</div>
-)}
+function render(){
 
-</div>
+ grid.innerHTML="";
 
-);
+ let list=[...prophets];
+
+ if(searchInput.value)
+  list=list.filter(p=>
+   p.name.toLowerCase().includes(searchInput.value.toLowerCase())
+  );
+
+ if(filterGen.value)
+  list=list.filter(p=>p.generation===filterGen.value);
+
+ list.forEach(p=>{
+
+  const isSaved=bookmarks.includes(p.slug);
+
+  const card=document.createElement("div");
+  card.className="bg-white dark:bg-slate-900 p-3 rounded-xl border shadow-sm relative";
+
+  card.innerHTML=`
+   <button onclick="toggleBookmark('${p.slug}')"
+    class="absolute top-2 right-2 text-lg">
+     ${isSaved?"⭐":"☆"}
+   </button>
+
+   <div onclick="openNabi('${p.slug}')"
+    class="cursor-pointer">
+    <div class="text-3xl">📖</div>
+    <h4 class="font-bold text-sm mt-2">${p.name}</h4>
+    <p class="text-[10px] text-slate-500">${p.generation}</p>
+   </div>
+  `;
+
+  grid.appendChild(card);
+ });
+
+}
+
+const openNabi=(slug)=>{
+ if(!isPro){
+  alert("Fitur PRO. Upgrade untuk membuka kisah lengkap nabi.");
+  return;
+ }
+ location.href=`/noorrahma/nabi/${slug}/`;
 };
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+searchInput.oninput=render;
+filterGen.onchange=render;
+
+render();
 
 </script>
 
