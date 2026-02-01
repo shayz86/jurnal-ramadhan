@@ -1,0 +1,37 @@
+{
+  "slug": "nuh-as",
+  "nama": "Nabi Nuh عليه السلام",
+  "mode": "tadabbur",
+  "judul": "Nabi Nuh: Kesabaran di Tengah Penolakan",
+  "narasi": [
+    {
+      "judul": "Kaum yang Menyimpang",
+      "isi": "Kaum Nabi Nuh tenggelam dalam penyembahan berhala dan kesombongan. Mereka menolak seruan tauhid meski telah diperingatkan bertahun-tahun."
+    },
+    {
+      "judul": "Dakwah Panjang",
+      "isi": "Nuh berdakwah hampir seribu tahun dengan penuh kelembutan, namun hanya sedikit yang beriman."
+    },
+    {
+      "judul": "Perintah Bahtera",
+      "isi": "Allah memerintahkannya membangun kapal sebagai bentuk ketaatan total."
+    },
+    {
+      "judul": "Banjir Besar",
+      "isi": "Air turun dari langit dan bumi, membersihkan kezaliman dan menyelamatkan orang beriman."
+    },
+    {
+      "judul": "Awal Baru",
+      "isi": "Keselamatan adalah buah iman dan ketundukan."
+    }
+  ],
+  "ayat": [
+    { "surah": "Hud", "ayat": "25–48" }
+  ],
+  "hikmah": [
+    "Kesabaran dakwah.",
+    "Ketaatan mutlak.",
+    "Azab Allah pasti.",
+    "Rahmat Allah luas."
+  ]
+}
