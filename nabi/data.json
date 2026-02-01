@@ -1,407 +1,152 @@
-{
-  "version": 1,
-  "updated": "2026-01-31",
-  "total": 25,
-  "prophets": [
-    {
-      "id": 1,
-      "slug": "adam-as",
-      "name": "Nabi Adam عليه السلام",
-      "arabic": "آدم عليه السلام",
-      "full_name": "Adam bin diciptakan Allah tanpa ayah dan ibu",
-      "title": "Bapak Manusia",
-      "people": "Manusia pertama",
-      "location": "Surga → Bumi",
-      "era": "Awal penciptaan manusia",
-      "generation": "Primordial",
-      "summary": "Manusia pertama yang diciptakan Allah dan nabi pertama.",
-      "quran_refs": ["Al-Baqarah 2:30-39", "Al-A'raf 7:19-27", "Thaha 20:115-123"],
-      "illustration": "adam-child.png"
-    },
-
-    {
-      "id": 2,
-      "slug": "idris-as",
-      "name": "Nabi Idris عليه السلام",
-      "arabic": "إدريس عليه السلام",
-      "full_name": "Idris bin Yarid",
-      "title": "Nabi yang diangkat ke langit",
-      "people": "Keturunan Adam",
-      "location": "Mesopotamia",
-      "era": "Pasca Adam",
-      "generation": "Awal manusia",
-      "summary": "Nabi yang dikenal karena kesalehan dan kecerdasannya.",
-      "quran_refs": ["Maryam 19:56-57", "Al-Anbiya 21:85"],
-      "illustration": "idris-child.png"
-    },
-
-    {
-      "id": 3,
-      "slug": "nuh-as",
-      "name": "Nabi Nuh عليه السلام",
-      "arabic": "نوح عليه السلام",
-      "full_name": "Nuh bin Lamik",
-      "title": "Rasul pertama",
-      "people": "Kaum penyembah berhala",
-      "location": "Mesopotamia",
-      "era": "Zaman banjir besar",
-      "generation": "Pra-Ibrahim",
-      "summary": "Rasul yang berdakwah ratusan tahun dan membangun bahtera.",
-      "quran_refs": ["Hud 11:25-48", "Nuh 71"],
-      "illustration": "nuh-child.png"
-    },
-
-    {
-      "id": 4,
-      "slug": "hud-as",
-      "name": "Nabi Hud عليه السلام",
-      "arabic": "هود عليه السلام",
-      "full_name": "Hud bin Abdullah",
-      "title": "Pemberi peringatan kaum 'Ad",
-      "people": "Kaum 'Ad",
-      "location": "Arab Selatan",
-      "era": "Pasca banjir",
-      "generation": "Pra-Ibrahim",
-      "summary": "Nabi yang diutus kepada kaum kuat namun sombong.",
-      "quran_refs": ["Hud 11:50-60"],
-      "illustration": "hud-child.png"
-    },
-
-    {
-      "id": 5,
-      "slug": "shalih-as",
-      "name": "Nabi Shalih عليه السلام",
-      "arabic": "صالح عليه السلام",
-      "full_name": "Shalih bin Ubaid",
-      "title": "Pembawa mukjizat unta",
-      "people": "Kaum Tsamud",
-      "location": "Hijr / Madain Shalih",
-      "era": "Arab kuno",
-      "generation": "Pra-Ibrahim",
-      "summary": "Nabi yang membawa tanda berupa unta betina.",
-      "quran_refs": ["Asy-Syams 91:11-15"],
-      "illustration": "shalih-child.png"
-    },
-
-    {
-      "id": 6,
-      "slug": "ibrahim-as",
-      "name": "Nabi Ibrahim عليه السلام",
-      "arabic": "إبراهيم عليه السلام",
-      "full_name": "Ibrahim bin Azar",
-      "title": "Khalilullah",
-      "people": "Kaum penyembah berhala",
-      "location": "Ur → Syam → Makkah",
-      "era": "±2000 SM",
-      "generation": "Bapak para nabi",
-      "summary": "Nabi tauhid dan bapak para nabi.",
-      "quran_refs": ["Ibrahim 14", "Al-Baqarah 2:124-132"],
-      "illustration": "ibrahim-child.png"
-    }
-
-    ,
-{
-  "id": 7,
-  "slug": "luth-as",
-  "name": "Nabi Luth عليه السلام",
-  "arabic": "لوط عليه السلام",
-  "full_name": "Luth bin Haran",
-  "title": "Pemberi peringatan kaum Sodom",
-  "people": "Kaum Sodom",
-  "location": "Yordania / Palestina",
-  "era": "±1900 SM",
-  "generation": "Zaman Ibrahim",
-  "summary": "Nabi yang mengingatkan kaumnya dari perbuatan keji.",
-  "quran_refs": ["Hud 11:77-83", "Al-A'raf 7:80-84"],
-  "illustration": "luth-child.png"
-},
-
-{
-  "id": 8,
-  "slug": "ismail-as",
-  "name": "Nabi Ismail عليه السلام",
-  "arabic": "إسماعيل عليه السلام",
-  "full_name": "Ismail bin Ibrahim",
-  "title": "Nabi penyabar",
-  "people": "Jurhum & Arab awal",
-  "location": "Makkah",
-  "era": "±1900 SM",
-  "generation": "Anak Ibrahim",
-  "summary": "Putra Ibrahim yang taat dan rela dikorbankan.",
-  "quran_refs": ["Ash-Shaffat 37:101-107"],
-  "illustration": "ismail-child.png"
-},
-
-{
-  "id": 9,
-  "slug": "ishaq-as",
-  "name": "Nabi Ishaq عليه السلام",
-  "arabic": "إسحاق عليه السلام",
-  "full_name": "Ishaq bin Ibrahim",
-  "title": "Pewaris kenabian",
-  "people": "Bani Kan'an",
-  "location": "Syam",
-  "era": "±1900 SM",
-  "generation": "Anak Ibrahim",
-  "summary": "Putra Ibrahim yang melanjutkan risalah tauhid.",
-  "quran_refs": ["Hud 11:71-73"],
-  "illustration": "ishaq-child.png"
-},
-
-{
-  "id": 10,
-  "slug": "yaqub-as",
-  "name": "Nabi Ya'qub عليه السلام",
-  "arabic": "يعقوب عليه السلام",
-  "full_name": "Ya'qub bin Ishaq",
-  "title": "Israel",
-  "people": "Bani Israil",
-  "location": "Kan'an",
-  "era": "±1800 SM",
-  "generation": "Cucu Ibrahim",
-  "summary": "Ayah dari dua belas suku Bani Israil.",
-  "quran_refs": ["Yusuf 12"],
-  "illustration": "yaqub-child.png"
-},
-
-{
-  "id": 11,
-  "slug": "yusuf-as",
-  "name": "Nabi Yusuf عليه السلام",
-  "arabic": "يوسف عليه السلام",
-  "full_name": "Yusuf bin Ya'qub",
-  "title": "Nabi keindahan & kesabaran",
-  "people": "Mesir",
-  "location": "Kan'an → Mesir",
-  "era": "±1700 SM",
-  "generation": "Bani Israil awal",
-  "summary": "Nabi yang diuji berat namun menjadi penguasa Mesir.",
-  "quran_refs": ["Yusuf 12"],
-  "illustration": "yusuf-child.png"
-},
-
-{
-  "id": 12,
-  "slug": "ayyub-as",
-  "name": "Nabi Ayyub عليه السلام",
-  "arabic": "أيوب عليه السلام",
-  "full_name": "Ayyub bin Mush",
-  "title": "Nabi kesabaran",
-  "people": "Penduduk Syam",
-  "location": "Syam",
-  "era": "±1600 SM",
-  "generation": "Pasca Yusuf",
-  "summary": "Nabi yang diuji penyakit dan kehilangan.",
-  "quran_refs": ["Al-Anbiya 21:83-84"],
-  "illustration": "ayyub-child.png"
-},
-
-{
-  "id": 13,
-  "slug": "syuaib-as",
-  "name": "Nabi Syu'aib عليه السلام",
-  "arabic": "شعيب عليه السلام",
-  "full_name": "Syu'aib bin Mikail",
-  "title": "Penegak keadilan",
-  "people": "Kaum Madyan",
-  "location": "Arab Barat",
-  "era": "±1500 SM",
-  "generation": "Zaman Musa",
-  "summary": "Menyeru kejujuran perdagangan.",
-  "quran_refs": ["Hud 11:84-95"],
-  "illustration": "syuaib-child.png"
-},
-
-{
-  "id": 14,
-  "slug": "musa-as",
-  "name": "Nabi Musa عليه السلام",
-  "arabic": "موسى عليه السلام",
-  "full_name": "Musa bin Imran",
-  "title": "Kalimullah",
-  "people": "Bani Israil",
-  "location": "Mesir → Sinai",
-  "era": "±1300 SM",
-  "generation": "Bani Israil",
-  "summary": "Pembebas Bani Israil dari Fir'aun.",
-  "quran_refs": ["Al-Qashash 28"],
-  "illustration": "musa-child.png"
-},
-
-{
-  "id": 15,
-  "slug": "harun-as",
-  "name": "Nabi Harun عليه السلام",
-  "arabic": "هارون عليه السلام",
-  "full_name": "Harun bin Imran",
-  "title": "Pendamping Musa",
-  "people": "Bani Israil",
-  "location": "Mesir / Sinai",
-  "era": "±1300 SM",
-  "generation": "Zaman Musa",
-  "summary": "Saudara Musa yang membantu dakwah.",
-  "quran_refs": ["Thaha 20:29-36"],
-  "illustration": "harun-child.png"
-},
-
-{
-  "id": 16,
-  "slug": "dzulkifli-as",
-  "name": "Nabi Dzulkifli عليه السلام",
-  "arabic": "ذو الكفل عليه السلام",
-  "full_name": "Dzulkifli",
-  "title": "Nabi yang istiqamah",
-  "people": "Bani Israil",
-  "location": "Syam / Irak",
-  "era": "Pasca Musa",
-  "generation": "Bani Israil",
-  "summary": "Dikenal karena keteguhan dan kesabaran.",
-  "quran_refs": ["Al-Anbiya 21:85"],
-  "illustration": "dzulkifli-child.png"
-},
-
-{
-  "id": 17,
-  "slug": "daud-as",
-  "name": "Nabi Daud عليه السلام",
-  "arabic": "داود عليه السلام",
-  "full_name": "Daud bin Isya",
-  "title": "Raja dan Nabi",
-  "people": "Bani Israil",
-  "location": "Yerusalem",
-  "era": "±1000 SM",
-  "generation": "Kerajaan Israil",
-  "summary": "Penerima kitab Zabur.",
-  "quran_refs": ["Shad 38:17-26"],
-  "illustration": "daud-child.png"
-},
-
-{
-  "id": 18,
-  "slug": "sulaiman-as",
-  "name": "Nabi Sulaiman عليه السلام",
-  "arabic": "سليمان عليه السلام",
-  "full_name": "Sulaiman bin Daud",
-  "title": "Raja bijaksana",
-  "people": "Bani Israil",
-  "location": "Yerusalem",
-  "era": "±970 SM",
-  "generation": "Kerajaan Israil",
-  "summary": "Menguasai jin dan hewan.",
-  "quran_refs": ["An-Naml 27"],
-  "illustration": "sulaiman-child.png"
-},
-
-{
-  "id": 19,
-  "slug": "ilyas-as",
-  "name": "Nabi Ilyas عليه السلام",
-  "arabic": "إلياس عليه السلام",
-  "full_name": "Ilyas bin Yasin",
-  "title": "Penentang penyembahan Baal",
-  "people": "Bani Israil",
-  "location": "Syam",
-  "era": "±900 SM",
-  "generation": "Kerajaan Israil",
-  "summary": "Mengajak tauhid.",
-  "quran_refs": ["Ash-Shaffat 37:123-132"],
-  "illustration": "ilyas-child.png"
-},
-
-{
-  "id": 20,
-  "slug": "alyasa-as",
-  "name": "Nabi Alyasa عليه السلام",
-  "arabic": "اليسع عليه السلام",
-  "full_name": "Alyasa",
-  "title": "Penerus Ilyas",
-  "people": "Bani Israil",
-  "location": "Syam",
-  "era": "±850 SM",
-  "generation": "Kerajaan Israil",
-  "summary": "Meneruskan dakwah tauhid.",
-  "quran_refs": ["Al-An'am 6:86"],
-  "illustration": "alyasa-child.png"
-},
-
-{
-  "id": 21,
-  "slug": "yunus-as",
-  "name": "Nabi Yunus عليه السلام",
-  "arabic": "يونس عليه السلام",
-  "full_name": "Yunus bin Matta",
-  "title": "Dzun Nun",
-  "people": "Kaum Ninawa",
-  "location": "Irak",
-  "era": "±800 SM",
-  "generation": "Kerajaan Israil",
-  "summary": "Nabi yang ditelan ikan besar.",
-  "quran_refs": ["Ash-Shaffat 37:139-148"],
-  "illustration": "yunus-child.png"
-},
-
-{
-  "id": 22,
-  "slug": "zakaria-as",
-  "name": "Nabi Zakaria عليه السلام",
-  "arabic": "زكريا عليه السلام",
-  "full_name": "Zakaria bin Barakhya",
-  "title": "Pemelihara Maryam",
-  "people": "Bani Israil",
-  "location": "Yerusalem",
-  "era": "±1 SM",
-  "generation": "Akhir Israil",
-  "summary": "Ayah Nabi Yahya.",
-  "quran_refs": ["Maryam 19:2-15"],
-  "illustration": "zakaria-child.png"
-},
-
-{
-  "id": 23,
-  "slug": "yahya-as",
-  "name": "Nabi Yahya عليه السلام",
-  "arabic": "يحيى عليه السلام",
-  "full_name": "Yahya bin Zakaria",
-  "title": "Nabi muda",
-  "people": "Bani Israil",
-  "location": "Palestina",
-  "era": "±1 SM",
-  "generation": "Akhir Israil",
-  "summary": "Nabi suci dan pemberani.",
-  "quran_refs": ["Maryam 19:12-15"],
-  "illustration": "yahya-child.png"
-},
-
-{
-  "id": 24,
-  "slug": "isa-as",
-  "name": "Nabi Isa عليه السلام",
-  "arabic": "عيسى عليه السلام",
-  "full_name": "Isa bin Maryam",
-  "title": "Ruhullah",
-  "people": "Bani Israil",
-  "location": "Palestina",
-  "era": "±1 M",
-  "generation": "Menjelang Rasulullah",
-  "summary": "Nabi yang lahir tanpa ayah.",
-  "quran_refs": ["Ali Imran 3:45-55"],
-  "illustration": "isa-child.png"
-},
-
-{
-  "id": 25,
-  "slug": "muhammad-saw",
-  "name": "Nabi Muhammad ﷺ",
-  "arabic": "محمد ﷺ",
-  "full_name": "Muhammad bin Abdullah",
-  "title": "Rasul terakhir",
-  "people": "Quraisy & umat manusia",
-  "location": "Makkah & Madinah",
-  "era": "570–632 M",
-  "generation": "Penutup Nabi",
-  "summary": "Rasul terakhir pembawa Al-Qur'an.",
-  "quran_refs": ["Al-Ahzab 33:40"],
-  "illustration": "muhammad-child.png"
-}
-  ]
-}
+[
+  {
+    "slug": "adam-as",
+    "name": "Nabi Adam عليه السلام",
+    "latin": "Adam AS",
+    "generation": "awal-manusia"
+  },
+  {
+    "slug": "idris-as",
+    "name": "Nabi Idris عليه السلام",
+    "latin": "Idris AS",
+    "generation": "awal-manusia"
+  },
+  {
+    "slug": "nuh-as",
+    "name": "Nabi Nuh عليه السلام",
+    "latin": "Nuh AS",
+    "generation": "awal-manusia"
+  },
+  {
+    "slug": "hud-as",
+    "name": "Nabi Hud عليه السلام",
+    "latin": "Hud AS",
+    "generation": "kaum-ad"
+  },
+  {
+    "slug": "shalih-as",
+    "name": "Nabi Shalih عليه السلام",
+    "latin": "Shalih AS",
+    "generation": "tsamud"
+  },
+  {
+    "slug": "ibrahim-as",
+    "name": "Nabi Ibrahim عليه السلام",
+    "latin": "Ibrahim AS",
+    "generation": "bapak-para-nabi"
+  },
+  {
+    "slug": "luth-as",
+    "name": "Nabi Luth عليه السلام",
+    "latin": "Luth AS",
+    "generation": "bapak-para-nabi"
+  },
+  {
+    "slug": "ismail-as",
+    "name": "Nabi Ismail عليه السلام",
+    "latin": "Ismail AS",
+    "generation": "bapak-para-nabi"
+  },
+  {
+    "slug": "ishaq-as",
+    "name": "Nabi Ishaq عليه السلام",
+    "latin": "Ishaq AS",
+    "generation": "bapak-para-nabi"
+  },
+  {
+    "slug": "yaqub-as",
+    "name": "Nabi Yaqub عليه السلام",
+    "latin": "Ya'qub AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "yusuf-as",
+    "name": "Nabi Yusuf عليه السلام",
+    "latin": "Yusuf AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "ayub-as",
+    "name": "Nabi Ayyub عليه السلام",
+    "latin": "Ayyub AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "syuaib-as",
+    "name": "Nabi Syuaib عليه السلام",
+    "latin": "Syuaib AS",
+    "generation": "madyan"
+  },
+  {
+    "slug": "musa-as",
+    "name": "Nabi Musa عليه السلام",
+    "latin": "Musa AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "harun-as",
+    "name": "Nabi Harun عليه السلام",
+    "latin": "Harun AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "dzulkifli-as",
+    "name": "Nabi Dzulkifli عليه السلام",
+    "latin": "Dzulkifli AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "daud-as",
+    "name": "Nabi Daud عليه السلام",
+    "latin": "Daud AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "sulaiman-as",
+    "name": "Nabi Sulaiman عليه السلام",
+    "latin": "Sulaiman AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "ilyas-as",
+    "name": "Nabi Ilyas عليه السلام",
+    "latin": "Ilyas AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "ilyasa-as",
+    "name": "Nabi Ilyasa عليه السلام",
+    "latin": "Ilyasa AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "yunus-as",
+    "name": "Nabi Yunus عليه السلام",
+    "latin": "Yunus AS",
+    "generation": "niniwe"
+  },
+  {
+    "slug": "zakariya-as",
+    "name": "Nabi Zakariya عليه السلام",
+    "latin": "Zakariya AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "yahya-as",
+    "name": "Nabi Yahya عليه السلام",
+    "latin": "Yahya AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "isa-as",
+    "name": "Nabi Isa عليه السلام",
+    "latin": "Isa AS",
+    "generation": "bani-israil"
+  },
+  {
+    "slug": "muhammad-saw",
+    "name": "Nabi Muhammad ﷺ",
+    "latin": "Muhammad SAW",
+    "generation": "akhir-zaman"
+  }
+]
