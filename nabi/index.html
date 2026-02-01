@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
 <title>Kisah 25 Nabi — NoorRahma</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -10,7 +11,6 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
 </head>
 
 <body class="bg-slate-50 dark:bg-slate-950">
@@ -21,126 +21,198 @@
 
 const { useState, useEffect } = React;
 
+const PROGRESS_KEY = "nr_nabi_progress";
+const LAST_KEY = "nr_nabi_last";
+
+const loadProgress = () =>
+  JSON.parse(localStorage.getItem(PROGRESS_KEY) || "{}");
+
+const saveProgress = (p) =>
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+
 const App = () => {
 
-  const [nabiList, setNabiList] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [mode, setMode] = useState("child");
-
-  // ==== PRO CHECK ====
   const isPro = localStorage.getItem("nr_is_pro") === "1";
 
-  useEffect(() => {
-    if (!isPro) location.href="/";
-  }, []);
+  const [nabi, setNabi] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [mode, setMode] = useState("child");
+  const [progress, setProgress] = useState(loadProgress());
 
-  useEffect(() => {
+  const synth = window.speechSynthesis;
+  const [utterance, setUtterance] = useState(null);
+
+  useEffect(()=>{
+    if(!isPro) location.href="/";
+  },[]);
+
+  useEffect(()=>{
     fetch("/nabi/data.json")
       .then(r=>r.json())
-      .then(setNabiList);
-  }, []);
+      .then(setNabi);
+  },[]);
 
-  if (!isPro)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-slate-400">
-        PRO Only
-      </div>
-    );
+  const percent =
+    nabi.length
+      ? Math.round(
+          (Object.keys(progress).length / nabi.length) * 100
+        )
+      : 0;
+
+  const markDone = (id) => {
+    const p = { ...progress, [id]: true };
+    setProgress(p);
+    saveProgress(p);
+  };
+
+  const playTTS = (text) => {
+    synth.cancel();
+
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "id-ID";
+    synth.speak(u);
+
+    setUtterance(u);
+  };
+
+  const stopTTS = () => {
+    synth.cancel();
+    setUtterance(null);
+  };
+
+  if(!isPro)
+    return <div className="min-h-screen flex items-center justify-center">PRO ONLY</div>;
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-5">
 
-      {/* HEADER */}
-      <div className="flex items-center gap-3">
-        {selected && (
-          <button
-            onClick={()=>setSelected(null)}
-            className="text-sm font-bold text-emerald-600"
-          >
-            ← Kembali
-          </button>
-        )}
+<div className="max-w-md mx-auto p-4 space-y-4">
 
-        <h1 className="font-bold text-lg">
-          📜 Kisah 25 Nabi & Rasul
-        </h1>
-      </div>
+{/* HEADER */}
+<h1 className="text-lg font-bold">
+📜 Kisah 25 Nabi & Rasul
+</h1>
 
-      {!selected && (
+{/* PROGRESS BAR */}
+<div className="bg-white dark:bg-slate-900 p-3 rounded-xl shadow border">
 
-        <>
-          {/* MODE */}
-          <div className="flex bg-slate-200 dark:bg-slate-800 rounded-xl p-1">
-            {["child","adult"].map(m=>(
-              <button
-                key={m}
-                onClick={()=>setMode(m)}
-                className={`
-                  flex-1 py-2 rounded-lg text-xs font-bold
-                  ${mode===m
-                    ? "bg-white dark:bg-slate-900 text-emerald-600"
-                    : "text-slate-500"}
-                `}
-              >
-                {m==="child" ? "Mode Anak 👶" : "Mode Dewasa 📖"}
-              </button>
-            ))}
-          </div>
+  <div className="flex justify-between text-xs font-bold mb-2">
+    <span>Progress</span>
+    <span>{percent}%</span>
+  </div>
 
-          {/* LIST */}
-          <div className="grid grid-cols-2 gap-3">
+  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+    <div
+      style={{ width: percent + "%" }}
+      className="h-full bg-emerald-500 transition-all"
+    />
+  </div>
 
-            {nabiList.map(n=>(
-              <button
-                key={n.id}
-                onClick={()=>setSelected(n)}
-                className="
-                  bg-white dark:bg-slate-900
-                  rounded-2xl p-4
-                  border border-slate-100 dark:border-slate-800
-                  shadow-sm
-                  text-left
-                  active:scale-95
-                "
-              >
-                <div className="text-lg">🕌</div>
-                <h3 className="font-bold text-sm mt-2">
-                  Nabi {n.name}
-                </h3>
-                <p className="text-[10px] text-slate-500">
-                  {n.short}
-                </p>
-              </button>
-            ))}
+</div>
 
-          </div>
+{/* MODE */}
+<div className="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
 
-        </>
-      )}
+  {["child","adult"].map(m=>(
+    <button
+      key={m}
+      onClick={()=>setMode(m)}
+      className={`flex-1 py-2 text-xs font-bold rounded-lg
+        ${mode===m
+          ? "bg-white dark:bg-slate-900 text-emerald-600"
+          : "text-slate-500"}
+      `}
+    >
+      {m==="child" ? "Mode Anak 👶" : "Mode Dewasa 📖"}
+    </button>
+  ))}
 
-      {selected && (
+</div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow border">
+{/* LIST */}
+{!selected && (
 
-          <h2 className="text-xl font-bold mb-3">
-            Nabi {selected.name}
-          </h2>
+<div className="grid grid-cols-2 gap-3">
 
-          <p className="text-sm leading-relaxed text-justify">
-            {mode==="child" ? selected.child : selected.adult}
-          </p>
+{nabi.map(n=>(
+<button
+  key={n.id}
+  onClick={()=>setSelected(n)}
+  className="bg-white dark:bg-slate-900 rounded-2xl p-4 border shadow text-left relative"
+>
 
-          {selected.audio && (
-            <audio controls className="w-full mt-4">
-              <source src={selected.audio} />
-            </audio>
-          )}
+{progress[n.id] && (
+<div className="absolute top-2 right-2 text-green-500 text-xs">
+✔
+</div>
+)}
 
-        </div>
-      )}
+<h3 className="font-bold text-sm">
+Nabi {n.name}
+</h3>
 
-    </div>
-  );
+<p className="text-[10px] text-slate-500">
+{n.short}
+</p>
+
+</button>
+))}
+
+</div>
+)}
+
+{/* DETAIL */}
+{selected && (
+
+<div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow border space-y-4">
+
+<button
+  onClick={()=>setSelected(null)}
+  className="text-xs font-bold text-emerald-600"
+>
+← Kembali
+</button>
+
+<h2 className="text-xl font-bold">
+Nabi {selected.name}
+</h2>
+
+<p className="text-sm leading-relaxed text-justify">
+{mode==="child" ? selected.child : selected.adult}
+</p>
+
+{/* AUDIO */}
+<div className="flex gap-3">
+
+<button
+  onClick={()=>playTTS(mode==="child" ? selected.child : selected.adult)}
+  className="flex-1 bg-emerald-600 text-white py-2 rounded-xl text-xs font-bold"
+>
+▶ Dengarkan
+</button>
+
+<button
+  onClick={stopTTS}
+  className="bg-slate-200 px-4 rounded-xl text-xs font-bold"
+>
+■ Stop
+</button>
+
+</div>
+
+{/* MARK DONE */}
+<button
+  onClick={()=>markDone(selected.id)}
+  className="w-full bg-indigo-600 text-white py-2 rounded-xl text-xs font-bold"
+>
+✔ Tandai Selesai
+</button>
+
+</div>
+)}
+
+</div>
+
+);
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
