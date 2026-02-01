@@ -73,7 +73,8 @@ Mode Tadabbur 📖
 <script>
 /* ========= CONFIG ========= */
 
-const slug = location.pathname.split("/").filter(Boolean).pop();
+const parts = location.pathname.split("/").filter(Boolean);
+const slug = parts[parts.length - 2];
 
 const isPro = localStorage.getItem("nr_is_pro")==="1";
 
