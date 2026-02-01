@@ -74,7 +74,7 @@ Mode Tadabbur 📖
 /* ========= CONFIG ========= */
 
 const parts = location.pathname.split("/").filter(Boolean);
-const slug = parts[parts.length - 2];
+const slug = parts[parts.length - 1];
 
 const isPro = localStorage.getItem("nr_is_pro")==="1";
 
