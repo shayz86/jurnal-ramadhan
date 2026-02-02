@@ -271,14 +271,31 @@ renderCalendar();
 
 /* ================= NAV ================= */
 
-document.getElementById("prevMonth").onclick=()=>{
- baseDate.setDate(baseDate.getDate()-30);
+function moveHijriMonth(dir){
+
+ const hijri = getHijriParts(baseDate);
+ const hYear = hijri.year;
+ const hMonth = hijri.month;
+
+ const key = hYear + "-" + hMonth;
+
+ const days =
+   MANUAL_MONTH_LENGTH[key] ??
+   getHijriMonthLength(hYear, hMonth);
+
+ baseDate.setDate(
+   baseDate.getDate() + dir * days
+ );
+
  renderCalendar();
+}
+
+document.getElementById("prevMonth").onclick = () => {
+ moveHijriMonth(-1);
 };
 
-document.getElementById("nextMonth").onclick=()=>{
- baseDate.setDate(baseDate.getDate()+30);
- renderCalendar();
+document.getElementById("nextMonth").onclick = () => {
+ moveHijriMonth(1);
 };
 
 /* ================= POPUP ================= */
