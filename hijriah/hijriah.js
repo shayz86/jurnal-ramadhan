@@ -12,7 +12,7 @@ function renderHijri() {
 
   grid.innerHTML = "";
 
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 29; i++) {
 
     const box = document.createElement("div");
     box.className = "hijri-day";
