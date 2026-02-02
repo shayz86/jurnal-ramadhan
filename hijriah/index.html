@@ -131,6 +131,18 @@
 
 <script>
 
+/* ================= ADMIN OVERRIDE ================= */
+
+const MANUAL_MONTH_LENGTH = {
+
+  // isi manual di sini:
+  // "1447-8": 29,  // Sha'ban 1447
+  // "1447-9": 30   // Ramadhan 1447
+
+};
+
+/* ================================================= */
+
 const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
 
 function toArabic(num){
@@ -164,6 +176,29 @@ function getHijriParts(date){
  return obj;
 }
 
+function getHijriMonthLength(hYear,hMonth){
+
+ let d=new Date();
+
+ while(true){
+  const p=getHijriParts(d);
+  if(p.year===hYear && p.month===hMonth && p.day===1) break;
+  d.setDate(d.getDate()-1);
+ }
+
+ const first=new Date(d);
+
+ let next=new Date(first);
+
+ while(true){
+  next.setDate(next.getDate()+1);
+  const p=getHijriParts(next);
+  if(p.day===1) break;
+ }
+
+ return Math.round((next-first)/86400000);
+}
+
 let baseDate=new Date();
 
 /* ===== simpan hijri today asli ===== */
@@ -183,7 +218,6 @@ function renderCalendar(){
  monthTitle.textContent=
   hijriMonths[hMonth]+" "+hYear+" H";
 
- // cari masehi awal bulan hijriah
  const firstDayDate=new Date(baseDate);
  firstDayDate.setDate(
   baseDate.getDate()-(hijri.day-1)
@@ -196,7 +230,11 @@ function renderCalendar(){
   grid.appendChild(document.createElement("div"));
  }
 
- const daysInMonth=30;
+ const key=hYear+"-"+hijri.month;
+
+ const daysInMonth=
+  MANUAL_MONTH_LENGTH[key] ??
+  getHijriMonthLength(hYear,hijri.month);
 
  for(let d=1;d<=daysInMonth;d++){
 
@@ -215,7 +253,6 @@ function renderCalendar(){
   h.className="hijri";
   h.textContent=toArabic(d);
 
-  /* highlight ONLY jika bulan+tahun sama */
   if(
     hijri.month===todayHijri.month &&
     hijri.year===todayHijri.year &&
