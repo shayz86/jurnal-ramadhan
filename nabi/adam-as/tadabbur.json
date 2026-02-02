@@ -2,108 +2,54 @@
   "slug": "adam-as",
   "nama": "Nabi Adam عليه السلام",
   "mode": "tadabbur",
-  "judul": "Nabi Adam: Awal Kekhalifahan dan Jalan Tobat",
-  "ringkasan": "Kisah Nabi Adam bukan hanya sejarah awal manusia, tetapi refleksi mendalam tentang kehormatan, ujian, kesalahan, dan rahmat Allah.",
-  "bab": [
+  "judul": "Nabi Adam: Awal Manusia dan Makna Tobat",
+  "ringkasan": "Nabi Adam adalah manusia pertama sekaligus nabi pertama. Kisahnya mengajarkan tentang kehormatan manusia, ujian, kesalahan, dan rahmat Allah yang luas.",
+  "narasi": [
     {
-      "judul": "Kondisi Alam dan Makhluk Langit",
-      "paragraf": [
-        "Sebelum manusia berjalan di atas tanah, bumi telah diciptakan dengan gunung-gunung yang kokoh, lautan yang luas, serta tumbuhan yang menyejukkan mata.",
-        "Langit dipenuhi cahaya bintang dan lintasan matahari serta bulan.",
-        "Para malaikat hidup dalam ketaatan mutlak kepada Allah.",
-        "Mereka tidak pernah lelah bertasbih.",
-        "Di antara makhluk itu pula terdapat iblis yang sebelumnya dikenal rajin beribadah."
-      ]
+      "judul": "Penciptaan dan Kemuliaan",
+      "isi": "Allah menciptakan Adam dari tanah dan meniupkan ruh kepadanya. Allah mengajarkan kepadanya nama-nama, menandakan kapasitas ilmu sebagai pembeda manusia."
     },
     {
-      "judul": "Dialog Langit dan Rencana Ilahi",
-      "paragraf": [
-        "Allah mengumumkan rencana penciptaan makhluk baru di bumi.",
-        "Para malaikat bertanya dengan penuh adab.",
-        "Mereka khawatir makhluk itu akan menumpahkan darah.",
-        "Allah menjawab bahwa Dia mengetahui apa yang tidak mereka ketahui.",
-        "Jawaban itu menyimpan rahasia besar tentang masa depan manusia."
-      ]
+      "judul": "Sujud Para Malaikat",
+      "isi": "Perintah sujud kepada Adam adalah bentuk pemuliaan, bukan ibadah. Penolakan iblis lahir dari kesombongan dan merasa lebih tinggi."
     },
     {
-      "judul": "Penciptaan Adam",
-      "paragraf": [
-        "Tanah dari berbagai penjuru bumi dikumpulkan.",
-        "Allah membentuk tubuh Adam dengan sempurna.",
-        "Kemudian ruh ditiupkan.",
-        "Adam pun membuka mata untuk pertama kali.",
-        "Ilmu langsung dianugerahkan kepadanya."
-      ]
+      "judul": "Ujian di Surga",
+      "isi": "Larangan memakan satu pohon menjadi ujian ketaatan. Adam dan Hawa tergelincir karena bujukan iblis."
     },
     {
-      "judul": "Sujud Kehormatan",
-      "paragraf": [
-        "Para malaikat diperintahkan bersujud.",
-        "Semua tunduk kecuali iblis.",
-        "Kesombongan tumbuh di dalam dirinya.",
-        "Ia merasa lebih tinggi.",
-        "Penolakannya mengantarkannya pada kehinaan."
-      ]
+      "judul": "Tobat dan Ampunan",
+      "isi": "Adam segera mengakui kesalahannya dan memohon ampun. Allah menerima tobatnya, menunjukkan rahmat-Nya meliputi segala sesuatu."
     },
     {
-      "judul": "Surga dan Ujian",
-      "paragraf": [
-        "Adam hidup di taman yang penuh kedamaian.",
-        "Ia tidak kekurangan apa pun.",
-        "Satu larangan menjadi ujian ketaatan.",
-        "Iblis tidak berhenti menggoda.",
-        "Bisikannya terdengar lembut namun berbahaya."
-      ]
-    },
-    {
-      "judul": "Kejatuhan dan Tobat",
-      "paragraf": [
-        "Adam menyadari kesalahannya.",
-        "Ia tidak menyalahkan siapa pun.",
-        "Ia menangis dan memohon ampun.",
-        "Allah menerima tobatnya.",
-        "Kasih sayang Ilahi mengalahkan murka."
-      ]
-    },
-    {
-      "judul": "Turun ke Dunia",
-      "paragraf": [
-        "Bumi menjadi tempat ujian baru.",
-        "Adam memulai kehidupan manusia.",
-        "Ia menjadi guru pertama.",
-        "Ia menanamkan tauhid.",
-        "Ia membangun keluarga beriman."
-      ]
-    },
-    {
-      "judul": "Refleksi Zaman Modern",
-      "paragraf": [
-        "Kesombongan iblis masih hidup di hati manusia.",
-        "Godaan masih membisikkan keraguan.",
-        "Manusia sering lupa kepada Tuhan.",
-        "Namun pintu tobat tetap terbuka.",
-        "Setiap jatuh adalah peluang untuk bangkit."
-      ]
-    },
-    {
-      "judul": "Hikmah Spiritual",
-      "paragraf": [
-        "Ilmu adalah amanah.",
-        "Kekuasaan adalah ujian.",
-        "Tobat adalah cahaya.",
-        "Kerendahan hati menyelamatkan.",
-        "Rahmat Allah meliputi segala sesuatu."
-      ]
-    },
-    {
-      "judul": "Renungan Penutup",
-      "paragraf": [
-        "Kisah Adam adalah kisah kita semua.",
-        "Kita sering tergelincir.",
-        "Namun Allah selalu membuka jalan kembali.",
-        "Siapa pun yang mengetuk pintu-Nya akan diterima.",
-        "Maka berjalanlah di bumi dengan hati yang tunduk."
-      ]
+      "judul": "Turun ke Bumi",
+      "isi": "Penurunan ke bumi bukan sekadar hukuman, melainkan awal misi kekhalifahan manusia di dunia."
     }
-  ]
+  ],
+  "ayat": [
+    {
+      "surah": "Al-Baqarah",
+      "ayat": "30–39",
+      "tema": "Kekhalifahan dan taubat."
+    },
+    {
+      "surah": "Tha-Ha",
+      "ayat": "115–123",
+      "tema": "Ujian dan petunjuk Allah."
+    },
+    {
+      "surah": "Al-A'raf",
+      "ayat": "11–27",
+      "tema": "Permusuhan iblis terhadap manusia."
+    }
+  ],
+  "hikmah": [
+    "Kesalahan manusia bukan akhir segalanya jika disertai tobat.",
+    "Ilmu adalah kehormatan utama manusia.",
+    "Kesombongan adalah sifat iblis.",
+    "Hidup di dunia adalah amanah kekhalifahan.",
+    "Petunjuk Allah selalu tersedia bagi yang kembali."
+  ],
+  "doa": "رَبَّنَا ظَلَمْنَا أَنْفُسَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ",
+  "penutup": "Kisah Nabi Adam mengajarkan bahwa jalan kembali kepada Allah selalu terbuka bagi siapa pun yang merendah dan bertobat."
 }
