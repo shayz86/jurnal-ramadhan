@@ -6,14 +6,12 @@
 <title>Kalender Hijriah</title>
 
 <link rel="stylesheet" href="hijriah.css" />
-
 </head>
 <body>
 
 <header class="topbar">
   <button onclick="history.back()" class="back">←</button>
   <h1>Kalender Hijriah</h1>
-
   <button id="openPuasa" class="calendarBtn">📅</button>
 </header>
 
@@ -38,66 +36,23 @@
 <!-- ================= POPUP PUASA ================= -->
 
 <div id="puasaPopup" class="puasa-popup">
-
   <header class="puasa-header">
     <button onclick="closePuasa()">←</button>
     <h2>Puasa Sunnah</h2>
   </header>
 
   <div class="puasa-list">
-
-    <div class="puasa-item">
-      <h4>Awal Bulan Rajab (Bulan Mulia) 1447 H</h4>
-      <span>21 Desember</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Jumadil–Akhirah 1447 H</h4>
-      <span>6 Desember</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Jumadil–Akhirah 1447 H</h4>
-      <span>5 Desember</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Jumadil–Akhirah 1447 H</h4>
-      <span>4 Desember</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Awal Bulan Jumadil–Akhirah 1447 H</h4>
-      <span>22 November</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Jumadil–Ula 1447 H</h4>
-      <span>6 November</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Jumadil–Ula 1447 H</h4>
-      <span>5 November</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Jumadil–Ula 1447 H</h4>
-      <span>4 November</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Awal Bulan Jumadil–Ula 1447 H</h4>
-      <span>23 Oktober</span>
-    </div>
-
-    <div class="puasa-item">
-      <h4>Puasa Ayyamul Bidh Rabi'ul–Akhir 1447 H</h4>
-      <span>7 Oktober</span>
-    </div>
-
+    <div class="puasa-item"><h4>Awal Bulan Rajab (Bulan Mulia) 1447 H</h4><span>21 Desember</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Jumadil–Akhirah 1447 H</h4><span>6 Desember</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Jumadil–Akhirah 1447 H</h4><span>5 Desember</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Jumadil–Akhirah 1447 H</h4><span>4 Desember</span></div>
+    <div class="puasa-item"><h4>Awal Bulan Jumadil–Akhirah 1447 H</h4><span>22 November</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Jumadil–Ula 1447 H</h4><span>6 November</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Jumadil–Ula 1447 H</h4><span>5 November</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Jumadil–Ula 1447 H</h4><span>4 November</span></div>
+    <div class="puasa-item"><h4>Awal Bulan Jumadil–Ula 1447 H</h4><span>23 Oktober</span></div>
+    <div class="puasa-item"><h4>Puasa Ayyamul Bidh Rabi'ul–Akhir 1447 H</h4><span>7 Oktober</span></div>
   </div>
-
 </div>
 
 <!-- ================= SCRIPT ================= -->
@@ -106,40 +61,33 @@
 /* ===================================================
    🔒 PRO GUARD — BLOCK NON PRO
 =================================================== */
-
 (function () {
   try {
     const cache = localStorage.getItem("nr_pro_cache");
-
-    if (!cache) {
-      location.href = "/";
-      return;
-    }
-
+    if (!cache) { location.href="/"; return; }
     const parsed = JSON.parse(cache);
-
-    if (!parsed.pro) {
-      location.href = "/";
-      return;
-    }
-
-  } catch (e) {
-    location.href = "/";
-  }
+    if (!parsed.pro) { location.href="/"; return; }
+  } catch (e) { location.href="/"; }
 })();
 </script>
 
 <script>
 
-/* ================= ADMIN OVERRIDE ================= */
+/* ================= LOAD DATA KEMENAG ================= */
 
-const MANUAL_MONTH_LENGTH = {
+let hijriData = null;
 
-  "1447-2": 29,  // Safar 1447
+fetch("./data/hijri-1447.json")
+ .then(r => r.json())
+ .then(d => {
+   hijriData = d;
+   initCalendar();
+ })
+ .catch(err => {
+   console.error("Gagal load hijri json:", err);
+ });
 
-};
-
-/* ================================================= */
+/* ==================================================== */
 
 const arabNums=["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
 
@@ -157,53 +105,21 @@ const hijriMonths=[
 const grid=document.getElementById("calendarGrid");
 const monthTitle=document.getElementById("monthTitle");
 
-function getHijriParts(date){
+let baseIndex = 0;   // offset hari sejak 1 Muharram
 
- const fmt=new Intl.DateTimeFormat(
-  "en-TN-u-ca-islamic",
-  {day:"numeric",month:"numeric",year:"numeric"}
- );
-
- const parts=fmt.formatToParts(date);
- const obj={};
-
- parts.forEach(p=>{
-  if(p.type!=="literal") obj[p.type]=parseInt(p.value);
- });
-
- return obj;
+function parseDate(str){
+ const [y,m,d]=str.split("-").map(Number);
+ return new Date(y,m-1,d);
 }
 
-function getHijriMonthLength(hYear,hMonth){
-
- // mulai dari bulan yg sedang dirender
- let d = new Date(baseDate);
-
- // mundur sampai ketemu tanggal 1 bulan itu
- while(true){
-  const p = getHijriParts(d);
-  if(p.year===hYear && p.month===hMonth && p.day===1) break;
-  d.setDate(d.getDate()-1);
- }
-
- const first = new Date(d);
-
- // maju sampai bulan berikutnya
- let next = new Date(first);
-
- while(true){
-  next.setDate(next.getDate()+1);
-  const p = getHijriParts(next);
-  if(p.day===1) break;
- }
-
- return Math.round((next-first)/86400000);
+function initCalendar(){
+ baseIndex = daysBetween(parseDate(hijriData.gregorian_start), new Date());
+ renderCalendar();
 }
 
-let baseDate=new Date();
-
-/* ===== simpan hijri today asli ===== */
-const todayHijri=getHijriParts(new Date());
+function daysBetween(a,b){
+ return Math.floor((b - a)/86400000);
+}
 
 /* ================= RENDER ================= */
 
@@ -211,18 +127,27 @@ function renderCalendar(){
 
  grid.innerHTML="";
 
- const hijri=getHijriParts(baseDate);
+ const startDate=parseDate(hijriData.gregorian_start);
 
- const hMonth=hijri.month-1;
- const hYear=hijri.year;
+ let offset=baseIndex;
+ let month=0;
+
+ while(offset >= hijriData.months[month]){
+   offset -= hijriData.months[month];
+   month++;
+ }
+
+ const hYear=hijriData.year;
+ const hMonth=month;
+ const hDay=offset+1;
 
  monthTitle.textContent=
   hijriMonths[hMonth]+" "+hYear+" H";
 
- const firstDayDate=new Date(baseDate);
- firstDayDate.setDate(
-  baseDate.getDate()-(hijri.day-1)
- );
+ const firstDayDate=new Date(startDate);
+ let daysBefore=0;
+ for(let i=0;i<hMonth;i++) daysBefore+=hijriData.months[i];
+ firstDayDate.setDate(startDate.getDate()+daysBefore);
 
  const startOffset=firstDayDate.getDay()===0
   ?6:firstDayDate.getDay()-1;
@@ -231,11 +156,7 @@ function renderCalendar(){
   grid.appendChild(document.createElement("div"));
  }
 
- const key=hYear+"-"+hijri.month;
-
- const daysInMonth=
-  MANUAL_MONTH_LENGTH[key] ??
-  getHijriMonthLength(hYear,hijri.month);
+ const daysInMonth=hijriData.months[hMonth];
 
  for(let d=1;d<=daysInMonth;d++){
 
@@ -254,10 +175,9 @@ function renderCalendar(){
   h.className="hijri";
   h.textContent=toArabic(d);
 
+  const today=new Date();
   if(
-    hijri.month===todayHijri.month &&
-    hijri.year===todayHijri.year &&
-    d===todayHijri.day
+    mDate.toDateString()===today.toDateString()
   ){
     cell.classList.add("today");
   }
@@ -267,36 +187,27 @@ function renderCalendar(){
  }
 }
 
-renderCalendar();
-
 /* ================= NAV ================= */
 
-function moveHijriMonth(dir){
-
- const hijri = getHijriParts(baseDate);
- const hYear = hijri.year;
- const hMonth = hijri.month;
-
- const key = hYear + "-" + hMonth;
-
- const days =
-   MANUAL_MONTH_LENGTH[key] ??
-   getHijriMonthLength(hYear, hMonth);
-
- baseDate.setDate(
-   baseDate.getDate() + dir * days
- );
-
+document.getElementById("prevMonth").onclick=()=>{
+ baseIndex -= hijriData.months[currentMonth()];
  renderCalendar();
+};
+
+document.getElementById("nextMonth").onclick=()=>{
+ baseIndex += hijriData.months[currentMonth()];
+ renderCalendar();
+};
+
+function currentMonth(){
+ let offset=baseIndex;
+ let m=0;
+ while(offset >= hijriData.months[m]){
+   offset -= hijriData.months[m];
+   m++;
+ }
+ return m;
 }
-
-document.getElementById("prevMonth").onclick = () => {
- moveHijriMonth(-1);
-};
-
-document.getElementById("nextMonth").onclick = () => {
- moveHijriMonth(1);
-};
 
 /* ================= POPUP ================= */
 
