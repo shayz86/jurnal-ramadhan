@@ -2,62 +2,66 @@
   "slug": "yunus-as",
   "nama": "Nabi Yunus عليه السلام",
   "mode": "tadabbur",
-  "judul": "Nabi Yunus: Dzun Nun dan Tiga Kegelapan",
-  "ringkasan": "Analisis psikologis tentang keputusasaan dai, teguran 'Hukum Alam' di laut, munajat agung di perut ikan, dan satu-satunya kaum yang azabnya dibatalkan.",
-  "cerita": [
+  "judul": "Nabi Yunus: Dzun-Nun dan Teologi Pertobatan Kolektif",
+  "ringkasan": "Kisah tentang kemarahan seorang dai, pelarian yang ditegur Tuhan, kegelapan perut ikan, dan fenomena unik pertobatan massal bangsa Asyiria.",
+  "narasi": [
     {
-      "judul": "Bab 1: Pelarian Sang Nabi (Abaqo)",
-      "isi": "Nabi Yunus a.s. (Yunus bin Matta) diutus ke Ninawa, ibukota Assyria kuno. Setelah dakwah panjang yang nihil hasil, Yunus mengalami kelelahan mental. Ia pergi dengan marah ('Mughadhiban') tanpa izin Allah (Izin Kauni). Al-Qur'an menggunakan kata 'Abaqo' (lari seperti budak yang kabur dari tuannya) untuk menggambarkan kepergiannya. Ia mengira Allah tidak akan mempersempit ruang geraknya ('Lan naqdira 'alaihi'). Ini adalah kesalahan ijtihad seorang Nabi: mendahului takdir Tuhan."
+      "judul": "Bab 1: Misi Ninawa dan Frustrasi Dai",
+      "isi": "Nabi Yunus a.s. (Yunus bin Matta) diutus ke Ninawa, ibu kota kerajaan Asyiria (Assyria) yang perkasa namun pagan. Penduduknya dikenal keras, sombong, dan penyembah berhala. Dakwah Yunus menghadapi tembok tebal penolakan. Berbeda dengan Nabi Nuh yang bersabar 950 tahun, Nabi Yunus mengalami 'Burnout' (kelelahan mental) dan frustrasi lebih cepat. Ia merasa kaumnya 'Hopeless' (tidak ada harapan)."
     },
     {
-      "judul": "Bab 2: Undian Maut di Laut",
-      "isi": "Pelarian Yunus terhenti oleh badai. Fenomena undian (Qur'ah) di kapal mengajarkan bahwa alam semesta tidak mendukung pelarian seorang hamba yang 'Buronan Langit'. Tiga kali namanya keluar menunjukkan ini bukan kebetulan (statistik), melainkan ketetapan (Qadar). Yunus dengan kesadaran penuh ('Mulim' - tercela/menyadari kesalahan) menceburkan diri, menerima konsekuensi tindakannya."
+      "judul": "Bab 2: 'Abiq' (Hamba yang Minggat)",
+      "isi": "Puncak kekecewaan Yunus membuatnya mengambil keputusan fatal: pergi meninggalkan kaumnya sebelum ada izin resmi dari Allah ('Idz dzahaba mughadhiban'). Al-Qur'an menggunakan istilah 'Abaqa' (lari dari majikan) untuk menggambarkan tindakannya. Ia mengira ('Fazhanna') bahwa Allah tidak akan mempersempit ruang geraknya ('Lan naqdira 'alaihi'). Ini adalah ijtihad yang keliru dari seorang Nabi; ia mengutamakan emosi kemanusiaannya di atas prosedur wahyu."
     },
     {
-      "judul": "Bab 3: Penjara Biologis (Iltiqam)",
-      "isi": "Allah memerintahkan ikan (Hut/Nun) untuk menelannya ('Iltiqam' - menelan sekaligus tanpa mengunyah). Perut ikan menjadi penjara isolasi yang unik: lembab, sempit, dan bau. Ini adalah 'Uzlah' (pengasingan) paksa bagi Yunus untuk merenungi kesalahannya. Allah menjaganya tetap hidup di lingkungan yang mematikan (asam lambung, tanpa oksigen) sebagai mukjizat."
+      "judul": "Bab 3: Fenomena Pertobatan Ninawa",
+      "isi": "Ironi terjadi. Justru setelah Yunus pergi dan tanda azab muncul (awan hitam bergulung), rasionalitas kaum Ninawa bekerja. Mereka tidak seperti kaum 'Ad atau Thamud yang menantang azab. Mereka melakukan 'Mass Repentance' (Tobat Massal). Raja turun dari singgasana, mengenakan pakaian kasar, dan memerintahkan puasa total (termasuk memisahkan hewan ternak dari anaknya agar suara lolongan hewan menambah kedahsyatan doa). Allah memuji mereka: 'Adakah satu negeri yang beriman (di saat azab datang) lalu imannya itu bermanfaat baginya selain kaum Yunus?' (QS. Yunus: 98)."
     },
     {
-      "judul": "Bab 4: Munajat di Tiga Kegelapan",
-      "isi": "Yunus menyeru dalam kegelapan ('Fanzada fizh-zhulumat'): kegelapan perut ikan, kegelapan dasar laut, dan kegelapan malam. Doanya: 'La ilaha illa Anta Subhanaka Inni Kuntu Minaz Zhalimin', mengandung tiga unsur kekuatan: 1) Tauhid (La ilaha illa Anta), 2) Tanzih/Penyucian Allah (Subhanaka), dan 3) Istighfar/Pengakuan Dosa (Inni kuntu minaz zhalimin). Ia tidak membela diri, ia menyalahkan dirinya sepenuhnya. Inilah kunci 'Naja' (keselamatan)."
+      "judul": "Bab 4: Undian Takdir (Qur'ah)",
+      "isi": "Di laut, Yunus menaiki kapal yang penuh muatan ('Fulkul Masyhun'). Badai datang bukan sekadar fenomena cuaca, tapi 'Penyergapan Ilahi'. Nakhoda menggunakan metode undian (Qur'ah) untuk membuang penumpang. Nama Yunus keluar tiga kali berturut-turut. Ini adalah konfirmasi takdir: 'Edhomi' (Nabi yang lari) harus dikembalikan. Yunus 'Fasahama' (kalah dalam undian) dan menceburkan diri."
     },
     {
-      "judul": "Bab 5: Rehabilitasi Fisik dan Mental",
-      "isi": "Setelah dimuntahkan ('Nabadznahu') di tanah tandus, Yunus dalam kondisi 'Saqim' (sakit parah/seperti bayi baru lahir). Allah menumbuhkan pohon 'Yaqthin' (sejenis labu/gourd) yang daunnya lebar (anti-lalat) dan buahnya bernutrisi. Ini adalah fase penyembuhan (Recovery) fisik dan psikis sebelum kembali bertugas."
+      "judul": "Bab 5: Tiga Kegelapan (Zhulumat)",
+      "isi": "Yunus ditelan oleh 'Al-Hut' (Ikan Besar/Paus). Ia tidak dicerna, lambung ikan itu menjadi 'Penjara Tarbiyah'. Yunus berada dalam tiga lapis kegelapan: perut ikan, dasar laut, dan malam hari. Di titik nadir isolasi ini, ego kemanusiaannya runtuh. Ia tidak menyalahkan kaumnya, tidak menyalahkan takdir, tapi menyalahkan diri sendiri."
     },
     {
-      "judul": "Bab 6: Fenomena Kaum Ninawa",
-      "isi": "Kejadian luar biasa terjadi di Ninawa. Biasanya, kaum yang ditinggal Nabinya akan diazab. Namun kaum Yunus adalah *pengecualian sejarah* (Illal qauma Yunus). Saat melihat tanda azab, mereka melakukan tobat kolektif yang jujur. Allah 'Kasyafna' (mengangkat) azab itu. Ini membuktikan bahwa azab Allah bisa dibatalkan (conditional) jika hamba bertaubat sebelum terlambat (sebelum 'Ghargharah')."
+      "judul": "Bab 6: Doa Pemungkas (Dzikir Yunus)",
+      "isi": "Doa Yunus adalah masterpiece tauhid: 'La ilaha illa Anta' (Tauhid), 'Subhanaka' (Tanzih/Penyucian Allah dari sifat zalim), 'Inni kuntu minaz zhalimin' (Pengakuan Dosa). Allah merespons: 'Maka Kami telah memperkenankan doanya dan menyelamatkannya dari kedukaan. Dan demikianlah Kami selamatkan orang-orang yang beriman.' (QS. Al-Anbiya: 88). Ini adalah dalil bahwa pengakuan dosa adalah kunci pembuka pintu rahmat."
     },
     {
-      "judul": "Bab 7: Refleksi Modern",
-      "isi": "Kisah Yunus adalah terapi bagi depresi dan 'Burnout' para aktivis kebaikan. Bahwa boleh jadi kita merasa gagal, padahal kesuksesan sudah di depan mata (seperti tobatnya Ninawa). Doa Dzun Nun adalah 'Panic Button' terbaik bagi manusia modern yang terhimpit masalah (hutang, penyakit, kesedihan)."
+      "judul": "Bab 7: Rehabilitasi Fisik dan Mental",
+      "isi": "Yunus dimuntahkan ke tanah tandus ('Al-'Ara'). Fisiknya rapuh seperti bayi. Allah menumbuhkan pohon 'Yaqthin' (sejenis labu/waluh) yang daunnya lebar (menaungi), baunya mengusir lalat, dan buahnya bergizi. Ini adalah proses 'Recovery' fisik. Setelah pulih, ia diperintahkan kembali ke Ninawa dan mendapati 100.000 orang lebih telah beriman. Misi yang ia kira gagal total, ternyata sukses besar di tangan Allah."
+    },
+    {
+      "judul": "Bab 8: Refleksi Modern",
+      "isi": "Kisah Yunus adalah cermin bagi para aktivis dakwah/perubahan. Seringkali kita putus asa melihat kondisi masyarakat yang rusak dan ingin 'lari' (berhenti peduli). Yunus mengajarkan bahwa tugas kita hanya menyampaikan, adapun hidayah adalah urusan Allah. Jangan pernah memvonis 'Gagal' pada suatu umat, karena bisa jadi tobat mereka lebih tulus daripada ibadah kita."
     }
   ],
   "ayat": [
     {
       "surah": "Al-Anbiya",
       "ayat": "87-88",
-      "tema": "Kisah kemarahan Yunus, doanya, dan penyelamatannya."
+      "tema": "Kisah Dzun-Nun (Yunus), kemarahannya, dan doa penyelamat."
     },
     {
       "surah": "Ash-Shaffat",
       "ayat": "139-148",
-      "tema": "Detail undian kapal, ditelan ikan, dan pohon Yaqthin."
+      "tema": "Pelarian Yunus, undian di kapal, dan pohon Yaqthin."
     },
     {
       "surah": "Yunus",
       "ayat": "98",
-      "tema": "Keistimewaan tobat kaum Yunus yang mengangkat azab."
+      "tema": "Keistimewaan tobat kaum Yunus dibanding umat lain."
     }
   ],
   "hikmah": [
-    "**Manajemen Emosi Dakwah:** Marah karena Allah itu baik, tapi putus asa dari rahmat-Nya itu dilarang.",
-    "**Kekuatan Pengakuan:** Mengakui kesalahan (tanpa *excuse*) adalah cara tercepat mengetuk pintu rahmat Tuhan.",
-    "**Harapan di Kegelapan:** Tidak ada situasi yang terlalu gelap bagi Allah untuk menolong.",
-    "**Tobat Massal:** Kekuatan tobat satu bangsa mampu mengubah takdir buruk menjadi kenikmatan.",
-    "**Pentingnya 'Me Time' Spiritual:** Terkadang Allah memaksa kita berhenti dari kesibukan (sakit/masalah) agar kita punya waktu berdialog dengan-Nya."
+    "**Manajemen Emosi Dakwah:** Marah karena Allah itu baik, tapi putus asa dari rahmat Allah terhadap suatu kaum itu dilarang.",
+    "**Kekuatan Istighfar:** Mengakui kesalahan sendiri (Self-Criticism) lebih dicintai Allah daripada mencari kambing hitam.",
+    "**The Power of Hope:** Tidak ada tempat yang terlalu gelap (bahkan perut ikan) bagi Allah untuk mengirimkan pertolongan.",
+    "**Mekanisme Undian:** Syariat membolehkan undian (Qur'ah) untuk mengambil keputusan sulit yang setara haknya.",
+    "**Rahmat Universal:** Allah menerima tobat satu kota penuh, menunjukkan kasih sayang-Nya melampaui murka-Nya."
   ],
-  "doa": "La ilaha illa Anta subhanaka inni kuntu minaz zhalimin. (Tidak ada Tuhan selain Engkau. Maha Suci Engkau, sesungguhnya aku adalah termasuk orang-orang yang zalim).",
-  "penutup": "Nabi Yunus a.s. mengajarkan bahwa jalan keluar dari perut masalah bukanlah dengan meronta, melainkan dengan bersujud dan mengakui kelemahan diri."
+  "doa": "La ilaha illa Anta subhanaka inni kuntu minaz zhalimin. (Tidak ada Tuhan selain Engkau, Maha Suci Engkau, sesungguhnya aku adalah termasuk orang-orang yang zalim).",
+  "penutup": "Nabi Yunus a.s. mengajarkan bahwa jalan keluar dari perut masalah bukanlah dengan menyalahkan keadaan, melainkan dengan memperbaiki hubungan dengan Sang Pencipta."
 }
