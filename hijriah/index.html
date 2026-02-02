@@ -178,21 +178,24 @@ function getHijriParts(date){
 
 function getHijriMonthLength(hYear,hMonth){
 
- let d=new Date();
+ // mulai dari bulan yg sedang dirender
+ let d = new Date(baseDate);
 
+ // mundur sampai ketemu tanggal 1 bulan itu
  while(true){
-  const p=getHijriParts(d);
+  const p = getHijriParts(d);
   if(p.year===hYear && p.month===hMonth && p.day===1) break;
   d.setDate(d.getDate()-1);
  }
 
- const first=new Date(d);
+ const first = new Date(d);
 
- let next=new Date(first);
+ // maju sampai bulan berikutnya
+ let next = new Date(first);
 
  while(true){
   next.setDate(next.getDate()+1);
-  const p=getHijriParts(next);
+  const p = getHijriParts(next);
   if(p.day===1) break;
  }
 
