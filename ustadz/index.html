@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tanya Ustadz AI - NoorRahma</title>
-<link rel="manifest" href="/manifest.json" />
 
 <style>
 body{
@@ -14,19 +13,11 @@ body{
   font-family:system-ui;
 }
 
-  #overlay{
-  pointer-events:none;
-}
-
-#overlay.show{
-  pointer-events:auto;
-}
-
 /* ================= SIDEBAR ================= */
 
 #sidebar{
   position:fixed;
-  left:-280px;
+  left:-270px;
   top:0;
   width:260px;
   height:100%;
@@ -35,24 +26,20 @@ body{
   padding:15px;
   overflow-y:auto;
   transition:.3s;
-  z-index:200;
+  z-index:500;
 }
 
-#sidebar.show{
-  left:0;
-}
+#sidebar.show{ left:0; }
 
 #overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.5);
   display:none;
-  z-index:150;
+  z-index:400;
 }
 
-#overlay.show{
-  display:block;
-}
+#overlay.show{ display:block; }
 
 .new-chat{
   background:#10b981;
@@ -74,9 +61,7 @@ body{
   cursor:pointer;
 }
 
-.chat-tab.active{
-  background:#064e3b;
-}
+.chat-tab.active{ background:#064e3b; }
 
 /* ================= HEADER ================= */
 
@@ -122,7 +107,7 @@ header{
   white-space:nowrap;
 }
 
-.settings input{accent-color:#10b981}
+.settings input{ accent-color:#10b981 }
 
 /* ================= QUICK ================= */
 
@@ -150,7 +135,7 @@ header{
   display:flex;
   flex-direction:column;
   gap:14px;
-  padding-bottom:200px;
+  padding-bottom:220px;
 }
 
 .msg{
@@ -183,9 +168,10 @@ header{
   display:flex;
   gap:10px;
   border-top:1px solid #1e293b;
+  z-index:600;
 }
 
-.input-box textarea{
+textarea{
   flex:1;
   resize:none;
   border-radius:14px;
@@ -196,13 +182,14 @@ header{
   font-size:13px;
 }
 
-.input-box button{
+button{
   background:#10b981;
   border:none;
   padding:0 18px;
   border-radius:14px;
   color:black;
   font-weight:bold;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -223,7 +210,6 @@ header{
 <span style="font-size:11px;background:#facc15;color:black;padding:4px 10px;border-radius:999px;margin-left:6px;">PRO</span>
 </header>
 
-<!-- SETTINGS ASLI TETAP ADA -->
 <div class="settings">
 <select id="mode">
 <option value="ai">Mode Konsultan</option>
@@ -267,7 +253,7 @@ placeholder="Tanyakan masalah ibadah, muamalah, keluarga, dsb..."></textarea>
 
 <script>
 
-/* ================= TAB SYSTEM ================= */
+/* ================= CORE CHAT ================= */
 
 let allChats = JSON.parse(localStorage.getItem("nr_all_chats")||"[]");
 let currentChatId = null;
@@ -279,30 +265,13 @@ function saveTabs(){
 function renderTabs(){
  const wrap=document.getElementById("chatTabs");
  wrap.innerHTML="";
-
  allChats.forEach(c=>{
    const d=document.createElement("div");
    d.className="chat-tab"+(c.id===currentChatId?" active":"");
-   d.innerHTML=`
-     ${c.title}
-     <span style="float:right;opacity:.5;cursor:pointer" onclick="deleteChat('${c.id}',event)">✕</span>
-   `;
-
+   d.innerHTML=`${c.title}
+   <span style="float:right;cursor:pointer" onclick="deleteChat('${c.id}',event)">✕</span>`;
    d.onclick=()=>loadChat(c.id);
-
-   // Rename (klik kanan desktop)
-   d.oncontextmenu=(e)=>{
-     e.preventDefault();
-     renameChat(c.id);
-   };
-
-   // Long press mobile
-   let pressTimer;
-   d.ontouchstart=()=>{
-     pressTimer=setTimeout(()=>renameChat(c.id),600);
-   };
-   d.ontouchend=()=>clearTimeout(pressTimer);
-
+   d.oncontextmenu=(e)=>{e.preventDefault();renameChat(c.id)};
    wrap.appendChild(d);
  });
 }
@@ -319,63 +288,80 @@ function newChat(){
 
 function loadChat(id){
  currentChatId=id;
- const chat=document.getElementById("chat");
- chat.innerHTML="";
- const data=allChats.find(c=>c.id===id);
- if(data){
-   data.messages.forEach(m=>add(m.role,m.text,false));
- }
+ document.getElementById("chat").innerHTML="";
  renderTabs();
- toggleSidebar();
+ toggleSidebar(false);
 }
 
 function deleteChat(id,e){
  e.stopPropagation();
- if(!confirm("Hapus chat ini?")) return;
-
  allChats=allChats.filter(c=>c.id!==id);
-
- if(allChats.length===0){
-   newChat();
- }else{
-   currentChatId=allChats[0].id;
-   loadChat(currentChatId);
- }
-
+ if(allChats.length===0)newChat();
+ else loadChat(allChats[0].id);
  saveTabs();
  renderTabs();
 }
 
 function renameChat(id){
  const data=allChats.find(c=>c.id===id);
- if(!data) return;
-
  const name=prompt("Rename chat:",data.title);
- if(!name) return;
-
+ if(!name)return;
  data.title=name;
  saveTabs();
  renderTabs();
 }
 
-function toggleSidebar(){
+function toggleSidebar(forceClose){
  const sb=document.getElementById("sidebar");
  const ov=document.getElementById("overlay");
 
- if(sb.classList.contains("show")){
+ if(forceClose===false){
    sb.classList.remove("show");
    ov.classList.remove("show");
- }else{
-   sb.classList.add("show");
-   ov.classList.add("show");
+   return;
  }
+
+ sb.classList.toggle("show");
+ ov.classList.toggle("show");
 }
-/* AUTO NEW CHAT */
-if(allChats.length===0){
- newChat();
-}else{
- newChat();
+
+/* ================= CHAT FUNCTION ================= */
+
+function askQuick(text){
+ document.getElementById("input").value=text;
+ send();
 }
+
+function add(role,text){
+ const chat=document.getElementById("chat");
+ const d=document.createElement("div");
+ d.className="msg "+(role==="user"?"user":"ai");
+ d.innerHTML=text.replace(/\n/g,"<br>");
+ chat.appendChild(d);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+async function send(){
+ const input=document.getElementById("input");
+ const q=input.value.trim();
+ if(!q)return;
+
+ add("user",q);
+ input.value="";
+
+ const res=await fetch("https://noorrahma-app.pembang001.workers.dev/assistant/ai",{
+  method:"POST",
+  headers:{"content-type":"application/json"},
+  body:JSON.stringify({prompt:q})
+ });
+
+ const d=await res.json();
+ add("ai",d.answer||"Tidak ada jawaban.");
+}
+
+/* AUTO CHAT */
+if(allChats.length===0)newChat();
+else newChat();
 
 renderTabs();
 
