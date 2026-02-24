@@ -341,22 +341,40 @@ function add(role,text){
  chat.scrollTop=chat.scrollHeight;
 }
 
+let uid = localStorage.getItem("nr_uid") || "uid-" + Date.now();
+
 async function send(){
  const input=document.getElementById("input");
  const q=input.value.trim();
- if(!q)return;
+ if(!q) return;
 
  add("user",q);
  input.value="";
 
- const res=await fetch("https://noorrahma-app.pembang001.workers.dev/assistant/ai",{
-  method:"POST",
-  headers:{"content-type":"application/json"},
-  body:JSON.stringify({prompt:q})
- });
+ try{
+   const res = await fetch(
+     "https://noorrahma-app.pembang001.workers.dev/assistant/ai",
+     {
+       method:"POST",
+       headers:{"content-type":"application/json"},
+       body:JSON.stringify({
+         uid: uid,
+         prompt: q
+       })
+     }
+   );
 
- const d=await res.json();
- add("ai",d.answer||"Tidak ada jawaban.");
+   const d = await res.json();
+   const ans = d.answer || "⚠️ Tidak bisa menjawab.";
+
+   const withAyat = ans + 
+     "\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa";
+
+   add("ai",withAyat);
+
+ }catch(err){
+   add("ai","⚠️ Terjadi kesalahan koneksi.");
+ }
 }
 
 /* AUTO CHAT */
