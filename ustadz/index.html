@@ -271,11 +271,30 @@ function saveTabs(){
 function renderTabs(){
  const wrap=document.getElementById("chatTabs");
  wrap.innerHTML="";
+
  allChats.forEach(c=>{
    const d=document.createElement("div");
    d.className="chat-tab"+(c.id===currentChatId?" active":"");
-   d.innerText=c.title;
+   d.innerHTML=`
+     ${c.title}
+     <span style="float:right;opacity:.5;cursor:pointer" onclick="deleteChat('${c.id}',event)">✕</span>
+   `;
+
    d.onclick=()=>loadChat(c.id);
+
+   // Rename (klik kanan desktop)
+   d.oncontextmenu=(e)=>{
+     e.preventDefault();
+     renameChat(c.id);
+   };
+
+   // Long press mobile
+   let pressTimer;
+   d.ontouchstart=()=>{
+     pressTimer=setTimeout(()=>renameChat(c.id),600);
+   };
+   d.ontouchend=()=>clearTimeout(pressTimer);
+
    wrap.appendChild(d);
  });
 }
@@ -295,9 +314,40 @@ function loadChat(id){
  const chat=document.getElementById("chat");
  chat.innerHTML="";
  const data=allChats.find(c=>c.id===id);
- if(data) data.messages.forEach(m=>add(m.role,m.text,false));
+ if(data){
+   data.messages.forEach(m=>add(m.role,m.text,false));
+ }
  renderTabs();
  toggleSidebar();
+}
+
+function deleteChat(id,e){
+ e.stopPropagation();
+ if(!confirm("Hapus chat ini?")) return;
+
+ allChats=allChats.filter(c=>c.id!==id);
+
+ if(allChats.length===0){
+   newChat();
+ }else{
+   currentChatId=allChats[0].id;
+   loadChat(currentChatId);
+ }
+
+ saveTabs();
+ renderTabs();
+}
+
+function renameChat(id){
+ const data=allChats.find(c=>c.id===id);
+ if(!data) return;
+
+ const name=prompt("Rename chat:",data.title);
+ if(!name) return;
+
+ data.title=name;
+ saveTabs();
+ renderTabs();
 }
 
 function toggleSidebar(){
@@ -306,8 +356,11 @@ function toggleSidebar(){
 }
 
 /* AUTO NEW CHAT */
-if(allChats.length===0)newChat();
-else newChat();
+if(allChats.length===0){
+ newChat();
+}else{
+ newChat();
+}
 
 renderTabs();
 
