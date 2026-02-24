@@ -251,27 +251,38 @@ placeholder="Tanyakan masalah ibadah, muamalah, keluarga, dsb..."></textarea>
 <button onclick="send()">Kirim</button>
 </div>
 
-<script>
+ <script>
 
-/* ================= CORE CHAT ================= */
+/* ================= DATA ================= */
+
+let uid = localStorage.getItem("nr_uid") || "uid-" + Date.now();
+localStorage.setItem("nr_uid", uid);
 
 let allChats = JSON.parse(localStorage.getItem("nr_all_chats")||"[]");
 let currentChatId = null;
+
+/* ================= SAVE ================= */
 
 function saveTabs(){
  localStorage.setItem("nr_all_chats",JSON.stringify(allChats));
 }
 
+/* ================= TAB ================= */
+
 function renderTabs(){
  const wrap=document.getElementById("chatTabs");
  wrap.innerHTML="";
+
  allChats.forEach(c=>{
    const d=document.createElement("div");
    d.className="chat-tab"+(c.id===currentChatId?" active":"");
    d.innerHTML=`${c.title}
-   <span style="float:right;cursor:pointer" onclick="deleteChat('${c.id}',event)">✕</span>`;
+   <span style="float:right;cursor:pointer"
+   onclick="deleteChat('${c.id}',event)">✕</span>`;
+
    d.onclick=()=>loadChat(c.id);
    d.oncontextmenu=(e)=>{e.preventDefault();renameChat(c.id)};
+
    wrap.appendChild(d);
  });
 }
@@ -288,7 +299,16 @@ function newChat(){
 
 function loadChat(id){
  currentChatId=id;
- document.getElementById("chat").innerHTML="";
+ const chat=document.getElementById("chat");
+ chat.innerHTML="";
+
+ const data=allChats.find(c=>c.id===id);
+ if(data){
+   data.messages.forEach(m=>{
+     addMessage(m.role,m.text,false);
+   });
+ }
+
  renderTabs();
  toggleSidebar(false);
 }
@@ -311,6 +331,8 @@ function renameChat(id){
  renderTabs();
 }
 
+/* ================= SIDEBAR ================= */
+
 function toggleSidebar(forceClose){
  const sb=document.getElementById("sidebar");
  const ov=document.getElementById("overlay");
@@ -325,65 +347,138 @@ function toggleSidebar(forceClose){
  ov.classList.toggle("show");
 }
 
-/* ================= CHAT FUNCTION ================= */
+/* ================= MESSAGE ================= */
+
+function addMessage(role,text,save=true){
+
+ const chat=document.getElementById("chat");
+
+ const d=document.createElement("div");
+ d.className="msg "+(role==="user"?"user":"ai");
+ d.innerHTML=text.replace(/\n/g,"<br>");
+
+ chat.appendChild(d);
+ chat.scrollTop=chat.scrollHeight;
+
+ if(save){
+   const data=allChats.find(c=>c.id===currentChatId);
+   if(data){
+     data.messages.push({role,text});
+     if(data.title==="Chat Baru" && role==="user"){
+       data.title=text.substring(0,30)+"...";
+     }
+     saveTabs();
+   }
+ }
+}
+
+/* ================= TYPING EFFECT ================= */
+
+function typingEffect(text,callback){
+ const chat=document.getElementById("chat");
+
+ const bubble=document.createElement("div");
+ bubble.className="msg ai";
+ chat.appendChild(bubble);
+
+ let i=0;
+ const interval=setInterval(()=>{
+   bubble.innerHTML=text.substring(0,i).replace(/\n/g,"<br>");
+   chat.scrollTop=chat.scrollHeight;
+   i++;
+   if(i>text.length){
+     clearInterval(interval);
+     if(callback)callback();
+   }
+ },15);
+}
+
+/* ================= LOADING ================= */
+
+function showLoading(){
+ const chat=document.getElementById("chat");
+ const loading=document.createElement("div");
+ loading.className="msg ai";
+ loading.id="loadingBubble";
+ loading.innerHTML="Ustadz sedang mengetik<span id='dots'>...</span>";
+ chat.appendChild(loading);
+ chat.scrollTop=chat.scrollHeight;
+
+ let dotCount=0;
+ const dotInterval=setInterval(()=>{
+   const dots=document.getElementById("dots");
+   if(!dots){clearInterval(dotInterval);return;}
+   dotCount=(dotCount+1)%4;
+   dots.innerHTML=".".repeat(dotCount);
+ },500);
+}
+
+function removeLoading(){
+ const l=document.getElementById("loadingBubble");
+ if(l)l.remove();
+}
+
+/* ================= SEND ================= */
+
+async function send(){
+
+ const input=document.getElementById("input");
+ const q=input.value.trim();
+ if(!q)return;
+
+ addMessage("user",q);
+ input.value="";
+
+ showLoading();
+
+ try{
+   const res=await fetch(
+     "https://noorrahma-app.pembang001.workers.dev/assistant/ai",
+     {
+       method:"POST",
+       headers:{"content-type":"application/json"},
+       body:JSON.stringify({uid:uid,prompt:q})
+     }
+   );
+
+   const d=await res.json();
+   const ans=d.answer||"⚠️ Tidak bisa menjawab.";
+
+   removeLoading();
+
+   typingEffect(ans+"\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa",()=>{
+     addMessage("ai",ans,false);
+     const data=allChats.find(c=>c.id===currentChatId);
+     if(data){
+       data.messages.push({role:"ai",text:ans});
+       saveTabs();
+     }
+   });
+
+ }catch(e){
+   removeLoading();
+   addMessage("ai","⚠️ Terjadi kesalahan koneksi.");
+ }
+}
+
+/* ================= QUICK ================= */
 
 function askQuick(text){
  document.getElementById("input").value=text;
  send();
 }
 
-function add(role,text){
- const chat=document.getElementById("chat");
- const d=document.createElement("div");
- d.className="msg "+(role==="user"?"user":"ai");
- d.innerHTML=text.replace(/\n/g,"<br>");
- chat.appendChild(d);
- chat.scrollTop=chat.scrollHeight;
-}
+/* ================= INIT ================= */
 
-let uid = localStorage.getItem("nr_uid") || "uid-" + Date.now();
-
-async function send(){
- const input=document.getElementById("input");
- const q=input.value.trim();
- if(!q) return;
-
- add("user",q);
- input.value="";
-
- try{
-   const res = await fetch(
-     "https://noorrahma-app.pembang001.workers.dev/assistant/ai",
-     {
-       method:"POST",
-       headers:{"content-type":"application/json"},
-       body:JSON.stringify({
-         uid: uid,
-         prompt: q
-       })
-     }
-   );
-
-   const d = await res.json();
-   const ans = d.answer || "⚠️ Tidak bisa menjawab.";
-
-   const withAyat = ans + 
-     "\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa";
-
-   add("ai",withAyat);
-
- }catch(err){
-   add("ai","⚠️ Terjadi kesalahan koneksi.");
- }
-}
-
-/* AUTO CHAT */
 if(allChats.length===0)newChat();
-else newChat();
+else{
+ currentChatId=allChats[0].id;
+ loadChat(currentChatId);
+}
 
 renderTabs();
 
 </script>
-
+  
 </body>
 </html>
