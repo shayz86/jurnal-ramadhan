@@ -17,12 +17,16 @@ body{
  overflow:hidden;
  background:#f1f5f9;
 }
+
+/* mobile vh fix */
 :root{
  --vh:1vh;
 }
+
 .app-root{
  height:calc(var(--vh) * 100);
  display:flex;
+ flex-direction:column;
  overflow:hidden;
 }
 </style>
@@ -35,103 +39,67 @@ body{
 
 const API="https://noorrahma-app.pembang001.workers.dev";
 
+/* UID */
 let UID = localStorage.getItem("nr_uid");
 if(!UID){
  UID="uid-"+Date.now();
  localStorage.setItem("nr_uid",UID);
 }
 
+/* Session */
+let sessionId=localStorage.getItem("nr_ai_session");
+
+/* ================= PRO GUARD ================= */
+
 if(localStorage.getItem("nr_is_pro")!=="1"){
  alert("Fitur PRO 🔒");
  location.href="/";
 }
 
-/* ================= MULTI CHAT SYSTEM ================= */
-
-let chats = JSON.parse(localStorage.getItem("nr_ai_chats")||"[]");
-let currentChatId=null;
-
-function saveChats(){
- localStorage.setItem("nr_ai_chats",JSON.stringify(chats));
+/* session baru jika belum ada */
+if(!sessionId){
+ sessionId="sess-"+Date.now();
+ localStorage.setItem("nr_ai_session",sessionId);
 }
-
-function createNewChat(){
- const id="sess-"+Date.now();
- const newChat={
-  id,
-  title:"Chat Baru",
-  messages:[]
- };
- chats.unshift(newChat);
- currentChatId=id;
- saveChats();
- renderSidebar();
- renderMessages();
-}
-
-function getCurrentChat(){
- return chats.find(c=>c.id===currentChatId);
-}
-
-function renderSidebar(){
- const list=document.getElementById("chatList");
- list.innerHTML="";
- chats.forEach(chat=>{
-  const item=document.createElement("div");
-  item.className="p-3 rounded-lg cursor-pointer hover:bg-slate-700 text-sm truncate";
-  item.innerText=chat.title;
-  item.onclick=()=>{
-   currentChatId=chat.id;
-   renderMessages();
-  };
-  list.appendChild(item);
- });
-}
-
-function renderMessages(){
- chatWrap.innerHTML="";
- const chat=getCurrentChat();
- if(!chat)return;
- chat.messages.forEach(m=>bubble(m.text,m.role));
-}
-
-/* ================= FIX ANDROID HEIGHT ================= */
-
-function setVH(){
- const vh = window.innerHeight * 0.01;
- document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-setVH();
-window.addEventListener("resize",setVH);
 </script>
 
+<!-- ROOT -->
 <div class="app-root">
 
-<!-- SIDEBAR -->
-<aside class="w-72 bg-slate-900 text-white flex flex-col shrink-0">
-
-<div class="p-4 border-b border-slate-700">
-<button onclick="createNewChat()"
-class="w-full bg-emerald-600 py-2 rounded-xl font-semibold">
-+ Chat Baru
-</button>
-</div>
-
-<div id="chatList"
-class="flex-1 overflow-y-auto p-2 space-y-2">
-</div>
-
-</aside>
-
-<!-- MAIN -->
-<div class="flex-1 flex flex-col">
-
+<!-- HEADER -->
 <header class="bg-emerald-700 text-white p-4 flex items-center gap-3 shrink-0">
+<button onclick="history.back()">←</button>
 <h2 class="font-bold">Smart Islamic Assistant</h2>
 </header>
 
+<!-- ============ SESSION MODAL ============ -->
+
+<div id="sessionModal"
+class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+
+<div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm space-y-4">
+
+<h3 class="font-bold text-lg">Mulai Percakapan</h3>
+
+<button onclick="resumeChat()"
+class="w-full bg-emerald-600 text-white py-3 rounded-xl">
+Lanjut Chat Terakhir
+</button>
+
+<button onclick="newChat()"
+class="w-full border py-3 rounded-xl">
+Chat Baru
+</button>
+
+</div>
+</div>
+
+<!-- ============ CHAT AREA ============ -->
+
 <div id="chatWrap"
-class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 overscroll-contain"></div>
+class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 hidden overscroll-contain"></div>
+
+<!-- ============ QUICK BUTTONS ============ -->
 
 <div class="px-4 py-2 flex gap-2 overflow-x-auto shrink-0 bg-slate-100">
 <button onclick="sendQuick('Waktu shalat hari ini')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">🕌 Waktu shalat</button>
@@ -139,6 +107,8 @@ class="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50 overscroll-contain
 <button onclick="sendQuick('Puasa sunnah')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">🌙 Puasa</button>
 <button onclick="sendQuick('Tafsir ayat')" class="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs whitespace-nowrap">📖 Tafsir</button>
 </div>
+
+<!-- ============ INPUT BAR ============ -->
 
 <div class="bg-white p-3 flex gap-2 items-center border-t shrink-0">
 
@@ -156,17 +126,83 @@ Kirim
 </div>
 
 </div>
-</div>
 
 <script>
+/* ========== FIX ANDROID HEIGHT ========== */
+
+function setVH(){
+ const vh = window.innerHeight * 0.01;
+ document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+setVH();
+window.addEventListener("resize",setVH);
+
+/* ================= STATE ================= */
+
 const chatWrap=document.getElementById("chatWrap");
+const modal=document.getElementById("sessionModal");
+
+let history=JSON.parse(localStorage.getItem("nr_ai_history")||"[]");
+let bookmarks=JSON.parse(localStorage.getItem("nr_ai_bookmarks")||"[]");
 
 let recognizing=false;
 let recog;
 
-/* ================= BUBBLE (ASLI TIDAK DIUBAH) ================= */
+/* ================= SESSION ================= */
 
-function bubble(text,role){
+if(history.length){
+ modal.classList.remove("hidden");
+}else{
+ chatWrap.classList.remove("hidden");
+
+ const intro =
+ "👋 Assalamu’alaikum!\n\n"+
+ "Saya Smart Islamic Assistant.\n\n"+
+ "Silakan tanya:\n"+
+ "• 🕌 Waktu shalat\n"+
+ "• 🤲 Doa\n"+
+ "• 🌙 Puasa\n"+
+ "• 📖 Tafsir\n\n"+
+ "Apa yang ingin Anda ketahui hari ini?";
+
+ history.push({ role:"assistant", text:intro });
+ localStorage.setItem("nr_ai_history",JSON.stringify(history));
+ bubble(intro,"assistant");
+}
+
+/* ================= UI ================= */
+
+function resumeChat(){
+ modal.classList.add("hidden");
+ chatWrap.classList.remove("hidden");
+ renderHistory();
+}
+
+function newChat(){
+
+ history=[];
+ sessionId="sess-"+Date.now();
+
+ localStorage.setItem("nr_ai_session",sessionId);
+ localStorage.removeItem("nr_ai_history");
+
+ modal.classList.add("hidden");
+ chatWrap.classList.remove("hidden");
+ chatWrap.innerHTML="";
+
+ const intro =
+ "👋 Assalamu’alaikum!\n\n"+
+ "Saya Smart Islamic Assistant.\n\n"+
+ "Silakan tanya tentang ibadah 🙏";
+
+ history.push({ role:"assistant", text:intro });
+ localStorage.setItem("nr_ai_history",JSON.stringify(history));
+ bubble(intro,"assistant");
+}
+
+/* ================= RENDER ================= */
+
+function bubble(text,role,loading=false){
 
  const wrap=document.createElement("div");
 
@@ -193,34 +229,23 @@ function bubble(text,role){
  box.style.whiteSpace="pre-line";
 
  wrap.appendChild(box);
+
  chatWrap.appendChild(wrap);
  chatWrap.scrollTop=chatWrap.scrollHeight;
-}
 
-/* ================= PUSH MESSAGE (DISESUAIKAN MULTI CHAT) ================= */
-
-function push(role,text){
- const chat=getCurrentChat();
- if(!chat)return;
-
- chat.messages.push({role,text});
-
- if(role==="user" && chat.messages.length===1){
-  chat.title=text.substring(0,25);
- }
-
- saveChats();
- renderSidebar();
- bubble(text,role);
+ return wrap;
 }
 
 /* ================= SEND ================= */
 
 function sendMessage(){
+
  const input=document.getElementById("input");
  const text=input.value.trim();
  if(!text)return;
+
  input.value="";
+
  push("user",text);
  fetchAnswer(text);
 }
@@ -230,26 +255,35 @@ function sendQuick(t){
  fetchAnswer(t);
 }
 
-/* ================= BACKEND (ASLI) ================= */
+function push(role,text){
+
+ history.push({role,text});
+ localStorage.setItem("nr_ai_history",JSON.stringify(history));
+ bubble(text,role);
+}
+
+/* ================= BACKEND ================= */
 
 async function fetchAnswer(q){
 
- const loadingBubble=bubble("⏳ Memproses...","assistant");
+ const loadingBubble=bubble("⏳ Memproses...","assistant",true);
 
  try{
+
   const r=await fetch(API+"/assistant/ai",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
       uid:UID,
       prompt:q,
-      sessionId:currentChatId
+      sessionId
     })
   });
 
   const d=await r.json();
 
-  renderMessages();
+  loadingBubble.remove();
+
   if(d.error){
     push("assistant","⚠️ "+d.error);
   }else{
@@ -257,13 +291,17 @@ async function fetchAnswer(q){
   }
 
  }catch(err){
+
+  console.error(err);
+  loadingBubble.remove();
   push("assistant","⚠️ AI gagal dipanggil.");
  }
 }
 
-/* ================= VOICE (ASLI) ================= */
+/* ================= VOICE ================= */
 
 function startVoice(){
+
  if(recognizing)return;
 
  const SpeechRecognition=
@@ -291,11 +329,10 @@ function startVoice(){
 
 /* ================= INIT ================= */
 
-if(chats.length===0){
- createNewChat();
-}else{
- createNewChat(); // selalu buka tab baru seperti ChatGPT
- renderSidebar();
+function renderHistory(){
+
+ chatWrap.innerHTML="";
+ history.forEach(m=>bubble(m.text,m.role));
 }
 </script>
 
