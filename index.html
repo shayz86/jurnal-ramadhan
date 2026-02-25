@@ -1987,54 +1987,57 @@ const sendAssistant = () => {
 
 
         useEffect(() => {
-  const audio = audioRef.current;
-  if (!audio) return;
 
-  if (!selectedSurah || playingAyatIndex === null) {
-    audio.pause();
-    return;
-  }
+          const audio = audioRef.current;
 
-  const a = selectedSurah.ayat[playingAyatIndex];
-  const url = a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0];
-  if (!url) return;
+          if (!audio) return;
 
-  audio.src = url;
-  audio.preload = "auto";
 
-  // ===== MEDIA SESSION SAFE =====
-  if ("mediaSession" in navigator && typeof MediaMetadata !== "undefined") {
-    try {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: `${selectedSurah?.namaLatin || "Al-Qur'an"} - Ayat ${a?.nomorAyat || ""}`,
-        artist: "NoorRahma Qur'an",
-        album: "Al-Qur'an",
-      });
 
-      navigator.mediaSession.setActionHandler("play", () => audio.play());
-      navigator.mediaSession.setActionHandler("pause", () => audio.pause());
-    } catch (err) {
-      console.log("MediaSession error:", err);
-    }
-  }
-  // ==============================
+          const play = () => {
 
-  audio.play().catch(() => {});
+            if (selectedSurah && playingAyatIndex !== null) {
 
-  const handleEnded = () => {
-    if (playingAyatIndex < selectedSurah.ayat.length - 1) {
-      setPlayingAyatIndex((prev) => prev + 1);
-    } else {
-      setPlayingAyatIndex(null);
-    }
-  };
+              const a = selectedSurah.ayat[playingAyatIndex];
 
-  audio.addEventListener("ended", handleEnded);
+              const url = a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0];
 
-  return () => {
-    audio.removeEventListener("ended", handleEnded);
-  };
-}, [playingAyatIndex, selectedSurah]);
+              if (url) {
+
+                audio.src = url;
+
+                audio.play().catch(() => setPlayingAyatIndex(null));
+
+              }
+
+            }
+
+          };
+
+
+
+          play();
+
+
+
+          const ended = () => {
+
+            if (selectedSurah && playingAyatIndex < selectedSurah.ayat.length - 1)
+
+              setPlayingAyatIndex((p) => p + 1);
+
+            else setPlayingAyatIndex(null);
+
+          };
+
+
+
+          audio.addEventListener("ended", ended);
+
+          return () => audio.removeEventListener("ended", ended);
+
+        }, [playingAyatIndex, selectedSurah]);
+
 
 
         const fetchSurahList = async () => {
