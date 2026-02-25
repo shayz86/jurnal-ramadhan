@@ -2036,13 +2036,6 @@ const sendAssistant = () => {
   };
 }, [playingAyatIndex, selectedSurah]);
 
-          audio.addEventListener("ended", ended);
-
-          return () => audio.removeEventListener("ended", ended);
-
-        }, [playingAyatIndex, selectedSurah]);
-
-
 
         const fetchSurahList = async () => {
 
