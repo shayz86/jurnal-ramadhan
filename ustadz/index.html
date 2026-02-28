@@ -383,6 +383,7 @@ function addMessage(role,text,save=true){
 /* ================= TYPING EFFECT ================= */
 
 function typingEffect(text,callback){
+
  const chat=document.getElementById("chat");
 
  const bubble=document.createElement("div");
@@ -390,13 +391,15 @@ function typingEffect(text,callback){
  chat.appendChild(bubble);
 
  let i=0;
+
  const interval=setInterval(()=>{
    bubble.innerHTML=text.substring(0,i).replace(/\n/g,"<br>");
    chat.scrollTop=chat.scrollHeight;
    i++;
+
    if(i>text.length){
      clearInterval(interval);
-     if(callback)callback();
+     if(callback)callback(text);
    }
  },15);
 }
