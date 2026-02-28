@@ -245,8 +245,8 @@ button{
 <div class="quick">
 <button onclick="askQuick('Apakah riba itu haram?')">Riba</button>
 <button onclick="askQuick('Apa syarat sah shalat?')">Shalat</button>
-<button onclick="askQuick('Apakah wudhu batal?')">Wudhu</button>
-<button onclick="askQuick('Bagaimana zakat?')">Zakat</button>
+<button onclick="askQuick('Apakah yang membatalkan wudhu?')">Wudhu</button>
+<button onclick="askQuick('Bagaimana hukum zakat?')">Zakat</button>
 </div>
 
 <div class="chat" id="chat"></div>
@@ -443,12 +443,27 @@ async function send(){
  showLoading();
 
  try{
+
+   const systemPrompt = `
+Anda adalah Ustadz AI yang menjawab sesuai Al-Qur'an dan Sunnah.
+Jawab dengan bahasa yang jelas dan terstruktur.
+Di akhir jawaban, tambahkan bagian:
+
+📖 Rekomendasi Ayat:
+- Sebutkan 1-3 ayat yang relevan
+- Sertakan nama surat dan nomor ayat
+- Jika memungkinkan sertakan kutipan singkat ayatnya
+`;
+
    const res=await fetch(
      "https://noorrahma-app.pembang001.workers.dev/assistant/ai",
      {
        method:"POST",
        headers:{"content-type":"application/json"},
-       body:JSON.stringify({uid:uid,prompt:q})
+       body:JSON.stringify({
+         uid:uid,
+         prompt: systemPrompt + "\n\nPertanyaan:\n" + q
+       })
      }
    );
 
@@ -457,17 +472,15 @@ async function send(){
 
    removeLoading();
 
-   typingEffect(ans + 
-"\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa",
-(finalText)=>{
+   typingEffect(ans,(finalText)=>{
 
-   const data=allChats.find(c=>c.id===currentChatId);
-   if(data){
-     data.messages.push({role:"ai",text:finalText});
-     saveTabs();
-   }
+     const data=allChats.find(c=>c.id===currentChatId);
+     if(data){
+       data.messages.push({role:"ai",text:finalText});
+       saveTabs();
+     }
 
-});
+   });
 
  }catch(e){
    removeLoading();
