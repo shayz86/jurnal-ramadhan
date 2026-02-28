@@ -457,14 +457,17 @@ async function send(){
 
    removeLoading();
 
-   typingEffect(ans+"\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa",()=>{
-     addMessage("ai",ans,false);
-     const data=allChats.find(c=>c.id===currentChatId);
-     if(data){
-       data.messages.push({role:"ai",text:ans});
-       saveTabs();
-     }
-   });
+   typingEffect(ans + 
+"\n\n📖 Rekomendasi Ayat:\n• QS. Al-Baqarah\n• QS. An-Nisa",
+(finalText)=>{
+
+   const data=allChats.find(c=>c.id===currentChatId);
+   if(data){
+     data.messages.push({role:"ai",text:finalText});
+     saveTabs();
+   }
+
+});
 
  }catch(e){
    removeLoading();
