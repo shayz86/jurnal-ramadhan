@@ -1113,7 +1113,7 @@ const requestNotifPermission = async () => {
 
         const juzAmmaList = surahList
           .filter((s) => s.nomor >= 78 && s.nomor <= 114)
-          .sort((a, b) => a.nomor - b.nomor);
+          .sort((a, b) => b.nomor - a.nomor);
         const juzHafalanCount = juzAmmaList.filter((s) => juzHafalan.includes(s.nomor)).length;
         const juzHafalanPercent = Math.round((juzHafalanCount / 37) * 100);
 
@@ -1145,11 +1145,9 @@ const requestNotifPermission = async () => {
           const key = juzAyatKey(surahNo, ayatNo);
           setJuzAyatHafalan((prev) => ({ ...prev, [key]: !prev[key] }));
         };
-        const getJuzAudioUrl = (surahNo, ayatNo) => {
-          const ss = String(surahNo).padStart(3, "0");
-          const aa = String(ayatNo).padStart(3, "0");
-          return `https://huggingface.co/datasets/ashraf-ali/quran-data/resolve/main/data/audio/Imam/Abdullah_Basfar/${ss}${aa}_Abdullah_Basfar_64kbps.wav`;
-        };
+        // Juz Amma menggunakan URL audio per-ayat yang sama dari API Quran NoorRahma (equran.id).
+        const getJuzAudioUrl = (ayat) =>
+          ayat?.audio?.["05"] || ayat?.audio?.["01"] || (ayat?.audio ? Object.values(ayat.audio)[0] : "");
         const juzAyatHafalanCount = Object.values(juzAyatHafalan).filter(Boolean).length;
 
 
@@ -2070,7 +2068,7 @@ const sendAssistant = () => {
   const a = selectedSurah.ayat[playingAyatIndex];
   const isJuzAmmaAudio = activeTab === "juzamma";
   const url = isJuzAmmaAudio
-    ? getJuzAudioUrl(selectedSurah.nomor, a.nomorAyat)
+    ? getJuzAudioUrl(a)
     : (a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0]);
   if (!url) return;
 
