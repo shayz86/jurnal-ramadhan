@@ -1076,6 +1076,9 @@ const requestNotifPermission = async () => {
 
         const [selectedSurah, setSelectedSurah] = useState(null);
 
+        const quranScrollRef = useRef(null);
+        const juzAmmaScrollRef = useRef(null);
+
 
 
         const [surahTafsir, setSurahTafsir] = useState(null);
@@ -1110,8 +1113,7 @@ const requestNotifPermission = async () => {
 
         const juzAmmaList = surahList
           .filter((s) => s.nomor >= 78 && s.nomor <= 114)
-          // Juz Amma ditampilkan dari surah terakhir ke awal: An-Nas → An-Naba'
-          .sort((a, b) => b.nomor - a.nomor);
+          .sort((a, b) => a.nomor - b.nomor);
         const juzHafalanCount = juzAmmaList.filter((s) => juzHafalan.includes(s.nomor)).length;
         const juzHafalanPercent = Math.round((juzHafalanCount / 37) * 100);
 
@@ -1124,7 +1126,15 @@ const requestNotifPermission = async () => {
           }
         });
         const [juzRepeatMode, setJuzRepeatMode] = useState(1);
+        const [juzPlaybackRate, setJuzPlaybackRate] = useState(() => {
+          try { return Number(localStorage.getItem("nr_juz_amma_speed") || "1") || 1; } catch { return 1; }
+        });
         const juzRepeatCountRef = useRef(0);
+
+        useEffect(() => {
+          localStorage.setItem("nr_juz_amma_speed", String(juzPlaybackRate));
+          if (audioRef.current && activeTab === "juzamma") audioRef.current.playbackRate = juzPlaybackRate;
+        }, [juzPlaybackRate, activeTab]);
 
         useEffect(() => {
           localStorage.setItem("nr_juz_amma_ayat_hafalan", JSON.stringify(juzAyatHafalan));
@@ -1135,11 +1145,10 @@ const requestNotifPermission = async () => {
           const key = juzAyatKey(surahNo, ayatNo);
           setJuzAyatHafalan((prev) => ({ ...prev, [key]: !prev[key] }));
         };
-        // Juz Amma memakai audio per-ayat dari API Quran NoorRahma yang sudah
-        // dipakai tab Quran. Ini menjaga format URL yang memang aktif di aplikasi.
-        const getJuzAudioUrl = (ayat) => {
-          if (!ayat?.audio) return null;
-          return ayat.audio["05"] || ayat.audio["01"] || Object.values(ayat.audio)[0] || null;
+        const getJuzAudioUrl = (surahNo, ayatNo) => {
+          const ss = String(surahNo).padStart(3, "0");
+          const aa = String(ayatNo).padStart(3, "0");
+          return `https://huggingface.co/datasets/ashraf-ali/quran-data/resolve/main/data/audio/Imam/Abdullah_Basfar/${ss}${aa}_Abdullah_Basfar_64kbps.wav`;
         };
         const juzAyatHafalanCount = Object.values(juzAyatHafalan).filter(Boolean).length;
 
@@ -1238,6 +1247,15 @@ const sendAssistant = () => {
 
         };
 
+
+
+        useEffect(() => {
+          if (!selectedSurah || (activeTab !== "quran" && activeTab !== "juzamma")) return;
+          const scrollEl = activeTab === "juzamma" ? juzAmmaScrollRef.current : quranScrollRef.current;
+          if (scrollEl) {
+            requestAnimationFrame(() => scrollEl.scrollTo({ top: 0, behavior: "auto" }));
+          }
+        }, [selectedSurah, activeTab]);
 
 
         useEffect(() => {
@@ -2051,11 +2069,14 @@ const sendAssistant = () => {
 
   const a = selectedSurah.ayat[playingAyatIndex];
   const isJuzAmmaAudio = activeTab === "juzamma";
-  const url = getJuzAudioUrl(a);
+  const url = isJuzAmmaAudio
+    ? getJuzAudioUrl(selectedSurah.nomor, a.nomorAyat)
+    : (a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0]);
   if (!url) return;
 
   audio.src = url;
   audio.preload = "auto";
+  audio.playbackRate = isJuzAmmaAudio ? juzPlaybackRate : 1;
 
   // ===== MEDIA SESSION SAFE =====
   if ("mediaSession" in navigator && typeof MediaMetadata !== "undefined") {
@@ -2099,7 +2120,7 @@ const sendAssistant = () => {
   return () => {
     audio.removeEventListener("ended", handleEnded);
   };
-}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode]);
+}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode, juzPlaybackRate]);
 
 
         const fetchSurahList = async () => {
@@ -3959,7 +3980,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
 
 
 
-                  <div className="flex-1 overflow-y-auto p-0 no-scrollbar scroll-smooth">
+                  <div ref={quranScrollRef} className="flex-1 overflow-y-auto p-0 no-scrollbar scroll-smooth">
 
                     {!selectedSurah ? (
 
@@ -4261,7 +4282,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                     </span>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-0 no-scrollbar scroll-smooth">
+                  <div ref={juzAmmaScrollRef} className="flex-1 overflow-y-auto p-0 no-scrollbar scroll-smooth">
                     {!selectedSurah ? (
                       <div>
                         <div className="p-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white m-4 rounded-xl shadow-sm">
@@ -4331,7 +4352,14 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                             <div className="text-[11px] font-black text-emerald-700 dark:text-emerald-300">🎧 Mode latihan hafalan</div>
                             <div className="text-[9px] text-slate-500 dark:text-slate-400">Audio ayat diulang agar anak bisa mengikuti.</div>
                           </div>
+                          <div className="flex items-center gap-2 flex-wrap justify-end">
+                            <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-300">⚡ Kecepatan</span>
+                            {[0.75,0.9,1,1.25,1.5,2].map((rate) => (
+                              <button key={rate} onClick={() => setJuzPlaybackRate(rate)} className={`px-2.5 py-1.5 rounded-full text-[10px] font-black ${juzPlaybackRate === rate ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}>{rate}×</button>
+                            ))}
+                          </div>
                           <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-300">🔁 Ulang</span>
                             {[1,2,3,5].map((n) => (
                               <button key={n} onClick={() => { juzRepeatCountRef.current = 0; setJuzRepeatMode(n); }} className={`px-2.5 py-1.5 rounded-full text-[10px] font-black ${juzRepeatMode === n ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}>{n}×</button>
                             ))}
@@ -4340,7 +4368,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                         </div>
                         <div className="flex justify-between items-center px-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                           <span>⭐ Ayat ditandai: {juzAyatHafalanCount}</span>
-                          <span>🔁 Ulangi: {juzRepeatMode === Infinity ? "tanpa batas" : `${juzRepeatMode}×`}</span>
+                          <span>🔁 Ulangi: {juzRepeatMode === Infinity ? "tanpa batas" : `${juzRepeatMode}×`} • ⚡ {juzPlaybackRate}×</span>
                         </div>
 
                         {isLoading ? (
@@ -4386,7 +4414,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                           })
                         )}
 
-                        <p className="text-center text-[9px] text-slate-400 dark:text-slate-500">Audio latihan menggunakan sumber audio NoorRahma yang sama dengan tab Quran.</p>
+                        <p className="text-center text-[9px] text-slate-400 dark:text-slate-500">Audio latihan: Abdullah Basfar • sumber dataset CC0 1.0</p>
                         <button
                           onClick={() => toggleJuzHafalan(selectedSurah.nomor)}
                           className={`w-full py-3 rounded-xl text-sm font-bold border ${juzHafalan.includes(selectedSurah.nomor) ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
