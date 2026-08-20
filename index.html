@@ -1088,6 +1088,8 @@ const requestNotifPermission = async () => {
 
         const [searchSurah, setSearchSurah] = useState("");
 
+        const [searchJuzAmma, setSearchJuzAmma] = useState("");
+
 
 
         const [tasbihCount, setTasbihCount] = useState(0);
@@ -1188,7 +1190,7 @@ const sendAssistant = () => {
 
         useEffect(() => {
 
-          if (activeTab === "quran" && selectedSurah && playingAyatIndex !== null) {
+          if ((activeTab === "quran" || activeTab === "juzamma") && selectedSurah && playingAyatIndex !== null) {
 
             const el = document.getElementById(`ayat-${playingAyatIndex}`);
 
@@ -3537,6 +3539,25 @@ const sendAssistant = () => {
 
 
 
+{/* JUZ AMMA PREMIUM */}
+
+{isPro && (
+  <div
+    onClick={() => {
+      setSelectedSurah(null);
+      setPlayingAyatIndex(null);
+      setSearchJuzAmma("");
+      setActiveTab("juzamma");
+    }}
+    className="bg-gradient-to-br from-teal-600 to-emerald-700 border border-teal-200 rounded-2xl p-4 shadow-lg text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
+  >
+    <div className="absolute -right-4 -top-4 opacity-10"><Icon name="BookOpen" size={90} /></div>
+    <Icon name="BookOpen" size={28} className="mx-auto" />
+    <h4 className="font-bold text-sm mt-2">Juz Amma</h4>
+    <p className="text-[10px] opacity-90">Surah 78–114 • Premium</p>
+  </div>
+)}
+
 {/* DOA PREMIUM */}
 
 
@@ -4149,6 +4170,107 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
 
               )}
 
+
+
+              {/* TAB JUZ AMMA — PRO ONLY */}
+
+              {activeTab === "juzamma" && isPro && (
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col h-[600px] animate-in">
+                  <div className="bg-teal-50 dark:bg-teal-950/30 p-3 border-b border-teal-100 dark:border-teal-900 flex items-center gap-2">
+                    {selectedSurah && (
+                      <button
+                        onClick={() => {
+                          setSelectedSurah(null);
+                          setPlayingAyatIndex(null);
+                          if (audioRef.current) audioRef.current.pause();
+                        }}
+                        className="p-1"
+                      >
+                        <Icon name="ArrowLeft" size={18} className="text-teal-700 dark:text-teal-400" />
+                      </button>
+                    )}
+                    {!selectedSurah && (
+                      <button onClick={() => setActiveTab("doa")} className="p-1">
+                        <Icon name="ArrowLeft" size={18} className="text-teal-700 dark:text-teal-400" />
+                      </button>
+                    )}
+                    <span className="font-bold text-teal-800 dark:text-teal-400 text-sm">
+                      {selectedSurah ? `QS. ${selectedSurah.namaLatin}` : "Juz Amma"}
+                    </span>
+                    <span className="ml-auto text-[9px] font-bold text-teal-600 dark:text-teal-400 uppercase">Premium</span>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
+                    {!selectedSurah ? (
+                      <div>
+                        <div className="p-4 bg-gradient-to-br from-teal-600 to-emerald-700 text-white m-4 rounded-xl shadow-lg">
+                          <h3 className="font-bold text-base">Juz Amma</h3>
+                          <p className="text-[10px] opacity-90 mt-1">Urutan sesuai mushaf: An-Naba' hingga An-Nas</p>
+                          <p className="text-[10px] opacity-80 mt-2">37 surah • Juz ke-30</p>
+                        </div>
+
+                        <div className="p-3 sticky top-0 bg-white dark:bg-slate-900 z-10 border-b border-slate-50 dark:border-slate-800">
+                          <input
+                            type="text"
+                            placeholder="Cari surah Juz Amma..."
+                            value={searchJuzAmma}
+                            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-teal-500"
+                            onChange={(e) => setSearchJuzAmma(e.target.value.toLowerCase())}
+                          />
+                        </div>
+
+                        <div className="divide-y dark:divide-slate-800">
+                          {surahList
+                            .filter((s) => s.nomor >= 78 && s.nomor <= 114)
+                            .filter((s) => s.namaLatin.toLowerCase().includes(searchJuzAmma) || String(s.nomor).includes(searchJuzAmma))
+                            .sort((a, b) => a.nomor - b.nomor)
+                            .map((s) => (
+                              <button
+                                key={s.nomor}
+                                onClick={() => fetchSurahDetail(s.nomor)}
+                                className="w-full text-left p-4 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-teal-50 dark:bg-teal-950 rounded-full flex items-center justify-center text-xs font-bold text-teal-700 dark:text-teal-400">{s.nomor}</div>
+                                  <div>
+                                    <h4 className="font-bold text-sm">{s.namaLatin}</h4>
+                                    <p className="text-[10px] text-slate-400">{s.arti} • {s.jumlahAyat} ayat</p>
+                                  </div>
+                                </div>
+                                <span className="font-serif text-slate-300 group-hover:text-teal-600 text-lg">{s.nama}</span>
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 space-y-6">
+                        <div className="text-center py-6 bg-slate-50 dark:bg-slate-800 rounded-xl font-serif text-2xl mb-4 dark:text-slate-200 shadow-sm border border-slate-100 dark:border-slate-700">
+                          بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
+                        </div>
+                        {isLoading ? (
+                          <div className="text-center py-10">Memuat...</div>
+                        ) : (
+                          selectedSurah.ayat.map((a, index) => {
+                            const isP = playingAyatIndex === index;
+                            return (
+                              <div key={a.nomorAyat} id={`juz-ayat-${index}`} className={`group border-b dark:border-slate-800 pb-5 cursor-pointer transition-all duration-500 ${isP ? "bg-teal-50/50 dark:bg-teal-900/20 -mx-4 px-4 py-5 rounded border-teal-100" : "hover:bg-slate-50"}`}>
+                                <div className="mb-3 flex justify-between items-center">
+                                  <span className={`text-[10px] w-6 h-6 flex items-center justify-center rounded-full font-bold ${isP ? "bg-teal-500 text-white" : "bg-teal-100 text-teal-800"}`}>{a.nomorAyat}</span>
+                                  <button onClick={(e) => { e.stopPropagation(); togglePlayAyat(index); }} className={`p-1.5 rounded-full ${isP ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-500"}`}>
+                                    {isP ? <Icon name="Pause" size={14} /> : <Icon name="Play" size={14} />}
+                                  </button>
+                                </div>
+                                <div className="text-right font-serif text-2xl leading-loose dark:text-slate-100" dir="rtl">{a.teksArab}</div>
+                                <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{a.teksIndonesia}</p>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
 
               {/* TAB RAMADHAN */}
