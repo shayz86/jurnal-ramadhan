@@ -1114,6 +1114,32 @@ const requestNotifPermission = async () => {
         const juzHafalanCount = juzAmmaList.filter((s) => juzHafalan.includes(s.nomor)).length;
         const juzHafalanPercent = Math.round((juzHafalanCount / 37) * 100);
 
+        // ===== JUZ AMMA: AYAT HAFALAN + REPEAT =====
+        const [juzAyatHafalan, setJuzAyatHafalan] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem("nr_juz_amma_ayat_hafalan") || "{}");
+          } catch {
+            return {};
+          }
+        });
+        const [juzRepeatMode, setJuzRepeatMode] = useState(1);
+        const juzRepeatCountRef = useRef(0);
+
+        useEffect(() => {
+          localStorage.setItem("nr_juz_amma_ayat_hafalan", JSON.stringify(juzAyatHafalan));
+        }, [juzAyatHafalan]);
+
+        const juzAyatKey = (surahNo, ayatNo) => `${surahNo}:${ayatNo}`;
+        const toggleJuzAyatHafalan = (surahNo, ayatNo) => {
+          const key = juzAyatKey(surahNo, ayatNo);
+          setJuzAyatHafalan((prev) => ({ ...prev, [key]: !prev[key] }));
+        };
+        const getJuzAudioUrl = (surahNo, ayatNo) => {
+          const ss = String(surahNo).padStart(3, "0");
+          const aa = String(ayatNo).padStart(3, "0");
+          return `https://huggingface.co/datasets/ashraf-ali/quran-data/resolve/main/data/audio/Imam/Abdullah_Basfar/${ss}${aa}_Abdullah_Basfar_64kbps.wav`;
+        };
+        const juzAyatHafalanCount = Object.values(juzAyatHafalan).filter(Boolean).length;
 
 
         const [tasbihCount, setTasbihCount] = useState(0);
@@ -2022,7 +2048,10 @@ const sendAssistant = () => {
   }
 
   const a = selectedSurah.ayat[playingAyatIndex];
-  const url = a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0];
+  const isJuzAmmaAudio = activeTab === "juzamma";
+  const url = isJuzAmmaAudio
+    ? getJuzAudioUrl(selectedSurah.nomor, a.nomorAyat)
+    : (a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0]);
   if (!url) return;
 
   audio.src = url;
@@ -2048,6 +2077,16 @@ const sendAssistant = () => {
   audio.play().catch(() => {});
 
   const handleEnded = () => {
+    if (isJuzAmmaAudio) {
+      const mode = juzRepeatMode;
+      if (mode === Infinity || juzRepeatCountRef.current < mode - 1) {
+        juzRepeatCountRef.current += 1;
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+        return;
+      }
+      juzRepeatCountRef.current = 0;
+    }
     if (playingAyatIndex < selectedSurah.ayat.length - 1) {
       setPlayingAyatIndex((prev) => prev + 1);
     } else {
@@ -2060,7 +2099,7 @@ const sendAssistant = () => {
   return () => {
     audio.removeEventListener("ended", handleEnded);
   };
-}, [playingAyatIndex, selectedSurah]);
+}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode]);
 
 
         const fetchSurahList = async () => {
@@ -3153,7 +3192,7 @@ const sendAssistant = () => {
 
                   <div className="text-[10px] font-bold bg-emerald-800 dark:bg-emerald-900 px-3 py-1 rounded-full border border-emerald-600">
 
-                    1447 H
+                    1448 H
 
                   </div>
 
@@ -4287,6 +4326,23 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                           بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
                         </div>
 
+                        <div className="flex flex-wrap items-center justify-between gap-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 rounded-xl px-3 py-2.5">
+                          <div>
+                            <div className="text-[11px] font-black text-emerald-700 dark:text-emerald-300">🎧 Mode latihan hafalan</div>
+                            <div className="text-[9px] text-slate-500 dark:text-slate-400">Audio ayat diulang agar anak bisa mengikuti.</div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            {[1,2,3,5].map((n) => (
+                              <button key={n} onClick={() => { juzRepeatCountRef.current = 0; setJuzRepeatMode(n); }} className={`px-2.5 py-1.5 rounded-full text-[10px] font-black ${juzRepeatMode === n ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}>{n}×</button>
+                            ))}
+                            <button onClick={() => { juzRepeatCountRef.current = 0; setJuzRepeatMode(Infinity); }} className={`px-2.5 py-1.5 rounded-full text-[10px] font-black ${juzRepeatMode === Infinity ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}>∞</button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center px-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                          <span>⭐ Ayat ditandai: {juzAyatHafalanCount}</span>
+                          <span>🔁 Ulangi: {juzRepeatMode === Infinity ? "tanpa batas" : `${juzRepeatMode}×`}</span>
+                        </div>
+
                         {isLoading ? (
                           <div className="text-center py-10">Memuat... 📖</div>
                         ) : (
@@ -4304,14 +4360,25 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                                     <span className={`text-[10px] w-6 h-6 flex items-center justify-center rounded-full font-bold ${isP ? "bg-emerald-500 text-white" : "bg-emerald-100 text-emerald-800"}`}>{a.nomorAyat}</span>
                                     <span className="text-[9px] opacity-0 group-hover:opacity-60 text-emerald-600 uppercase font-bold tracking-tighter hidden sm:inline">Lihat Tafsir</span>
                                   </div>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); togglePlayAyat(index); }}
-                                    className={`p-1.5 rounded-full ${isP ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-500"}`}
-                                  >
-                                    {isP ? <Icon name="StopCircle" size={18} /> : <Icon name="PlayCircle" size={18} />}
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); togglePlayAyat(index); }}
+                                      aria-label={isP ? "Hentikan audio" : "Putar audio"}
+                                      className={`px-2.5 py-1.5 rounded-full flex items-center gap-1 text-[10px] font-bold ${isP ? "bg-red-100 text-red-600" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}
+                                    >
+                                      <span>{isP ? "⏹️" : "▶️"}</span>
+                                      {isP ? "Stop" : "Dengar"}
+                                    </button>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); toggleJuzAyatHafalan(selectedSurah.nomor, a.nomorAyat); }}
+                                      aria-label={juzAyatHafalan[juzAyatKey(selectedSurah.nomor, a.nomorAyat)] ? "Batalkan tanda hafalan ayat" : "Tandai ayat sudah hafal"}
+                                      className={`px-2 py-1.5 rounded-full text-[10px] font-bold ${juzAyatHafalan[juzAyatKey(selectedSurah.nomor, a.nomorAyat)] ? "bg-amber-100 text-amber-600" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}
+                                    >
+                                      {juzAyatHafalan[juzAyatKey(selectedSurah.nomor, a.nomorAyat)] ? "⭐ Hafal" : "☆ Tandai"}
+                                    </button>
+                                  </div>
                                 </div>
-                                <p className="text-right font-serif text-4xl leading-[1.8] mb-4" dir="rtl">{a.teksArab}</p>
+                                <p className={`text-right font-serif text-5xl leading-[1.9] mb-4 ${isP ? "text-emerald-700 dark:text-emerald-300" : ""}`} dir="rtl">{a.teksArab}</p>
                                 <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium mb-1.5 leading-relaxed">{a.teksLatin}</p>
                                 <p className="text-xs text-slate-500 italic leading-relaxed">"{a.teksIndonesia}"</p>
                               </div>
@@ -4319,6 +4386,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                           })
                         )}
 
+                        <p className="text-center text-[9px] text-slate-400 dark:text-slate-500">Audio latihan: Abdullah Basfar • sumber dataset CC0 1.0</p>
                         <button
                           onClick={() => toggleJuzHafalan(selectedSurah.nomor)}
                           className={`w-full py-3 rounded-xl text-sm font-bold border ${juzHafalan.includes(selectedSurah.nomor) ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
@@ -4366,7 +4434,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
 
                           Fitur Planner Ibadah & Rencana Dapur akan terbuka otomatis pada 1 Ramadhan
 
-                          1447 H.
+                          1448 H.
 
                         </p>
 
