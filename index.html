@@ -1110,7 +1110,8 @@ const requestNotifPermission = async () => {
 
         const juzAmmaList = surahList
           .filter((s) => s.nomor >= 78 && s.nomor <= 114)
-          .sort((a, b) => a.nomor - b.nomor);
+          // Juz Amma ditampilkan dari surah terakhir ke awal: An-Nas → An-Naba'
+          .sort((a, b) => b.nomor - a.nomor);
         const juzHafalanCount = juzAmmaList.filter((s) => juzHafalan.includes(s.nomor)).length;
         const juzHafalanPercent = Math.round((juzHafalanCount / 37) * 100);
 
@@ -1134,10 +1135,11 @@ const requestNotifPermission = async () => {
           const key = juzAyatKey(surahNo, ayatNo);
           setJuzAyatHafalan((prev) => ({ ...prev, [key]: !prev[key] }));
         };
-        const getJuzAudioUrl = (surahNo, ayatNo) => {
-          const ss = String(surahNo).padStart(3, "0");
-          const aa = String(ayatNo).padStart(3, "0");
-          return `https://huggingface.co/datasets/ashraf-ali/quran-data/resolve/main/data/audio/Imam/Abdullah_Basfar/${ss}${aa}_Abdullah_Basfar_64kbps.wav`;
+        // Juz Amma memakai audio per-ayat dari API Quran NoorRahma yang sudah
+        // dipakai tab Quran. Ini menjaga format URL yang memang aktif di aplikasi.
+        const getJuzAudioUrl = (ayat) => {
+          if (!ayat?.audio) return null;
+          return ayat.audio["05"] || ayat.audio["01"] || Object.values(ayat.audio)[0] || null;
         };
         const juzAyatHafalanCount = Object.values(juzAyatHafalan).filter(Boolean).length;
 
@@ -2049,9 +2051,7 @@ const sendAssistant = () => {
 
   const a = selectedSurah.ayat[playingAyatIndex];
   const isJuzAmmaAudio = activeTab === "juzamma";
-  const url = isJuzAmmaAudio
-    ? getJuzAudioUrl(selectedSurah.nomor, a.nomorAyat)
-    : (a.audio["05"] || a.audio["01"] || Object.values(a.audio)[0]);
+  const url = getJuzAudioUrl(a);
   if (!url) return;
 
   audio.src = url;
@@ -4386,7 +4386,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                           })
                         )}
 
-                        <p className="text-center text-[9px] text-slate-400 dark:text-slate-500">Audio latihan: Abdullah Basfar • sumber dataset CC0 1.0</p>
+                        <p className="text-center text-[9px] text-slate-400 dark:text-slate-500">Audio latihan menggunakan sumber audio NoorRahma yang sama dengan tab Quran.</p>
                         <button
                           onClick={() => toggleJuzHafalan(selectedSurah.nomor)}
                           className={`w-full py-3 rounded-xl text-sm font-bold border ${juzHafalan.includes(selectedSurah.nomor) ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
