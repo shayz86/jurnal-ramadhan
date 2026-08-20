@@ -1126,6 +1126,11 @@ const requestNotifPermission = async () => {
           }
         });
         const [juzRepeatMode, setJuzRepeatMode] = useState(1);
+        const [juzHafalanMode, setJuzHafalanMode] = useState("surah");
+        const [juzInitialAyatIndex, setJuzInitialAyatIndex] = useState(null);
+        const [juzLastSession, setJuzLastSession] = useState(() => {
+          try { return JSON.parse(localStorage.getItem("nr_juz_amma_lanjutkan") || "null"); } catch { return null; }
+        });
         const [juzPlaybackRate, setJuzPlaybackRate] = useState(() => {
           try { return Number(localStorage.getItem("nr_juz_amma_speed") || "1") || 1; } catch { return 1; }
         });
@@ -1149,6 +1154,18 @@ const requestNotifPermission = async () => {
         const getJuzAudioUrl = (ayat) =>
           ayat?.audio?.["05"] || ayat?.audio?.["01"] || (ayat?.audio ? Object.values(ayat.audio)[0] : "");
         const juzAyatHafalanCount = Object.values(juzAyatHafalan).filter(Boolean).length;
+        const saveJuzLastSession = (surahNo, ayatIndex = 0) => {
+          const payload = { surahNo, ayatIndex, updatedAt: Date.now() };
+          setJuzLastSession(payload);
+          localStorage.setItem("nr_juz_amma_lanjutkan", JSON.stringify(payload));
+        };
+        const getNextUnhafalAyatIndex = (surah, startIndex = 0) => {
+          if (!surah?.ayat?.length) return null;
+          for (let i = startIndex; i < surah.ayat.length; i++) {
+            if (!juzAyatHafalan[juzAyatKey(surah.nomor, surah.ayat[i].nomorAyat)]) return i;
+          }
+          return null;
+        };
 
 
         const [tasbihCount, setTasbihCount] = useState(0);
@@ -1250,10 +1267,17 @@ const sendAssistant = () => {
         useEffect(() => {
           if (!selectedSurah || (activeTab !== "quran" && activeTab !== "juzamma")) return;
           const scrollEl = activeTab === "juzamma" ? juzAmmaScrollRef.current : quranScrollRef.current;
-          if (scrollEl) {
-            requestAnimationFrame(() => scrollEl.scrollTo({ top: 0, behavior: "auto" }));
-          }
-        }, [selectedSurah, activeTab]);
+          if (!scrollEl) return;
+          requestAnimationFrame(() => {
+            if (activeTab === "juzamma" && juzInitialAyatIndex !== null) {
+              const el = document.getElementById(`juz-ayat-${juzInitialAyatIndex}`);
+              if (el) el.scrollIntoView({ behavior: "auto", block: "start" });
+              setJuzInitialAyatIndex(null);
+            } else {
+              scrollEl.scrollTo({ top: 0, behavior: "auto" });
+            }
+          });
+        }, [selectedSurah, activeTab, juzInitialAyatIndex]);
 
 
         useEffect(() => {
@@ -2106,8 +2130,23 @@ const sendAssistant = () => {
       }
       juzRepeatCountRef.current = 0;
     }
-    if (playingAyatIndex < selectedSurah.ayat.length - 1) {
-      setPlayingAyatIndex((prev) => prev + 1);
+    let nextIndex = null;
+    if (isJuzAmmaAudio) {
+      if (juzHafalanMode === "ayat") {
+        setPlayingAyatIndex(null);
+        return;
+      }
+      if (juzHafalanMode === "belum") {
+        nextIndex = getNextUnhafalAyatIndex(selectedSurah, playingAyatIndex + 1);
+      } else {
+        nextIndex = playingAyatIndex < selectedSurah.ayat.length - 1 ? playingAyatIndex + 1 : null;
+      }
+    } else {
+      nextIndex = playingAyatIndex < selectedSurah.ayat.length - 1 ? playingAyatIndex + 1 : null;
+    }
+    if (nextIndex !== null) {
+      if (isJuzAmmaAudio) saveJuzLastSession(selectedSurah.nomor, nextIndex);
+      setPlayingAyatIndex(nextIndex);
     } else {
       setPlayingAyatIndex(null);
     }
@@ -2118,7 +2157,7 @@ const sendAssistant = () => {
   return () => {
     audio.removeEventListener("ended", handleEnded);
   };
-}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode, juzPlaybackRate]);
+}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode, juzPlaybackRate, juzHafalanMode, juzAyatHafalan]);
 
 
         const fetchSurahList = async () => {
@@ -4283,6 +4322,24 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                   <div ref={juzAmmaScrollRef} className="flex-1 overflow-y-auto p-0 no-scrollbar scroll-smooth">
                     {!selectedSurah ? (
                       <div>
+                        {juzLastSession && (
+                          <div className="m-4 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/30">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-[10px] font-black text-emerald-700 dark:text-emerald-300">🎯 Lanjutkan Hafalan</div>
+                                <div className="font-bold text-sm truncate">{juzAmmaList.find(s => s.nomor === juzLastSession.surahNo)?.namaLatin || "Surah terakhir"}</div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400">Ayat {(juzLastSession.ayatIndex || 0) + 1} • siap dilanjutkan</div>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setJuzInitialAyatIndex(juzLastSession.ayatIndex || 0);
+                                  fetchSurahDetail(juzLastSession.surahNo);
+                                }}
+                                className="shrink-0 px-3 py-2 rounded-full bg-emerald-500 text-white text-[10px] font-black"
+                              >▶️ Lanjutkan</button>
+                            </div>
+                          </div>
+                        )}
                         <div className="p-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white m-4 rounded-xl shadow-sm">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -4364,6 +4421,21 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                             <button onClick={() => { juzRepeatCountRef.current = 0; setJuzRepeatMode(Infinity); }} className={`px-2.5 py-1.5 rounded-full text-[10px] font-black ${juzRepeatMode === Infinity ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}>∞</button>
                           </div>
                         </div>
+                        <div className="flex flex-wrap items-center justify-between gap-2 bg-sky-50 dark:bg-sky-950/20 border border-sky-100 dark:border-sky-900 rounded-xl px-3 py-2.5">
+                          <div>
+                            <div className="text-[11px] font-black text-sky-700 dark:text-sky-300">🎯 Mode Hafalan</div>
+                            <div className="text-[9px] text-slate-500 dark:text-slate-400">Pilih bagian yang ingin dilatih.</div>
+                          </div>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {[
+                              ["ayat", "🎯 Ayat ini"],
+                              ["surah", "📖 Surah ini"],
+                              ["belum", "⭐ Belum hafal"]
+                            ].map(([mode, label]) => (
+                              <button key={mode} onClick={() => setJuzHafalanMode(mode)} className={`px-2.5 py-1.5 rounded-full text-[10px] font-black ${juzHafalanMode === mode ? "bg-sky-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"}`}>{label}</button>
+                            ))}
+                          </div>
+                        </div>
                         <div className="flex justify-between items-center px-1 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                           <span>⭐ Ayat ditandai: {juzAyatHafalanCount}</span>
                           <span>🔁 Ulangi: {juzRepeatMode === Infinity ? "tanpa batas" : `${juzRepeatMode}×`} • ⚡ {juzPlaybackRate}×</span>
@@ -4388,7 +4460,7 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <button
-                                      onClick={(e) => { e.stopPropagation(); togglePlayAyat(index); }}
+                                      onClick={(e) => { e.stopPropagation(); saveJuzLastSession(selectedSurah.nomor, index); togglePlayAyat(index); }}
                                       aria-label={isP ? "Hentikan audio" : "Putar audio"}
                                       className={`px-2.5 py-1.5 rounded-full flex items-center gap-1 text-[10px] font-bold ${isP ? "bg-red-100 text-red-600" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"}`}
                                     >
