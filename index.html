@@ -1134,6 +1134,10 @@ const requestNotifPermission = async () => {
         const [juzPlaybackRate, setJuzPlaybackRate] = useState(() => {
           try { return Number(localStorage.getItem("nr_juz_amma_speed") || "1") || 1; } catch { return 1; }
         });
+        // Pemutaran penuh: nama surat -> basmalah -> seluruh surat.
+        const [isFullSurahPlaying, setIsFullSurahPlaying] = useState(false);
+        const fullSurahRepeatCountRef = useRef(0);
+        const speechQueueRef = useRef(false);
         const juzRepeatCountRef = useRef(0);
 
         useEffect(() => {
@@ -2068,6 +2072,11 @@ const sendAssistant = () => {
 
         const togglePlayAyat = (idx) => {
 
+          if (isFullSurahPlaying) {
+            stopFullSurahPlayback();
+            return;
+          }
+
           if (playingAyatIndex === idx) {
 
             setPlayingAyatIndex(null);
@@ -2078,28 +2087,125 @@ const sendAssistant = () => {
 
         };
 
-        // Putar seluruh surat Juz Amma dari ayat pertama sampai selesai.
-        const togglePlayFullJuzSurah = () => {
+        const speakText = (text, lang, rate = 0.9, pitch = 1.05) => new Promise((resolve) => {
+          if (!("speechSynthesis" in window)) { resolve(); return; }
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = lang;
+          u.rate = rate;
+          u.pitch = pitch;
+          u.volume = 1;
+          u.onend = resolve;
+          u.onerror = resolve;
+          window.speechSynthesis.speak(u);
+        });
+
+        const stopFullSurahPlayback = () => {
+          speechQueueRef.current = false;
+          if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+          if (audioRef.current) audioRef.current.pause();
+          setIsFullSurahPlaying(false);
+        };
+
+        // Putar surat lengkap: nama surat -> basmalah -> ayat 1 dan seterusnya.
+        const togglePlayFullJuzSurah = async () => {
           if (!selectedSurah?.ayat?.length) return;
 
-          if (playingAyatIndex !== null) {
-            setPlayingAyatIndex(null);
-            if (audioRef.current) audioRef.current.pause();
+          if (isFullSurahPlaying) {
+            stopFullSurahPlayback();
             return;
           }
 
-          juzRepeatCountRef.current = 0;
+          if (audioRef.current) audioRef.current.pause();
+          if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+          setPlayingAyatIndex(null);
           setJuzHafalanMode("surah");
           setJuzInitialAyatIndex(0);
           saveJuzLastSession(selectedSurah.nomor, 0);
-          setPlayingAyatIndex(0);
+          fullSurahRepeatCountRef.current = 0;
+          speechQueueRef.current = true;
+          setIsFullSurahPlaying(true);
         };
+
+        // Efek pemutaran lengkap. AudioFull berasal dari EQuran.id; setelah nama
+        // surat dan basmalah selesai dibacakan oleh TTS perangkat, rekaman surat dimulai.
+        useEffect(() => {
+          if (!isFullSurahPlaying || !selectedSurah) return;
+          const audio = audioRef.current;
+          if (!audio) return;
+
+          let cancelled = false;
+          const run = async () => {
+            const name = selectedSurah.namaLatin || selectedSurah.nama || "Al-Qur'an";
+            const fullUrl = selectedSurah.audioFull?.["05"] || selectedSurah.audioFull?.["01"] ||
+              (selectedSurah.audioFull ? Object.values(selectedSurah.audioFull)[0] : "");
+
+            if (!fullUrl) {
+              // Fallback: tetap gunakan rangkaian audio per-ayat bila API tidak menyediakan audioFull.
+              speechQueueRef.current = false;
+              setIsFullSurahPlaying(false);
+              setPlayingAyatIndex(0);
+              return;
+            }
+
+            // 1. Nama surat.
+            await speakText(`Surat ${name}`, "id-ID", 0.88, 1.08);
+            if (cancelled || !speechQueueRef.current) return;
+
+            // 2. Basmalah. Menggunakan TTS Arab agar selalu terdengar sebelum ayat pertama.
+            await speakText("بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ", "ar-SA", 0.82, 1.0);
+            if (cancelled || !speechQueueRef.current) return;
+
+            // 3. Rekaman surat lengkap (sudah berisi rangkaian ayat).
+            audio.src = fullUrl;
+            audio.preload = "auto";
+            audio.playbackRate = juzPlaybackRate;
+            try {
+              if ("mediaSession" in navigator && typeof MediaMetadata !== "undefined") {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                  title: `${name} — Juz Amma`,
+                  artist: "NoorRahma Qur'an",
+                  album: "Juz Amma"
+                });
+              }
+            } catch {}
+            audio.play().catch(() => {});
+          };
+
+          run();
+          return () => { cancelled = true; };
+        }, [isFullSurahPlaying, selectedSurah, juzPlaybackRate]);
+
+        // Repeat untuk pemutaran surat lengkap.
+        useEffect(() => {
+          const audio = audioRef.current;
+          if (!audio) return;
+          const handleFullEnded = () => {
+            if (!isFullSurahPlaying) return;
+            const mode = juzRepeatMode;
+            if (mode === Infinity || fullSurahRepeatCountRef.current < mode - 1) {
+              fullSurahRepeatCountRef.current += 1;
+              speechQueueRef.current = true;
+              // Ulang dari nama surat + basmalah + surat.
+              setIsFullSurahPlaying(false);
+              setTimeout(() => setIsFullSurahPlaying(true), 0);
+              return;
+            }
+            fullSurahRepeatCountRef.current = 0;
+            speechQueueRef.current = false;
+            setIsFullSurahPlaying(false);
+          };
+          audio.addEventListener("ended", handleFullEnded);
+          return () => audio.removeEventListener("ended", handleFullEnded);
+        }, [isFullSurahPlaying, juzRepeatMode]);
 
 
 
         useEffect(() => {
   const audio = audioRef.current;
   if (!audio) return;
+
+  if (isFullSurahPlaying) return;
 
   if (!selectedSurah || playingAyatIndex === null) {
     audio.pause();
@@ -2174,7 +2280,7 @@ const sendAssistant = () => {
   return () => {
     audio.removeEventListener("ended", handleEnded);
   };
-}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode, juzPlaybackRate, juzHafalanMode, juzAyatHafalan]);
+}, [playingAyatIndex, selectedSurah, activeTab, juzRepeatMode, juzPlaybackRate, juzHafalanMode, juzAyatHafalan, isFullSurahPlaying]);
 
 
         const fetchSurahList = async () => {
@@ -4419,17 +4525,21 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                           بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
                         </div>
 
+                        <div className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 -mt-2">
+                          🔊 Putar Surat: <span className="text-emerald-500">Nama surat → Bismillah → Ayat 1 → seterusnya</span>
+                        </div>
+
                         <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-3 shadow-sm text-white flex items-center justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="text-[11px] font-black">🎧 {playingAyatIndex !== null ? "Sedang memutar surat" : "Putar seluruh surat"}</div>
-                            <div className="text-[9px] opacity-90 truncate">{playingAyatIndex !== null ? `Ayat ${selectedSurah.ayat[playingAyatIndex]?.nomorAyat || ""} sedang diputar • lanjut otomatis` : "Mulai dari ayat 1 dan lanjut otomatis sampai selesai."}</div>
+                            <div className="text-[11px] font-black">🎧 {isFullSurahPlaying ? "Sedang memutar surat" : "Putar seluruh surat"}</div>
+                            <div className="text-[9px] opacity-90 truncate">{isFullSurahPlaying ? `Surat ${selectedSurah.namaLatin} • nama surat + bismillah + ayat` : "Mulai dari nama surat, bismillah, lalu ayat 1 sampai selesai."}</div>
                           </div>
                           <button
                             onClick={togglePlayFullJuzSurah}
-                            className={`shrink-0 px-3.5 py-2 rounded-full text-[10px] font-black shadow-sm ${playingAyatIndex !== null ? "bg-red-500 text-white" : "bg-white text-emerald-700"}`}
-                            aria-label={playingAyatIndex !== null ? "Hentikan pemutaran surat" : "Putar seluruh surat"}
+                            className={`shrink-0 px-3.5 py-2 rounded-full text-[10px] font-black shadow-sm ${isFullSurahPlaying ? "bg-red-500 text-white" : "bg-white text-emerald-700"}`}
+                            aria-label={isFullSurahPlaying ? "Hentikan pemutaran surat" : "Putar seluruh surat"}
                           >
-                            {playingAyatIndex !== null ? "⏹️ Hentikan" : "▶️ Putar Surat"}
+                            {isFullSurahPlaying ? "⏹️ Hentikan" : "▶️ Putar Surat"}
                           </button>
                         </div>
 
