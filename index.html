@@ -2107,7 +2107,10 @@ const sendAssistant = () => {
           setIsFullSurahPlaying(false);
         };
 
-        // Putar surat lengkap: nama surat -> basmalah -> ayat 1 dan seterusnya.
+        // Putar surat lengkap:
+        // 1) TTS hanya untuk nama surat
+        // 2) audioFull dari qari langsung dimulai (termasuk Bismillah)
+        // 3) posisi layar mengikuti ayat berdasarkan durasi audio per-ayat.
         const togglePlayFullJuzSurah = async () => {
           if (!selectedSurah?.ayat?.length) return;
 
@@ -2118,46 +2121,153 @@ const sendAssistant = () => {
 
           if (audioRef.current) audioRef.current.pause();
           if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-          setPlayingAyatIndex(null);
+
+          setPlayingAyatIndex(0);
           setJuzHafalanMode("surah");
           setJuzInitialAyatIndex(0);
           saveJuzLastSession(selectedSurah.nomor, 0);
+
           fullSurahRepeatCountRef.current = 0;
           speechQueueRef.current = true;
           setIsFullSurahPlaying(true);
         };
 
-        // Efek pemutaran lengkap. AudioFull berasal dari EQuran.id; setelah nama
-        // surat dan basmalah selesai dibacakan oleh TTS perangkat, rekaman surat dimulai.
+        // Sinkronisasi audioFull dengan ayat.
+        // Audio utama tetap audioFull dari qari sehingga Bismillah
+        // tetap dibaca oleh qari, bukan TTS.
+        const getAudioDuration = (url) =>
+          new Promise((resolve) => {
+            if (!url) return resolve(0);
+
+            const a = new Audio();
+            let done = false;
+
+            const finish = (value) => {
+              if (done) return;
+              done = true;
+              a.removeAttribute("src");
+              a.load();
+              resolve(Number.isFinite(value) ? value : 0);
+            };
+
+            a.preload = "metadata";
+            a.onloadedmetadata = () => finish(a.duration || 0);
+            a.onerror = () => finish(0);
+            a.src = url;
+          });
+
         useEffect(() => {
           if (!isFullSurahPlaying || !selectedSurah) return;
+
           const audio = audioRef.current;
           if (!audio) return;
 
           let cancelled = false;
+          let timeHandler = null;
+
           const run = async () => {
-            const name = selectedSurah.namaLatin || selectedSurah.nama || "Al-Qur'an";
-            const fullUrl = selectedSurah.audioFull?.["05"] || selectedSurah.audioFull?.["01"] ||
-              (selectedSurah.audioFull ? Object.values(selectedSurah.audioFull)[0] : "");
+            const name =
+              selectedSurah.namaLatin ||
+              selectedSurah.nama ||
+              "Al-Qur'an";
+
+            const fullUrl =
+              selectedSurah.audioFull?.["05"] ||
+              selectedSurah.audioFull?.["01"] ||
+              (selectedSurah.audioFull
+                ? Object.values(selectedSurah.audioFull)[0]
+                : "");
 
             if (!fullUrl) {
-              // Fallback: tetap gunakan rangkaian audio per-ayat bila API tidak menyediakan audioFull.
               speechQueueRef.current = false;
               setIsFullSurahPlaying(false);
               setPlayingAyatIndex(0);
               return;
             }
 
-            // 1. Nama surat.
+            // TETAP pertahankan TTS nama surat.
             await speakText(`Surat ${name}`, "id-ID", 0.88, 1.08);
+
             if (cancelled || !speechQueueRef.current) return;
 
-            // 2. Rekaman surat lengkap (sudah berisi rangkaian ayat).
+            // Ambil durasi audio masing-masing ayat untuk menentukan
+            // kapan highlight/scroll berpindah ke ayat berikutnya.
+            const durations = [];
+
+            for (const ayat of selectedSurah.ayat) {
+              if (cancelled) return;
+              durations.push(await getAudioDuration(getJuzAudioUrl(ayat)));
+            }
+
+            if (cancelled || !speechQueueRef.current) return;
+
+            const sumAyatDuration = durations.reduce(
+              (sum, d) => sum + (Number.isFinite(d) ? d : 0),
+              0
+            );
+
+            // Audio qari lengkap tetap menjadi sumber suara.
             audio.src = fullUrl;
             audio.preload = "auto";
             audio.playbackRate = juzPlaybackRate;
+
+            await new Promise((resolve) => {
+              if (audio.readyState >= 1 && Number.isFinite(audio.duration)) {
+                resolve();
+                return;
+              }
+
+              const onMeta = () => {
+                audio.removeEventListener("loadedmetadata", onMeta);
+                resolve();
+              };
+
+              audio.addEventListener("loadedmetadata", onMeta);
+              audio.load();
+
+              setTimeout(() => {
+                audio.removeEventListener("loadedmetadata", onMeta);
+                resolve();
+              }, 8000);
+            });
+
+            if (cancelled || !speechQueueRef.current) return;
+
+            const fullDuration = Number.isFinite(audio.duration)
+              ? audio.duration
+              : 0;
+
+            // Selisih ini mencakup Bismillah dan jeda yang tidak ada
+            // pada audio per-ayat. Jadi ayat pertama tidak langsung
+            // dianggap aktif ketika qari masih membaca Bismillah.
+            const introDuration = Math.max(
+              0,
+              fullDuration - sumAyatDuration
+            );
+
+            const boundaries = [];
+            let cursor = introDuration;
+
+            for (let i = 0; i < durations.length; i++) {
+              const d = Number.isFinite(durations[i]) ? durations[i] : 0;
+
+              boundaries.push({
+                start: cursor,
+                end: cursor + d
+              });
+
+              cursor += d;
+            }
+
+            setPlayingAyatIndex(0);
+            setJuzInitialAyatIndex(0);
+            saveJuzLastSession(selectedSurah.nomor, 0);
+
             try {
-              if ("mediaSession" in navigator && typeof MediaMetadata !== "undefined") {
+              if (
+                "mediaSession" in navigator &&
+                typeof MediaMetadata !== "undefined"
+              ) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                   title: `${name} — Juz Amma`,
                   artist: "NoorRahma Qur'an",
@@ -2165,11 +2275,49 @@ const sendAssistant = () => {
                 });
               }
             } catch {}
+
+            // Audio qari sedang berjalan:
+            // setiap pergantian ayat akan mengubah playingAyatIndex,
+            // sehingga effect scroll yang sudah ada di file ini
+            // otomatis membawa layar ke ayat aktif.
+            timeHandler = () => {
+              if (cancelled || !speechQueueRef.current) return;
+
+              const t = audio.currentTime || 0;
+              let activeIndex = 0;
+
+              const found = boundaries.findIndex(
+                (b) => t >= b.start && t < b.end
+              );
+
+              if (found >= 0) {
+                activeIndex = found;
+              } else if (
+                boundaries.length &&
+                t >= boundaries[boundaries.length - 1].end
+              ) {
+                activeIndex = boundaries.length - 1;
+              }
+
+              setPlayingAyatIndex((prev) => {
+                if (prev === activeIndex) return prev;
+                saveJuzLastSession(selectedSurah.nomor, activeIndex);
+                return activeIndex;
+              });
+            };
+
+            audio.addEventListener("timeupdate", timeHandler);
             audio.play().catch(() => {});
           };
 
           run();
-          return () => { cancelled = true; };
+
+          return () => {
+            cancelled = true;
+            if (timeHandler) {
+              audio.removeEventListener("timeupdate", timeHandler);
+            }
+          };
         }, [isFullSurahPlaying, selectedSurah, juzPlaybackRate]);
 
         // Repeat untuk pemutaran surat lengkap.
