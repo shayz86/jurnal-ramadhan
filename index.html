@@ -2152,11 +2152,7 @@ const sendAssistant = () => {
             await speakText(`Surat ${name}`, "id-ID", 0.88, 1.08);
             if (cancelled || !speechQueueRef.current) return;
 
-            // 2. Basmalah. Menggunakan TTS Arab agar selalu terdengar sebelum ayat pertama.
-            await speakText("بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ", "ar-SA", 0.82, 1.0);
-            if (cancelled || !speechQueueRef.current) return;
-
-            // 3. Rekaman surat lengkap (sudah berisi rangkaian ayat).
+            // 2. Rekaman surat lengkap (sudah berisi rangkaian ayat).
             audio.src = fullUrl;
             audio.preload = "auto";
             audio.playbackRate = juzPlaybackRate;
@@ -4525,14 +4521,12 @@ text-center cursor-pointer active:scale-95 text-white relative overflow-hidden"
                           بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
                         </div>
 
-                        <div className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 -mt-2">
-                          🔊 Putar Surat: <span className="text-emerald-500">Nama surat → Bismillah → Ayat 1 → seterusnya</span>
-                        </div>
+                    
 
                         <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-3 shadow-sm text-white flex items-center justify-between gap-3">
                           <div className="min-w-0">
                             <div className="text-[11px] font-black">🎧 {isFullSurahPlaying ? "Sedang memutar surat" : "Putar seluruh surat"}</div>
-                            <div className="text-[9px] opacity-90 truncate">{isFullSurahPlaying ? `Surat ${selectedSurah.namaLatin} • nama surat + bismillah + ayat` : "Mulai dari nama surat, bismillah, lalu ayat 1 sampai selesai."}</div>
+                            <div className="text-[9px] opacity-90 truncate">{isFullSurahPlaying ? `Surat ${selectedSurah.namaLatin}` : "Putar semua ayat sampai selesai."}</div>
                           </div>
                           <button
                             onClick={togglePlayFullJuzSurah}
