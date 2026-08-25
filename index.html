@@ -2326,17 +2326,32 @@ const sendAssistant = () => {
           if (!audio) return;
           const handleFullEnded = () => {
             if (!isFullSurahPlaying) return;
+
             const mode = juzRepeatMode;
+
             if (mode === Infinity || fullSurahRepeatCountRef.current < mode - 1) {
               fullSurahRepeatCountRef.current += 1;
               speechQueueRef.current = true;
-              // Ulang dari nama surat + basmalah + surat.
+
+              // Ulangi seluruh surat dari awal:
+              // TTS nama surat -> Bismillah qari -> ayat 1 -> dst.
               setIsFullSurahPlaying(false);
-              setTimeout(() => setIsFullSurahPlaying(true), 0);
+              setPlayingAyatIndex(0);
+
+              setTimeout(() => {
+                setIsFullSurahPlaying(true);
+              }, 0);
+
               return;
             }
+
+            // Benar-benar selesai. Jangan biarkan handler audio per-ayat
+            // memutar ulang ayat terakhir.
             fullSurahRepeatCountRef.current = 0;
             speechQueueRef.current = false;
+            audio.pause();
+            audio.currentTime = 0;
+            setPlayingAyatIndex(null);
             setIsFullSurahPlaying(false);
           };
           audio.addEventListener("ended", handleFullEnded);
@@ -2387,6 +2402,10 @@ const sendAssistant = () => {
   audio.play().catch(() => {});
 
   const handleEnded = () => {
+    // Pemutaran surat lengkap ditangani oleh handleFullEnded.
+    // Jangan jalankan logika audio per-ayat setelah full-surah selesai.
+    if (isFullSurahPlaying || speechQueueRef.current) return;
+
     if (isJuzAmmaAudio) {
       const mode = juzRepeatMode;
       if (mode === Infinity || juzRepeatCountRef.current < mode - 1) {
